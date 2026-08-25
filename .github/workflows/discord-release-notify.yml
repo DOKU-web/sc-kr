@@ -31,6 +31,9 @@ jobs:
               body = body[:3800] + "\n... (자세한 내용은 링크 참고)"
 
           payload = {
+              # The target channel is a Discord forum channel, which requires a thread_name
+              # (or thread_id) on every webhook post - otherwise Discord rejects it with a 400.
+              "thread_name": f"새 버전: {name}",
               "embeds": [
                   {
                       "title": f"새 버전: {name}",

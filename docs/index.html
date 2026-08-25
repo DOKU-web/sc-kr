@@ -88,13 +88,20 @@
       <div class="stat-row" id="statRow">
         <div class="stat"><div class="label">런처 버전</div><div class="value" id="statVersion">-</div></div>
         <div class="stat"><div class="label">최신 릴리스</div><div class="value" id="statLatestTag">-</div></div>
+        <div class="stat"><div class="label">총 다운로드</div><div class="value" id="statTotalDownloads">-</div></div>
         <div class="stat"><div class="label">디스코드 알림</div><div class="value" id="statDiscord" style="font-size:14px;">연결됨</div></div>
       </div>
     </div>
 
     <div class="card">
+      <h2>파일별 누적 다운로드</h2>
+      <p class="hint">모든 릴리스를 합산한, 파일 이름별 누적 다운로드 수입니다 (같은 파일명이 여러 릴리스에 걸쳐 있으면 합산됩니다).</p>
+      <div id="assetTotals" class="loading">불러오는 중...</div>
+    </div>
+
+    <div class="card">
       <h2>릴리스 / 패치노트 <span class="badge" id="releaseCount"></span></h2>
-      <p class="hint">새 릴리스를 게시하면(release: published) 자동으로 위 디스코드 웹훅으로 패치노트가 전송됩니다.</p>
+      <p class="hint">새 릴리스를 게시하면(release: published) 자동으로 위 디스코드 웹훅으로 패치노트가 전송됩니다. 각 릴리스 항목 아래에 그 릴리스 안의 파일별 다운로드 수가 표시됩니다.</p>
       <div id="releaseList" class="loading">불러오는 중...</div>
     </div>
 
@@ -170,16 +177,40 @@
     var listEl = document.getElementById("releaseList");
     if (!Array.isArray(releases) || releases.length === 0) {
       listEl.textContent = "게시된 릴리스가 없습니다.";
+      document.getElementById("assetTotals").textContent = "게시된 릴리스가 없습니다.";
+      document.getElementById("statTotalDownloads").textContent = "0";
       return;
     }
     document.getElementById("releaseCount").textContent = releases.length + "개";
     document.getElementById("statLatestTag").textContent = releases[0].tag_name || "-";
 
+    // Totals per asset filename across every release, plus a grand total.
+    var totalsByName = {};
+    var grandTotal = 0;
+    releases.forEach(function(rel){
+      (rel.assets || []).forEach(function(a){
+        totalsByName[a.name] = (totalsByName[a.name] || 0) + a.download_count;
+        grandTotal += a.download_count;
+      });
+    });
+    document.getElementById("statTotalDownloads").textContent = grandTotal.toLocaleString("ko-KR") + "회";
+
+    var totalNames = Object.keys(totalsByName).sort(function(a, b){ return totalsByName[b] - totalsByName[a]; });
+    if (totalNames.length === 0) {
+      document.getElementById("assetTotals").textContent = "다운로드 가능한 파일이 없습니다.";
+    } else {
+      var totalsHtml = '<div class="stat-row">' + totalNames.map(function(name){
+        return '<div class="stat"><div class="label">' + escapeHtml(name) + '</div>' +
+          '<div class="value">' + totalsByName[name].toLocaleString("ko-KR") + '회</div></div>';
+      }).join("") + '</div>';
+      document.getElementById("assetTotals").innerHTML = totalsHtml;
+    }
+
     var html = "";
     releases.forEach(function(rel){
       var date = rel.published_at ? new Date(rel.published_at).toLocaleString("ko-KR") : "-";
       var assetsHtml = (rel.assets || []).map(function(a){
-        return '<span>' + escapeHtml(a.name) + ' (' + a.download_count + '회 다운로드)</span>';
+        return '<span>' + escapeHtml(a.name) + ' (' + a.download_count.toLocaleString("ko-KR") + '회 다운로드)</span>';
       }).join("");
       html += '<div class="release">' +
         '<div class="title"><a href="' + rel.html_url + '" target="_blank" rel="noopener">' +

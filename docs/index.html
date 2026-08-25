@@ -60,6 +60,23 @@
   a{color:var(--accent);}
   .loading{color:var(--muted); font-size:13px;}
   .logout{float:right; font-size:12px; color:var(--muted); cursor:pointer; text-decoration:underline;}
+  .quicklinks{display:flex; gap:10px; flex-wrap:wrap;}
+  .quicklinks a.btn{display:inline-block; text-decoration:none;}
+  .issue{border-bottom:1px dashed var(--border); padding:10px 0;}
+  .issue:last-child{border-bottom:none;}
+  .issue .title{font-size:13px;}
+  .issue .meta{color:var(--muted); font-size:11px; margin-top:2px;}
+  .label-chip{
+    display:inline-block; padding:1px 7px; border-radius:8px; font-size:10px;
+    background:var(--panel); border:1px solid var(--border); margin-right:4px;
+  }
+  .commit{border-bottom:1px dashed var(--border); padding:9px 0; font-size:13px;}
+  .commit:last-child{border-bottom:none;}
+  .commit .meta{color:var(--muted); font-size:11px; margin-top:2px;}
+  .search-box{
+    width:100%; background:var(--panel); color:var(--text); border:1px solid var(--border);
+    border-radius:6px; padding:9px 12px; font-size:13px; margin-bottom:14px;
+  }
 </style>
 </head>
 <body>
@@ -94,14 +111,33 @@
     </div>
 
     <div class="card">
+      <h2>빠른 다운로드 (최신 릴리스)</h2>
+      <div class="quicklinks" id="quickLinks">
+        <span class="loading">불러오는 중...</span>
+      </div>
+    </div>
+
+    <div class="card">
       <h2>파일별 누적 다운로드</h2>
       <p class="hint">모든 릴리스를 합산한, 파일 이름별 누적 다운로드 수입니다 (같은 파일명이 여러 릴리스에 걸쳐 있으면 합산됩니다).</p>
       <div id="assetTotals" class="loading">불러오는 중...</div>
     </div>
 
     <div class="card">
+      <h2>미해결 이슈 (버그 제보 / 요청) <span class="badge" id="issueCount"></span></h2>
+      <p class="hint">GitHub 저장소에 열려있는 이슈 목록입니다. 클릭하면 GitHub에서 바로 답글/종료할 수 있습니다.</p>
+      <div id="issueList" class="loading">불러오는 중...</div>
+    </div>
+
+    <div class="card">
+      <h2>최근 커밋</h2>
+      <div id="commitList" class="loading">불러오는 중...</div>
+    </div>
+
+    <div class="card">
       <h2>릴리스 / 패치노트 <span class="badge" id="releaseCount"></span></h2>
       <p class="hint">새 릴리스를 게시하면(release: published) 자동으로 위 디스코드 웹훅으로 패치노트가 전송됩니다. 각 릴리스 항목 아래에 그 릴리스 안의 파일별 다운로드 수가 표시됩니다.</p>
+      <input type="text" class="search-box" id="releaseSearch" placeholder="패치노트 검색 (제목/내용)...">
       <div id="releaseList" class="loading">불러오는 중...</div>
     </div>
 
@@ -160,11 +196,99 @@
     fetch("https://api.github.com/repos/" + REPO + "/releases")
       .then(function(r){ return r.json(); })
       .then(function(releases){
+        renderQuickLinks(releases);
         renderReleases(releases);
       })
       .catch(function(err){
         document.getElementById("releaseList").textContent = "릴리스 목록을 불러오지 못했습니다: " + err;
+        document.getElementById("quickLinks").textContent = "불러오지 못했습니다.";
       });
+
+    fetch("https://api.github.com/repos/" + REPO + "/issues?state=open&per_page=15")
+      .then(function(r){ return r.json(); })
+      .then(renderIssues)
+      .catch(function(err){
+        document.getElementById("issueList").textContent = "이슈 목록을 불러오지 못했습니다: " + err;
+      });
+
+    fetch("https://api.github.com/repos/" + REPO + "/commits?per_page=8")
+      .then(function(r){ return r.json(); })
+      .then(renderCommits)
+      .catch(function(err){
+        document.getElementById("commitList").textContent = "커밋 목록을 불러오지 못했습니다: " + err;
+      });
+  }
+
+  function renderQuickLinks(releases){
+    var el = document.getElementById("quickLinks");
+    if (!Array.isArray(releases) || releases.length === 0) {
+      el.textContent = "릴리스가 없습니다.";
+      return;
+    }
+    var latest = releases[0];
+    var assets = latest.assets || [];
+    if (assets.length === 0) {
+      el.innerHTML = '<a class="btn" href="' + latest.html_url + '" target="_blank" rel="noopener">릴리스 페이지 열기</a>';
+      return;
+    }
+    el.innerHTML = assets.map(function(a){
+      return '<a class="btn" href="' + a.browser_download_url + '">' + escapeHtml(a.name) + ' 받기</a>';
+    }).join("");
+  }
+
+  function timeAgoKo(iso){
+    var diffMs = Date.now() - new Date(iso).getTime();
+    var mins = Math.floor(diffMs / 60000);
+    if (mins < 60) return mins + "분 전";
+    var hours = Math.floor(mins / 60);
+    if (hours < 24) return hours + "시간 전";
+    var days = Math.floor(hours / 24);
+    if (days < 30) return days + "일 전";
+    return new Date(iso).toLocaleDateString("ko-KR");
+  }
+
+  function renderIssues(issues){
+    var el = document.getElementById("issueList");
+    if (!Array.isArray(issues)) {
+      el.textContent = "이슈 목록을 불러오지 못했습니다.";
+      return;
+    }
+    var real = issues.filter(function(it){ return !it.pull_request; });
+    document.getElementById("issueCount").textContent = real.length + "개";
+    if (real.length === 0) {
+      el.textContent = "열려있는 이슈가 없습니다.";
+      return;
+    }
+    el.innerHTML = real.map(function(it){
+      var labelsHtml = (it.labels || []).map(function(l){
+        return '<span class="label-chip" style="' + (l.color ? "border-color:#" + l.color : "") + '">' + escapeHtml(l.name) + '</span>';
+      }).join("");
+      return '<div class="issue">' +
+        '<div class="title"><a href="' + it.html_url + '" target="_blank" rel="noopener">#' + it.number + ' ' + escapeHtml(it.title) + '</a></div>' +
+        '<div class="meta">' + escapeHtml(it.user ? it.user.login : "?") + ' · ' + timeAgoKo(it.created_at) + ' ' + labelsHtml + '</div>' +
+        '</div>';
+    }).join("");
+  }
+
+  function renderCommits(commits){
+    var el = document.getElementById("commitList");
+    if (!Array.isArray(commits)) {
+      el.textContent = "커밋 목록을 불러오지 못했습니다.";
+      return;
+    }
+    if (commits.length === 0) {
+      el.textContent = "커밋이 없습니다.";
+      return;
+    }
+    el.innerHTML = commits.map(function(c){
+      var msg = (c.commit.message || "").split("\n")[0];
+      var author = (c.commit.author && c.commit.author.name) || "?";
+      var date = c.commit.author ? timeAgoKo(c.commit.author.date) : "";
+      return '<div class="commit">' +
+        '<a href="' + c.html_url + '" target="_blank" rel="noopener">' + escapeHtml(msg) + '</a>' +
+        '<div class="meta">' + escapeHtml(author) + ' · ' + date + ' · ' + c.sha.slice(0, 7) + '</div>' +
+        '</div>';
+    }).join("");
   }
 
   function escapeHtml(s){
@@ -206,21 +330,36 @@
       document.getElementById("assetTotals").innerHTML = totalsHtml;
     }
 
-    var html = "";
-    releases.forEach(function(rel){
-      var date = rel.published_at ? new Date(rel.published_at).toLocaleString("ko-KR") : "-";
-      var assetsHtml = (rel.assets || []).map(function(a){
-        return '<span>' + escapeHtml(a.name) + ' (' + a.download_count.toLocaleString("ko-KR") + '회 다운로드)</span>';
-      }).join("");
-      html += '<div class="release">' +
-        '<div class="title"><a href="' + rel.html_url + '" target="_blank" rel="noopener">' +
-          escapeHtml(rel.name || rel.tag_name) + '</a></div>' +
-        '<div class="meta">' + escapeHtml(rel.tag_name) + ' · ' + date + '</div>' +
-        (rel.body ? '<div class="body">' + escapeHtml(rel.body) + '</div>' : '') +
-        (assetsHtml ? '<div class="assets">' + assetsHtml + '</div>' : '') +
-        '</div>';
-    });
-    listEl.innerHTML = html;
+    function renderList(filterTerm){
+      var term = (filterTerm || "").trim().toLowerCase();
+      var filtered = !term ? releases : releases.filter(function(rel){
+        var hay = ((rel.name || "") + " " + (rel.tag_name || "") + " " + (rel.body || "")).toLowerCase();
+        return hay.indexOf(term) !== -1;
+      });
+      if (filtered.length === 0) {
+        listEl.textContent = "검색 결과가 없습니다.";
+        return;
+      }
+      var html = "";
+      filtered.forEach(function(rel){
+        var date = rel.published_at ? new Date(rel.published_at).toLocaleString("ko-KR") : "-";
+        var assetsHtml = (rel.assets || []).map(function(a){
+          return '<span>' + escapeHtml(a.name) + ' (' + a.download_count.toLocaleString("ko-KR") + '회 다운로드)</span>';
+        }).join("");
+        html += '<div class="release">' +
+          '<div class="title"><a href="' + rel.html_url + '" target="_blank" rel="noopener">' +
+            escapeHtml(rel.name || rel.tag_name) + '</a></div>' +
+          '<div class="meta">' + escapeHtml(rel.tag_name) + ' · ' + date + '</div>' +
+          (rel.body ? '<div class="body">' + escapeHtml(rel.body) + '</div>' : '') +
+          (assetsHtml ? '<div class="assets">' + assetsHtml + '</div>' : '') +
+          '</div>';
+      });
+      listEl.innerHTML = html;
+    }
+
+    renderList("");
+    var searchEl = document.getElementById("releaseSearch");
+    searchEl.addEventListener("input", function(){ renderList(searchEl.value); });
   }
 })();
 </script>

@@ -1,0 +1,52 @@
+name: Notify Discord on release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send release notes to Discord
+        env:
+          WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          RELEASE_NAME: ${{ github.event.release.name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_BODY: ${{ github.event.release.body }}
+          RELEASE_URL: ${{ github.event.release.html_url }}
+        run: |
+          python3 - <<'EOF'
+          import json
+          import os
+          import urllib.request
+
+          webhook_url = os.environ["WEBHOOK_URL"]
+          name = os.environ.get("RELEASE_NAME") or os.environ["RELEASE_TAG"]
+          body = os.environ.get("RELEASE_BODY") or "(패치노트 내용 없음)"
+          url = os.environ["RELEASE_URL"]
+
+          # Discord embed description caps out around 4096 chars.
+          if len(body) > 3800:
+              body = body[:3800] + "\n... (자세한 내용은 링크 참고)"
+
+          payload = {
+              "embeds": [
+                  {
+                      "title": f"새 버전: {name}",
+                      "description": body,
+                      "url": url,
+                      "color": 0x4DA3FF,
+                  }
+              ]
+          }
+
+          req = urllib.request.Request(
+              webhook_url,
+              data=json.dumps(payload).encode("utf-8"),
+              headers={"Content-Type": "application/json"},
+              method="POST",
+          )
+          with urllib.request.urlopen(req) as resp:
+              print("Discord webhook status:", resp.status)
+          EOF

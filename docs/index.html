@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>SC-KR 관리자 대시보드</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --panel2:#1e2230; --border:#2a2f3d;
+    --text:#e8eaed; --muted:#9aa1ac; --accent:#4da3ff; --accent2:#6ee7b7;
+    --warn:#ffb454; --danger:#ff6b6b;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:"Malgun Gothic","Segoe UI",Arial,sans-serif;
+    background:var(--bg); color:var(--text); line-height:1.5;
+  }
+  header{
+    padding:20px 28px; background:linear-gradient(135deg,#141824,#1b2233);
+    border-bottom:1px solid var(--border);
+  }
+  header h1{margin:0 0 4px; font-size:20px;}
+  header p{margin:0; color:var(--muted); font-size:13px;}
+  .wrap{max-width:1000px; margin:0 auto; padding:24px 28px 60px;}
+  .gate{max-width:360px; margin:80px auto; text-align:center;}
+  .gate input{
+    width:100%; background:var(--panel); color:var(--text); border:1px solid var(--border);
+    border-radius:6px; padding:10px 12px; font-size:14px; margin-top:14px;
+  }
+  .gate button, .btn{
+    background:var(--accent); color:#08131f; border:none; border-radius:6px;
+    padding:10px 18px; font-size:14px; font-weight:600; cursor:pointer; margin-top:12px;
+  }
+  .gate .err{color:var(--danger); font-size:13px; margin-top:10px; min-height:18px;}
+  .card{
+    background:var(--panel2); border:1px solid var(--border); border-radius:8px;
+    padding:18px 20px; margin-bottom:16px;
+  }
+  .card h2{margin:0 0 12px; font-size:15px; color:var(--text);}
+  .stat-row{display:flex; gap:24px; flex-wrap:wrap;}
+  .stat{
+    background:var(--panel); border:1px solid var(--border); border-radius:8px;
+    padding:12px 16px; min-width:140px;
+  }
+  .stat .label{color:var(--muted); font-size:12px;}
+  .stat .value{font-size:20px; font-weight:700; margin-top:4px; color:var(--accent2);}
+  .release{border-bottom:1px dashed var(--border); padding:14px 0;}
+  .release:last-child{border-bottom:none;}
+  .release .title{font-weight:700; font-size:14px;}
+  .release .meta{color:var(--muted); font-size:12px; margin-top:2px;}
+  .release .body{white-space:pre-wrap; font-size:13px; margin-top:8px; color:#cdd3db; max-height:160px; overflow:auto;}
+  .assets{margin-top:8px; font-size:12px; color:var(--muted);}
+  .assets span{display:inline-block; margin-right:14px;}
+  .hint{color:var(--muted); font-size:12px;}
+  .badge{
+    display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px;
+    background:var(--panel); border:1px solid var(--border); color:var(--accent2); margin-left:8px;
+  }
+  a{color:var(--accent);}
+  .loading{color:var(--muted); font-size:13px;}
+  .logout{float:right; font-size:12px; color:var(--muted); cursor:pointer; text-decoration:underline;}
+</style>
+</head>
+<body>
+
+<div id="gateScreen" class="gate">
+  <h1>SC-KR 관리자 대시보드</h1>
+  <p class="hint">비밀번호를 입력하세요.</p>
+  <input type="password" id="pwInput" placeholder="관리자 비밀번호">
+  <div><button id="unlockBtn">잠금 해제</button></div>
+  <div class="err" id="pwErr"></div>
+  <p class="hint" style="margin-top:24px;">
+    참고: 이 페이지는 정적 GitHub Pages라 클라이언트 측 비밀번호 확인만 가능합니다.
+    페이지 소스(JS)를 직접 들여다보면 우회할 수 있는 수준의 보호이며, 진짜 서버 인증은 아닙니다.
+  </p>
+</div>
+
+<div id="dashboard" style="display:none;">
+  <header>
+    <h1>SC-KR 관리자 대시보드 <span class="logout" id="logoutBtn">잠그기</span></h1>
+    <p>DOKU-web/sc-kr 저장소 상태 · 릴리스 및 패치노트</p>
+  </header>
+  <div class="wrap">
+
+    <div class="card">
+      <h2>현재 상태</h2>
+      <div class="stat-row" id="statRow">
+        <div class="stat"><div class="label">런처 버전</div><div class="value" id="statVersion">-</div></div>
+        <div class="stat"><div class="label">최신 릴리스</div><div class="value" id="statLatestTag">-</div></div>
+        <div class="stat"><div class="label">디스코드 알림</div><div class="value" id="statDiscord" style="font-size:14px;">연결됨</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>릴리스 / 패치노트 <span class="badge" id="releaseCount"></span></h2>
+      <p class="hint">새 릴리스를 게시하면(release: published) 자동으로 위 디스코드 웹훅으로 패치노트가 전송됩니다.</p>
+      <div id="releaseList" class="loading">불러오는 중...</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  var PW_HASH = "ad09c3ba4c83dcf50b0453ac20ea013fcce39c7b31bb7fc852ce761aac402e25";
+  var SESSION_KEY = "sckr_admin_unlocked";
+  var REPO = "DOKU-web/sc-kr";
+
+  function sha256Hex(text){
+    var enc = new TextEncoder().encode(text);
+    return crypto.subtle.digest("SHA-256", enc).then(function(buf){
+      var bytes = Array.from(new Uint8Array(buf));
+      return bytes.map(function(b){ return b.toString(16).padStart(2, "0"); }).join("");
+    });
+  }
+
+  function showDashboard(){
+    document.getElementById("gateScreen").style.display = "none";
+    document.getElementById("dashboard").style.display = "block";
+    loadData();
+  }
+
+  if (sessionStorage.getItem(SESSION_KEY) === "1") {
+    showDashboard();
+  }
+
+  document.getElementById("unlockBtn").addEventListener("click", function(){
+    var pw = document.getElementById("pwInput").value;
+    sha256Hex(pw).then(function(hash){
+      if (hash === PW_HASH) {
+        sessionStorage.setItem(SESSION_KEY, "1");
+        showDashboard();
+      } else {
+        document.getElementById("pwErr").textContent = "비밀번호가 올바르지 않습니다.";
+      }
+    });
+  });
+  document.getElementById("pwInput").addEventListener("keydown", function(e){
+    if (e.key === "Enter") document.getElementById("unlockBtn").click();
+  });
+  document.getElementById("logoutBtn").addEventListener("click", function(){
+    sessionStorage.removeItem(SESSION_KEY);
+    location.reload();
+  });
+
+  function loadData(){
+    fetch("https://raw.githubusercontent.com/" + REPO + "/main/launcher_version.txt")
+      .then(function(r){ return r.text(); })
+      .then(function(t){ document.getElementById("statVersion").textContent = "v" + t.trim(); })
+      .catch(function(){ document.getElementById("statVersion").textContent = "확인 실패"; });
+
+    fetch("https://api.github.com/repos/" + REPO + "/releases")
+      .then(function(r){ return r.json(); })
+      .then(function(releases){
+        renderReleases(releases);
+      })
+      .catch(function(err){
+        document.getElementById("releaseList").textContent = "릴리스 목록을 불러오지 못했습니다: " + err;
+      });
+  }
+
+  function escapeHtml(s){
+    return String(s || "").replace(/[&<>"]/g, function(c){
+      return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c];
+    });
+  }
+
+  function renderReleases(releases){
+    var listEl = document.getElementById("releaseList");
+    if (!Array.isArray(releases) || releases.length === 0) {
+      listEl.textContent = "게시된 릴리스가 없습니다.";
+      return;
+    }
+    document.getElementById("releaseCount").textContent = releases.length + "개";
+    document.getElementById("statLatestTag").textContent = releases[0].tag_name || "-";
+
+    var html = "";
+    releases.forEach(function(rel){
+      var date = rel.published_at ? new Date(rel.published_at).toLocaleString("ko-KR") : "-";
+      var assetsHtml = (rel.assets || []).map(function(a){
+        return '<span>' + escapeHtml(a.name) + ' (' + a.download_count + '회 다운로드)</span>';
+      }).join("");
+      html += '<div class="release">' +
+        '<div class="title"><a href="' + rel.html_url + '" target="_blank" rel="noopener">' +
+          escapeHtml(rel.name || rel.tag_name) + '</a></div>' +
+        '<div class="meta">' + escapeHtml(rel.tag_name) + ' · ' + date + '</div>' +
+        (rel.body ? '<div class="body">' + escapeHtml(rel.body) + '</div>' : '') +
+        (assetsHtml ? '<div class="assets">' + assetsHtml + '</div>' : '') +
+        '</div>';
+    });
+    listEl.innerHTML = html;
+  }
+})();
+</script>
+
+</body>
+</html>

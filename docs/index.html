@@ -313,21 +313,28 @@
     busy = true;
     setControlsDisabled(true);
     try {
-      var getRes = await fetch('https://api.github.com/repos/' + GH_OWNER + '/' + GH_REPO + '/contents/' + GH_PAGE_PATH + '?ref=' + GH_BRANCH, {headers: ghHeaders(token)});
-      if (!getRes.ok) throw new Error('현재 파일을 불러오지 못했습니다 (' + getRes.status + ')');
-      var fileData = await getRes.json();
-      var html = b64DecodeUtf8(fileData.content);
-      html = replaceScriptBlock(html, 'meta-data', JSON.stringify(meta));
-      html = replaceScriptBlock(html, 'features-data', JSON.stringify(features));
-      html = replaceScriptBlock(html, 'crew-data', JSON.stringify(crew));
-      var putRes = await fetch('https://api.github.com/repos/' + GH_OWNER + '/' + GH_REPO + '/contents/' + GH_PAGE_PATH, {
-        method: 'PUT',
-        headers: ghHeaders(token, {'Content-Type': 'application/json'}),
-        body: JSON.stringify({message: '사이트 콘텐츠 업데이트', content: b64EncodeUtf8(html), sha: fileData.sha, branch: GH_BRANCH})
-      });
-      if (!putRes.ok) { var t = await putRes.text(); throw new Error('저장 실패 (' + putRes.status + '): ' + t.slice(0, 200)); }
+      for (var attempt = 1; attempt <= 3; attempt++) {
+        var getRes = await fetch('https://api.github.com/repos/' + GH_OWNER + '/' + GH_REPO + '/contents/' + GH_PAGE_PATH + '?ref=' + GH_BRANCH, {headers: ghHeaders(token)});
+        if (!getRes.ok) throw new Error('현재 파일을 불러오지 못했습니다 (' + getRes.status + ')');
+        var fileData = await getRes.json();
+        var html = b64DecodeUtf8(fileData.content);
+        html = replaceScriptBlock(html, 'meta-data', JSON.stringify(meta));
+        html = replaceScriptBlock(html, 'features-data', JSON.stringify(features));
+        html = replaceScriptBlock(html, 'crew-data', JSON.stringify(crew));
+        var putRes = await fetch('https://api.github.com/repos/' + GH_OWNER + '/' + GH_REPO + '/contents/' + GH_PAGE_PATH, {
+          method: 'PUT',
+          headers: ghHeaders(token, {'Content-Type': 'application/json'}),
+          body: JSON.stringify({message: '사이트 콘텐츠 업데이트', content: b64EncodeUtf8(html), sha: fileData.sha, branch: GH_BRANCH})
+        });
+        if (putRes.ok) return;
+        // 409 = 그 사이 다른 편집이 먼저 반영됨. 최신 파일을 다시 받아서 그 위에 내 변경을 다시 얹어 재시도.
+        if (putRes.status !== 409 || attempt === 3) {
+          var t = await putRes.text();
+          throw new Error('저장 실패 (' + putRes.status + '): ' + t.slice(0, 200));
+        }
+      }
     } catch (err) {
-      alert('저장하지 못했습니다: ' + (err && err.message ? err.message : err) + '\n(다른 곳에서 방금 저장했다면, 새로고침 후 다시 시도해주세요.)');
+      alert('저장하지 못했습니다: ' + (err && err.message ? err.message : err));
       throw err;
     } finally {
       busy = false;

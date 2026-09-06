@@ -204,25 +204,36 @@
     </div>
     <p class="disclaimer">이 프로젝트는 비공식 커뮤니티 팬 제작물이며, Cloud Imperium Games / Roberts Space Industries와 관련이 없습니다. Star Citizen은 Cloud Imperium Rights LLC의 상표입니다.</p>
     <div class="admin" id="adminPanel" hidden>
-      <h4>사이트 콘텐츠 · GitHub 릴리즈 관리</h4>
-      <p class="hint">토큰은 이 브라우저에만 저장되고 페이지에는 절대 포함되지 않습니다. 이 저장소(DOKU-web/sc-kr)에 커밋 권한이 있는 Personal Access Token이 필요합니다. 위 번역팀/기능 목록 추가·삭제는 저장 즉시 이 저장소의 docs/index.html에 직접 커밋됩니다.</p>
-      <div class="admin-row">
-        <input type="password" id="tokenInput" placeholder="GitHub Personal Access Token">
-        <button type="button" class="btn btn-ghost btn-sm" id="tokenSaveBtn">토큰 저장</button>
-        <button type="button" class="btn btn-ghost btn-sm" id="tokenClearBtn">삭제</button>
+      <div id="adminGate">
+        <h4>콘텐츠 편집 잠금 해제</h4>
+        <p class="hint">번역팀/운영진만 아는 비밀번호를 입력하세요.</p>
+        <div class="admin-row">
+          <input type="password" id="gatePwInput" placeholder="비밀번호">
+          <button type="button" class="btn btn-ghost btn-sm" id="gateUnlockBtn">확인</button>
+        </div>
+        <div class="admin-status" id="gateErr"></div>
       </div>
-      <div class="admin-status" id="tokenStatus">저장된 토큰 없음</div>
-      <div class="admin-upload">
-        <label>런처 EXE (SC-KR-Launcher.exe)</label>
-        <input type="file" id="fileLauncher" accept=".exe">
-        <button type="button" class="btn btn-primary btn-sm" id="uploadLauncherBtn">업로드</button>
+      <div id="adminBody" hidden>
+        <h4>사이트 콘텐츠 · GitHub 릴리즈 관리</h4>
+        <p class="hint">토큰은 이 브라우저에만 저장되고 페이지에는 절대 포함되지 않습니다. 이 저장소(DOKU-web/sc-kr)에 커밋 권한이 있는 Personal Access Token이 필요합니다. 위 번역팀/기능 목록 추가·삭제는 저장 즉시 이 저장소의 docs/index.html에 직접 커밋됩니다.</p>
+        <div class="admin-row">
+          <input type="password" id="tokenInput" placeholder="GitHub Personal Access Token">
+          <button type="button" class="btn btn-ghost btn-sm" id="tokenSaveBtn">토큰 저장</button>
+          <button type="button" class="btn btn-ghost btn-sm" id="tokenClearBtn">삭제</button>
+        </div>
+        <div class="admin-status" id="tokenStatus">저장된 토큰 없음</div>
+        <div class="admin-upload">
+          <label>런처 EXE (SC-KR-Launcher.exe)</label>
+          <input type="file" id="fileLauncher" accept=".exe">
+          <button type="button" class="btn btn-primary btn-sm" id="uploadLauncherBtn">업로드</button>
+        </div>
+        <div class="admin-upload">
+          <label>패치 ZIP (sc-kr-v1.zip)</label>
+          <input type="file" id="filePatch" accept=".zip">
+          <button type="button" class="btn btn-primary btn-sm" id="uploadPatchBtn">업로드</button>
+        </div>
+        <div class="admin-log" id="adminLog">대기 중...</div>
       </div>
-      <div class="admin-upload">
-        <label>패치 ZIP (sc-kr-v1.zip)</label>
-        <input type="file" id="filePatch" accept=".zip">
-        <button type="button" class="btn btn-primary btn-sm" id="uploadPatchBtn">업로드</button>
-      </div>
-      <div class="admin-log" id="adminLog">대기 중...</div>
     </div>
   </div>
 </footer>
@@ -240,7 +251,18 @@
   var GH_OWNER = 'DOKU-web', GH_REPO = 'sc-kr', GH_TAG = 'v1', GH_BRANCH = 'main';
   var GH_PAGE_PATH = 'docs/index.html';
   var TOKEN_KEY = 'sckr_admin_token';
+  var PANEL_PW_HASH = '37c66be91d5d0f54ec96b7e06716de186143de3590b718ea527f6e13da67c128';
+  var PANEL_UNLOCK_KEY = 'sckr_panel_unlocked';
 
+  function sha256Hex(text){
+    var enc = new TextEncoder().encode(text);
+    return crypto.subtle.digest('SHA-256', enc).then(function(buf){
+      return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2, '0'); }).join('');
+    });
+  }
+
+  // editable(추가/삭제 UI 노출)은 비밀번호 게이트를 통과해야만 열리는 adminBody 안의
+  // 토큰 저장 버튼을 거쳐야만 켤 수 있다 - 몰라서 아무 값이나 넣어 켜지는 걸 막는다.
   var editable = !!localStorage.getItem(TOKEN_KEY);
   var busy = false;
 
@@ -405,9 +427,33 @@
     document.getElementById('tokenStatus').textContent = t ? '저장된 토큰 있음 (' + t.slice(0, 4) + '••••)' : '저장된 토큰 없음';
   }
   refreshTokenStatus();
+
+  function showAdminBody(){
+    document.getElementById('adminGate').hidden = true;
+    document.getElementById('adminBody').hidden = false;
+  }
   document.getElementById('adminToggle').addEventListener('click', function(){
     var p = document.getElementById('adminPanel');
     p.hidden = !p.hidden;
+    if (!p.hidden && sessionStorage.getItem(PANEL_UNLOCK_KEY) === '1') {
+      showAdminBody();
+    }
+  });
+  document.getElementById('gateUnlockBtn').addEventListener('click', function(){
+    var pw = document.getElementById('gatePwInput').value;
+    sha256Hex(pw).then(function(hash){
+      if (hash === PANEL_PW_HASH) {
+        sessionStorage.setItem(PANEL_UNLOCK_KEY, '1');
+        document.getElementById('gateErr').textContent = '';
+        document.getElementById('gatePwInput').value = '';
+        showAdminBody();
+      } else {
+        document.getElementById('gateErr').textContent = '비밀번호가 올바르지 않습니다.';
+      }
+    });
+  });
+  document.getElementById('gatePwInput').addEventListener('keydown', function(e){
+    if (e.key === 'Enter') document.getElementById('gateUnlockBtn').click();
   });
   document.getElementById('tokenSaveBtn').addEventListener('click', function(){
     var v = document.getElementById('tokenInput').value.trim();

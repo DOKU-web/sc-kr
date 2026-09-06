@@ -1,369 +1,456 @@
 <!doctype html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<title>SC-KR 관리자 대시보드</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SC-KR 런처</title>
+<meta name="description" content="Star Citizen 한국어 번역 패치와 게임 채팅 한글 입력을 지원하는 비공식 커뮤니티 런처. 자동 다운로드·적용, 커뮤니티 번역, 한글 채팅을 하나의 프로그램에 담았습니다.">
+<link rel="canonical" href="https://doku-web.github.io/sc-kr/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="SC-KR 런처 — Star Citizen 한국어 패치">
+<meta property="og:description" content="Star Citizen 한국어 번역과 게임 채팅 한글 입력을 지원하는 비공식 커뮤니티 런처.">
+<meta property="og:url" content="https://doku-web.github.io/sc-kr/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg:#0f1115; --panel:#171a21; --panel2:#1e2230; --border:#2a2f3d;
-    --text:#e8eaed; --muted:#9aa1ac; --accent:#4da3ff; --accent2:#6ee7b7;
-    --warn:#ffb454; --danger:#ff6b6b;
-  }
+  :root{--void:#070605;--panel:#121009;--panel-2:#17140c;--line:rgba(242,183,41,.14);--line-soft:rgba(255,255,255,.08);--gold:#f2b705;--gold-hi:#ffd75e;--gold-deep:#b5790a;--text-hi:#f6f1e4;--text-mid:#b3aa96;--text-dim:#786f5c;--danger:#e05a4d;--ok:#5fbf7a;}
   *{box-sizing:border-box;}
-  body{
-    margin:0; font-family:"Malgun Gothic","Segoe UI",Arial,sans-serif;
-    background:var(--bg); color:var(--text); line-height:1.5;
-  }
-  header{
-    padding:20px 28px; background:linear-gradient(135deg,#141824,#1b2233);
-    border-bottom:1px solid var(--border);
-  }
-  header h1{margin:0 0 4px; font-size:20px;}
-  header p{margin:0; color:var(--muted); font-size:13px;}
-  .wrap{max-width:1000px; margin:0 auto; padding:24px 28px 60px;}
-  .gate{max-width:360px; margin:80px auto; text-align:center;}
-  .gate input{
-    width:100%; background:var(--panel); color:var(--text); border:1px solid var(--border);
-    border-radius:6px; padding:10px 12px; font-size:14px; margin-top:14px;
-  }
-  .gate button, .btn{
-    background:var(--accent); color:#08131f; border:none; border-radius:6px;
-    padding:10px 18px; font-size:14px; font-weight:600; cursor:pointer; margin-top:12px;
-  }
-  .gate .err{color:var(--danger); font-size:13px; margin-top:10px; min-height:18px;}
-  .card{
-    background:var(--panel2); border:1px solid var(--border); border-radius:8px;
-    padding:18px 20px; margin-bottom:16px;
-  }
-  .card h2{margin:0 0 12px; font-size:15px; color:var(--text);}
-  .stat-row{display:flex; gap:24px; flex-wrap:wrap;}
-  .stat{
-    background:var(--panel); border:1px solid var(--border); border-radius:8px;
-    padding:12px 16px; min-width:140px;
-  }
-  .stat .label{color:var(--muted); font-size:12px;}
-  .stat .value{font-size:20px; font-weight:700; margin-top:4px; color:var(--accent2);}
-  .release{border-bottom:1px dashed var(--border); padding:14px 0;}
-  .release:last-child{border-bottom:none;}
-  .release .title{font-weight:700; font-size:14px;}
-  .release .meta{color:var(--muted); font-size:12px; margin-top:2px;}
-  .release .body{white-space:pre-wrap; font-size:13px; margin-top:8px; color:#cdd3db; max-height:160px; overflow:auto;}
-  .assets{margin-top:8px; font-size:12px; color:var(--muted);}
-  .assets span{display:inline-block; margin-right:14px;}
-  .hint{color:var(--muted); font-size:12px;}
-  .badge{
-    display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px;
-    background:var(--panel); border:1px solid var(--border); color:var(--accent2); margin-left:8px;
-  }
-  a{color:var(--accent);}
-  .loading{color:var(--muted); font-size:13px;}
-  .logout{float:right; font-size:12px; color:var(--muted); cursor:pointer; text-decoration:underline;}
-  .quicklinks{display:flex; gap:10px; flex-wrap:wrap;}
-  .quicklinks a.btn{display:inline-block; text-decoration:none;}
-  .issue{border-bottom:1px dashed var(--border); padding:10px 0;}
-  .issue:last-child{border-bottom:none;}
-  .issue .title{font-size:13px;}
-  .issue .meta{color:var(--muted); font-size:11px; margin-top:2px;}
-  .label-chip{
-    display:inline-block; padding:1px 7px; border-radius:8px; font-size:10px;
-    background:var(--panel); border:1px solid var(--border); margin-right:4px;
-  }
-  .commit{border-bottom:1px dashed var(--border); padding:9px 0; font-size:13px;}
-  .commit:last-child{border-bottom:none;}
-  .commit .meta{color:var(--muted); font-size:11px; margin-top:2px;}
-  .search-box{
-    width:100%; background:var(--panel); color:var(--text); border:1px solid var(--border);
-    border-radius:6px; padding:9px 12px; font-size:13px; margin-bottom:14px;
-  }
+  html{background:var(--void);}
+  body{margin:0;background:var(--void);color:var(--text-hi);font-family:"Noto Sans KR",sans-serif;font-weight:400;line-height:1.7;-webkit-font-smoothing:antialiased;}
+  ::selection{background:var(--gold);color:#1a1400;}
+  a{color:var(--gold);}
+  a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:3px;}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 32px;}
+  .eyebrow{font-size:12.5px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--text-mid);display:flex;align-items:center;gap:10px;}
+  .eyebrow .led{width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px var(--gold);flex:none;}
+  header{position:sticky;top:0;z-index:30;background:rgba(7,6,5,.7);backdrop-filter:blur(14px);border-bottom:1px solid var(--line-soft);}
+  .nav{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;max-width:1120px;margin:0 auto;}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
+  .brand .mark{width:32px;height:32px;border-radius:10px;background:linear-gradient(150deg,var(--gold-hi),var(--gold-deep));display:flex;align-items:center;justify-content:center;font-family:"Black Han Sans",sans-serif;font-size:14px;color:#1a1400;}
+  .brand .word{font-family:"Black Han Sans",sans-serif;font-size:20px;color:var(--text-hi);letter-spacing:.01em;}
+  .navlinks{display:flex;align-items:center;gap:30px;font-size:14px;color:var(--text-mid);}
+  .navlinks a{color:var(--text-mid);text-decoration:none;font-weight:500;}
+  .navlinks a:hover{color:var(--gold);}
+  .nav-cta{font-size:13.5px;font-weight:700;color:#1a1400;background:linear-gradient(150deg,var(--gold-hi),var(--gold));padding:10px 20px;border-radius:999px;text-decoration:none;transition:filter .15s ease, transform .15s ease;}
+  .nav-cta:hover{filter:brightness(1.08);transform:translateY(-1px);}
+  .hero{position:relative;overflow:hidden;padding:120px 0 90px;}
+  .hero-bg{position:absolute;inset:0;z-index:0;background:radial-gradient(1100px 620px at 50% -8%, rgba(242,183,41,.16), transparent 60%),radial-gradient(900px 500px at 82% 8%, rgba(242,183,41,.10), transparent 55%),radial-gradient(700px 460px at 8% 30%, rgba(242,183,41,.06), transparent 60%),var(--void);}
+  .hero-stars{position:absolute;inset:0;z-index:0;opacity:.55;background-image:radial-gradient(1.6px 1.6px at 12% 22%, #fff, transparent),radial-gradient(1.2px 1.2px at 28% 68%, #fff, transparent),radial-gradient(1.8px 1.8px at 44% 14%, #fff, transparent),radial-gradient(1.1px 1.1px at 63% 44%, #fff, transparent),radial-gradient(1.4px 1.4px at 76% 76%, #fff, transparent),radial-gradient(1.1px 1.1px at 91% 26%, #fff, transparent),radial-gradient(1.6px 1.6px at 8% 82%, #fff, transparent),radial-gradient(1.2px 1.2px at 55% 88%, #fff, transparent),radial-gradient(1.3px 1.3px at 97% 62%, #fff, transparent),radial-gradient(1.1px 1.1px at 35% 40%, #fff, transparent);background-repeat:no-repeat;}
+  .hero-vignette{position:absolute;inset:0;z-index:0;background:linear-gradient(180deg, transparent 0%, transparent 60%, var(--void) 100%);}
+  .hero-inner{position:relative;z-index:1;text-align:center;}
+  .hero-inner .eyebrow{justify-content:center;margin-bottom:26px;}
+  h1{font-family:"Black Han Sans",sans-serif;font-weight:400;font-size:clamp(48px,8vw,104px);line-height:.96;margin:0 0 22px;letter-spacing:.01em;text-wrap:balance;}
+  h1 .accent{background:linear-gradient(150deg,var(--gold-hi),var(--gold) 55%,var(--gold-deep));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sub{font-size:18.5px;font-weight:500;color:var(--text-hi);margin:0 auto 14px;max-width:44ch;}
+  .desc{color:var(--text-mid);max-width:52ch;font-size:15px;margin:0 auto 40px;font-weight:400;}
+  .cta-row{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-bottom:56px;}
+  .btn{font-family:"Noto Sans KR",sans-serif;font-weight:700;font-size:15px;padding:16px 30px;border-radius:999px;text-decoration:none;display:inline-flex;align-items:center;gap:10px;border:1px solid transparent;transition:transform .16s ease, filter .16s ease, border-color .16s ease, background .16s ease;cursor:pointer;}
+  .btn:hover{transform:translateY(-2px);}
+  .btn-primary{background:linear-gradient(150deg,var(--gold-hi),var(--gold) 60%,var(--gold-deep));color:#1a1400;box-shadow:0 14px 34px -14px rgba(242,183,41,.55);}
+  .btn-primary:hover{filter:brightness(1.06);}
+  .btn-primary:disabled{opacity:.6;cursor:default;transform:none;}
+  .btn-ghost{border-color:rgba(255,255,255,.18);color:var(--text-hi);background:rgba(255,255,255,.03);}
+  .btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
+  .btn-sm{padding:9px 18px;font-size:13px;border-radius:999px;}
+  .stats{display:flex;justify-content:center;gap:0;border-top:1px solid var(--line-soft);padding-top:32px;max-width:640px;margin:0 auto;position:relative;}
+  .stat{flex:1;padding:0 24px;position:relative;}
+  .stat + .stat::before{content:"";position:absolute;left:0;top:4px;bottom:4px;width:1px;background:var(--line-soft);}
+  .stat .k{font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px;}
+  .stat .v{font-family:"Black Han Sans",sans-serif;font-size:20px;color:var(--gold-hi);}
+  .stat input{width:100%;background:var(--panel);border:1px solid var(--line-soft);border-radius:8px;color:var(--gold-hi);font-family:"Black Han Sans",sans-serif;font-size:16px;padding:6px 8px;text-align:center;}
+  .stats-save{display:none;margin:18px auto 0;}
+  .stats-save.show{display:inline-flex;}
+  section{padding:96px 0;}
+  h2{font-family:"Black Han Sans",sans-serif;font-weight:400;font-size:clamp(30px,3.6vw,44px);margin:10px 0 14px;text-wrap:balance;}
+  .section-head{max-width:56ch;margin:0 auto 56px;text-align:center;}
+  .section-head .eyebrow{justify-content:center;}
+  .section-head p{color:var(--text-mid);margin:0;font-size:15.5px;}
+  .grid-features{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  .f-card{background:var(--panel);border:1px solid var(--line-soft);border-radius:20px;padding:30px 26px;position:relative;}
+  .f-card .f-icon{width:44px;height:44px;border-radius:14px;background:linear-gradient(150deg,rgba(242,183,41,.22),rgba(242,183,41,.06));display:flex;align-items:center;justify-content:center;font-family:"Black Han Sans",sans-serif;color:var(--gold-hi);font-size:16px;margin-bottom:18px;}
+  .f-card h3{font-size:16.5px;margin:0 0 10px;color:var(--text-hi);font-weight:700;}
+  .f-card p{margin:0;color:var(--text-mid);font-size:14px;}
+  .f-x{position:absolute;top:14px;right:14px;border:none;background:rgba(255,255,255,.08);color:var(--text-mid);width:22px;height:22px;border-radius:50%;font-size:13px;cursor:pointer;}
+  .f-x:hover{background:var(--danger);color:#fff;}
+  .f-add{background:var(--panel);border:1px dashed var(--line-soft);border-radius:20px;padding:22px;margin-top:20px;display:grid;gap:10px;grid-template-columns:80px 1fr;}
+  .f-add input,.f-add textarea{font-family:"Noto Sans KR",sans-serif;font-size:13.5px;color:var(--text-hi);background:var(--void);border:1px solid var(--line-soft);border-radius:10px;padding:9px 12px;width:100%;resize:vertical;}
+  .f-add .f-add-title{grid-column:2;}
+  .f-add .f-add-desc{grid-column:1/3;min-height:52px;}
+  .f-add .f-add-btn{grid-column:1/3;justify-self:start;}
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+  .step{background:var(--panel);border:1px solid var(--line-soft);border-radius:20px;padding:26px 22px;}
+  .step .num{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:999px;background:rgba(242,183,41,.14);color:var(--gold-hi);font-family:"Black Han Sans",sans-serif;font-size:14px;margin-bottom:16px;}
+  .step h3{font-size:15.5px;margin:0 0 8px;color:var(--text-hi);font-weight:700;}
+  .step p{margin:0;color:var(--text-mid);font-size:13.5px;}
+  .crew{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-bottom:22px;}
+  .crew span{font-size:14px;font-weight:600;color:var(--text-hi);border:1px solid var(--line-soft);border-radius:999px;padding:10px 20px;background:var(--panel);display:inline-flex;align-items:center;gap:9px;}
+  .crew-x{border:none;background:rgba(255,255,255,.08);color:var(--text-mid);width:17px;height:17px;border-radius:50%;font-size:12px;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0;}
+  .crew-x:hover{background:var(--gold);color:#1a1400;}
+  .crew-add{display:flex;justify-content:center;gap:10px;}
+  .crew-add input{font-family:"Noto Sans KR",sans-serif;font-size:14px;color:var(--text-hi);background:var(--panel);border:1px solid var(--line-soft);border-radius:999px;padding:12px 20px;width:220px;outline:none;}
+  .crew-add input:focus{border-color:var(--gold);}
+  .crew-add button{font-family:"Noto Sans KR",sans-serif;font-weight:700;font-size:14px;color:#1a1400;background:linear-gradient(150deg,var(--gold-hi),var(--gold));border:none;border-radius:999px;padding:12px 22px;cursor:pointer;}
+  .crew-add button:disabled{opacity:.6;cursor:default;}
+  .crew-note{text-align:center;color:var(--text-dim);font-size:12px;margin-top:14px;}
+  footer{border-top:1px solid var(--line-soft);padding:44px 0 52px;}
+  .foot-grid{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;}
+  .foot-links{display:flex;gap:24px;font-size:13.5px;}
+  .foot-links a{color:var(--text-mid);text-decoration:none;font-weight:500;}
+  .foot-links a:hover{color:var(--gold);}
+  .foot-links button.linklike{background:none;border:none;font:inherit;color:var(--text-mid);cursor:pointer;padding:0;}
+  .foot-links button.linklike:hover{color:var(--gold);}
+  .disclaimer{color:var(--text-dim);font-size:11.5px;max-width:64ch;margin-top:20px;}
+  .regid{font-size:12px;color:var(--text-dim);}
+  .admin{max-width:640px;margin:28px auto 0;background:var(--panel-2);border:1px solid var(--line-soft);border-radius:18px;padding:24px 26px;}
+  .admin h4{margin:0 0 4px;font-size:14px;color:var(--gold-hi);}
+  .admin .hint{color:var(--text-dim);font-size:12px;margin:0 0 16px;}
+  .admin-row{display:flex;gap:10px;margin-bottom:14px;}
+  .admin-row input[type=password],.admin-row input[type=text]{flex:1;font-family:"Noto Sans KR",sans-serif;font-size:13.5px;color:var(--text-hi);background:var(--void);border:1px solid var(--line-soft);border-radius:10px;padding:10px 14px;}
+  .admin-upload{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line-soft);}
+  .admin-upload label{flex:1;font-size:13px;color:var(--text-mid);}
+  .admin-upload input[type=file]{flex:1;font-size:12px;color:var(--text-mid);}
+  .admin-log{margin-top:14px;background:var(--void);border:1px solid var(--line-soft);border-radius:10px;padding:12px 14px;font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--text-mid);max-height:140px;overflow-y:auto;white-space:pre-wrap;}
+  .admin-status{font-size:11.5px;color:var(--text-dim);margin-top:6px;}
+  @media (max-width:900px){.grid-features{grid-template-columns:1fr 1fr;}.steps{grid-template-columns:1fr 1fr;}}
+  @media (max-width:640px){.navlinks{display:none;}.grid-features{grid-template-columns:1fr;}.steps{grid-template-columns:1fr;}.stats{max-width:100%;}.crew-add{flex-direction:column;align-items:center;}.crew-add input{width:100%;max-width:280px;}.f-add{grid-template-columns:1fr;}.f-add .f-add-title,.f-add .f-add-desc,.f-add .f-add-btn{grid-column:1;}}
+  @media (prefers-reduced-motion:reduce){.btn,.nav-cta{transition:none;}}
 </style>
 </head>
 <body>
-
-<div id="gateScreen" class="gate">
-  <h1>SC-KR 관리자 대시보드</h1>
-  <p class="hint">비밀번호를 입력하세요.</p>
-  <input type="password" id="pwInput" placeholder="관리자 비밀번호">
-  <div><button id="unlockBtn">잠금 해제</button></div>
-  <div class="err" id="pwErr"></div>
-  <p class="hint" style="margin-top:24px;">
-    참고: 이 페이지는 정적 GitHub Pages라 클라이언트 측 비밀번호 확인만 가능합니다.
-    페이지 소스(JS)를 직접 들여다보면 우회할 수 있는 수준의 보호이며, 진짜 서버 인증은 아닙니다.
-  </p>
-</div>
-
-<div id="dashboard" style="display:none;">
-  <header>
-    <h1>SC-KR 관리자 대시보드 <span class="logout" id="logoutBtn">잠그기</span></h1>
-    <p>DOKU-web/sc-kr 저장소 상태 · 릴리스 및 패치노트</p>
-  </header>
-  <div class="wrap">
-
-    <div class="card">
-      <h2>현재 상태</h2>
-      <div class="stat-row" id="statRow">
-        <div class="stat"><div class="label">런처 버전</div><div class="value" id="statVersion">-</div></div>
-        <div class="stat"><div class="label">최신 릴리스</div><div class="value" id="statLatestTag">-</div></div>
-        <div class="stat"><div class="label">총 다운로드</div><div class="value" id="statTotalDownloads">-</div></div>
-        <div class="stat"><div class="label">디스코드 알림</div><div class="value" id="statDiscord" style="font-size:14px;">연결됨</div></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>빠른 다운로드 (최신 릴리스)</h2>
-      <div class="quicklinks" id="quickLinks">
-        <span class="loading">불러오는 중...</span>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>파일별 누적 다운로드</h2>
-      <p class="hint">모든 릴리스를 합산한, 파일 이름별 누적 다운로드 수입니다 (같은 파일명이 여러 릴리스에 걸쳐 있으면 합산됩니다).</p>
-      <div id="assetTotals" class="loading">불러오는 중...</div>
-    </div>
-
-    <div class="card">
-      <h2>미해결 이슈 (버그 제보 / 요청) <span class="badge" id="issueCount"></span></h2>
-      <p class="hint">GitHub 저장소에 열려있는 이슈 목록입니다. 클릭하면 GitHub에서 바로 답글/종료할 수 있습니다.</p>
-      <p class="hint">대부분의 버그 제보/문의는 <a href="https://discord.gg/EzAdtpCRJV" target="_blank" rel="noopener">디스코드 티켓</a>으로 접수됩니다 — 여기 목록이 비어있어도 디스코드 쪽을 확인해주세요.</p>
-      <div id="issueList" class="loading">불러오는 중...</div>
-    </div>
-
-    <div class="card">
-      <h2>최근 커밋</h2>
-      <div id="commitList" class="loading">불러오는 중...</div>
-    </div>
-
-    <div class="card">
-      <h2>릴리스 / 패치노트 <span class="badge" id="releaseCount"></span></h2>
-      <p class="hint">새 릴리스를 게시하면(release: published) 자동으로 위 디스코드 웹훅으로 패치노트가 전송됩니다. 각 릴리스 항목 아래에 그 릴리스 안의 파일별 다운로드 수가 표시됩니다.</p>
-      <input type="text" class="search-box" id="releaseSearch" placeholder="패치노트 검색 (제목/내용)...">
-      <div id="releaseList" class="loading">불러오는 중...</div>
-    </div>
-
+<header>
+  <div class="nav">
+    <a class="brand" href="#top"><span class="mark">KR</span><span class="word">SC-KR</span></a>
+    <nav class="navlinks">
+      <a href="#features">기능</a>
+      <a href="#install">설치</a>
+      <a href="#crew">번역팀</a>
+    </nav>
+    <a class="nav-cta" href="https://github.com/DOKU-web/sc-kr/releases/latest/download/SC-KR-Launcher.exe">다운로드</a>
   </div>
-</div>
-
+</header>
+<main id="top">
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-stars"></div>
+    <div class="hero-vignette"></div>
+    <div class="wrap hero-inner">
+      <div class="eyebrow"><span class="led"></span>STAR CITIZEN · 비공식 커뮤니티 패치</div>
+      <h1>PLAY IN<br><span class="accent">한국어</span>.</h1>
+      <p class="sub">번역 적용부터 한글 채팅까지, 런처 하나로.</p>
+      <p class="desc">Star Citizen 한국어 번역과 게임 채팅창에 직접 한글을 입력하는 기능을 하나의 런처에 담았습니다. 게임이 업데이트될 때마다 번역팀이 계속 손보고, 실행할 때마다 최신 버전을 스스로 확인합니다.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="https://github.com/DOKU-web/sc-kr/releases/latest/download/SC-KR-Launcher.exe">런처 다운로드 ↓</a>
+      </div>
+      <div class="stats" id="statsRow"></div>
+      <button type="button" class="btn btn-ghost btn-sm stats-save" id="statsSaveBtn">버전 정보 저장</button>
+    </div>
+  </section>
+  <section id="features" class="wrap">
+    <div class="section-head">
+      <div class="eyebrow"><span class="led"></span>MODULES</div>
+      <h2>탑재 기능</h2>
+      <p>패치 적용기부터 한글 채팅, 데이터 뷰어까지 — 런처 하나로 처리합니다.</p>
+    </div>
+    <div class="grid-features" id="featuresGrid"></div>
+    <form class="f-add" id="featureForm" hidden>
+      <input class="f-add-icon" id="fIcon" maxlength="2" placeholder="아이콘" required>
+      <input class="f-add-title" id="fTitle" placeholder="기능 이름" required>
+      <textarea class="f-add-desc" id="fDesc" placeholder="설명" required></textarea>
+      <button type="submit" class="btn btn-primary btn-sm f-add-btn">기능 추가</button>
+    </form>
+  </section>
+  <section id="install" class="wrap">
+    <div class="section-head">
+      <div class="eyebrow"><span class="led"></span>SETUP</div>
+      <h2>설치 순서</h2>
+      <p>설치 프로그램이 따로 없습니다. exe 하나만 받으면 됩니다.</p>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="num">1</div><h3>다운로드</h3><p>SC-KR-Launcher.exe를 받아 원하는 폴더에 둡니다.</p></div>
+      <div class="step"><div class="num">2</div><h3>폴더 지정</h3><p>스타시티즌 LIVE 폴더 경로를 확인·지정합니다.</p></div>
+      <div class="step"><div class="num">3</div><h3>적용</h3><p>"자동 다운로드 및 적용" 버튼을 누릅니다.</p></div>
+      <div class="step"><div class="num">4</div><h3>실행</h3><p>게임을 켜면 한국어로 표시됩니다.</p></div>
+    </div>
+  </section>
+  <section id="crew" class="wrap">
+    <div class="section-head">
+      <div class="eyebrow"><span class="led"></span>TRANSLATION CREW</div>
+      <h2>번역팀</h2>
+      <p>게임이 업데이트될 때마다 새로 생기는 텍스트를 자원해서 번역하고 있습니다.</p>
+    </div>
+    <div class="crew" id="crewList"></div>
+    <form class="crew-add" id="crewForm" hidden>
+      <input id="crewInput" type="text" placeholder="이름 추가" maxlength="40" autocomplete="off" required>
+      <button type="submit">추가</button>
+    </form>
+    <p class="crew-note" id="crewNote" hidden>이 페이지에서 바로 추가/삭제한 내용은 전체 방문자에게 반영됩니다 (GitHub 저장소에 직접 커밋됩니다).</p>
+  </section>
+</main>
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <a class="brand" href="#top"><span class="mark">KR</span><span class="word" style="font-size:17px;">SC-KR</span></a>
+        <div class="regid" style="margin-top:10px;">DOKU-web/sc-kr · 런처 <span id="footLauncherVer">v1.18</span> · 언어팩 <span id="footPatchVer">v2.0</span></div>
+      </div>
+      <div class="foot-links">
+        <a href="https://discord.gg/EzAdtpCRJV">Discord</a>
+        <a href="https://github.com/DOKU-web/sc-kr/releases/latest/download/SC-KR-Launcher.exe">다운로드</a>
+        <a href="admin.html">관리자 대시보드</a>
+        <button type="button" class="linklike" id="adminToggle">콘텐츠 편집</button>
+      </div>
+    </div>
+    <p class="disclaimer">이 프로젝트는 비공식 커뮤니티 팬 제작물이며, Cloud Imperium Games / Roberts Space Industries와 관련이 없습니다. Star Citizen은 Cloud Imperium Rights LLC의 상표입니다.</p>
+    <div class="admin" id="adminPanel" hidden>
+      <h4>사이트 콘텐츠 · GitHub 릴리즈 관리</h4>
+      <p class="hint">토큰은 이 브라우저에만 저장되고 페이지에는 절대 포함되지 않습니다. 이 저장소(DOKU-web/sc-kr)에 커밋 권한이 있는 Personal Access Token이 필요합니다. 위 번역팀/기능 목록 추가·삭제는 저장 즉시 이 저장소의 docs/index.html에 직접 커밋됩니다.</p>
+      <div class="admin-row">
+        <input type="password" id="tokenInput" placeholder="GitHub Personal Access Token">
+        <button type="button" class="btn btn-ghost btn-sm" id="tokenSaveBtn">토큰 저장</button>
+        <button type="button" class="btn btn-ghost btn-sm" id="tokenClearBtn">삭제</button>
+      </div>
+      <div class="admin-status" id="tokenStatus">저장된 토큰 없음</div>
+      <div class="admin-upload">
+        <label>런처 EXE (SC-KR-Launcher.exe)</label>
+        <input type="file" id="fileLauncher" accept=".exe">
+        <button type="button" class="btn btn-primary btn-sm" id="uploadLauncherBtn">업로드</button>
+      </div>
+      <div class="admin-upload">
+        <label>패치 ZIP (sc-kr-v1.zip)</label>
+        <input type="file" id="filePatch" accept=".zip">
+        <button type="button" class="btn btn-primary btn-sm" id="uploadPatchBtn">업로드</button>
+      </div>
+      <div class="admin-log" id="adminLog">대기 중...</div>
+    </div>
+  </div>
+</footer>
+<script id="meta-data" type="application/json">{"launcher":"v1.18","patch":"v2.0","install":"단일 EXE"}</script>
+<script id="features-data" type="application/json">[{"icon":"↓","title":"자동 다운로드 및 적용","desc":"최신 한국어 패치를 받아 지정한 스타시티즌 LIVE 폴더에 바로 적용합니다. 버튼 한 번이면 끝입니다."},{"icon":"가","title":"한국어 채팅","desc":"한영키로 게임 채팅창에서 직접 한글을 조합해 입력합니다. 패치를 쓰는 다른 플레이어 화면에는 정상적인 한글로 보입니다."},{"icon":"✓","title":"커뮤니티 번역","desc":"자원 번역팀이 게임 업데이트를 따라가며 번역을 계속 다듬습니다. 빠진 항목은 영어 원문으로 채워 빈칸이 없도록 합니다."},{"icon":"▤","title":"아이템 데이터 뷰어","desc":"Data.p4k에서 함선·부품 데이터베이스를 직접 추출해 표로 확인하고 검색할 수 있습니다."},{"icon":"↻","title":"자동 업데이트 확인","desc":"런처를 켤 때마다 런처 자체와 언어팩 버전을 각각 확인해, 새 버전이 있으면 바로 알려줍니다."},{"icon":"★","title":"RSI 계정 연동","desc":"함선 즐겨찾기를 불러와 정리하고 확인할 수 있습니다."}]</script>
+<script id="crew-data" type="application/json">["neogyuring","그리고 오류를 제보해주시는 모든 분","DOKKU"]</script>
 <script>
 (function(){
-  var PW_HASH = "ad09c3ba4c83dcf50b0453ac20ea013fcce39c7b31bb7fc852ce761aac402e25";
-  var SESSION_KEY = "sckr_admin_unlocked";
-  var REPO = "DOKU-web/sc-kr";
+  function escapeHtml(s){return String(s).replace(/[&<>"']/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 
-  function sha256Hex(text){
-    var enc = new TextEncoder().encode(text);
-    return crypto.subtle.digest("SHA-256", enc).then(function(buf){
-      var bytes = Array.from(new Uint8Array(buf));
-      return bytes.map(function(b){ return b.toString(16).padStart(2, "0"); }).join("");
+  var meta = JSON.parse(document.getElementById('meta-data').textContent);
+  var features = JSON.parse(document.getElementById('features-data').textContent);
+  var crew = JSON.parse(document.getElementById('crew-data').textContent);
+
+  var GH_OWNER = 'DOKU-web', GH_REPO = 'sc-kr', GH_TAG = 'v1', GH_BRANCH = 'main';
+  var GH_PAGE_PATH = 'docs/index.html';
+  var TOKEN_KEY = 'sckr_admin_token';
+
+  var editable = !!localStorage.getItem(TOKEN_KEY);
+  var busy = false;
+
+  function renderStats(){
+    document.getElementById('statsRow').innerHTML =
+      '<div class="stat"><div class="k">런처</div>' + (editable ? '<input id="statLauncher" value="' + escapeHtml(meta.launcher) + '">' : '<div class="v">' + escapeHtml(meta.launcher) + '</div>') + '</div>' +
+      '<div class="stat"><div class="k">언어팩</div>' + (editable ? '<input id="statPatch" value="' + escapeHtml(meta.patch) + '">' : '<div class="v">' + escapeHtml(meta.patch) + '</div>') + '</div>' +
+      '<div class="stat"><div class="k">설치</div>' + (editable ? '<input id="statInstall" value="' + escapeHtml(meta.install) + '">' : '<div class="v">' + escapeHtml(meta.install) + '</div>') + '</div>';
+    document.getElementById('statsSaveBtn').classList.toggle('show', editable);
+    var lv = document.getElementById('footLauncherVer'); if (lv) lv.textContent = meta.launcher;
+    var pv = document.getElementById('footPatchVer'); if (pv) pv.textContent = meta.patch;
+  }
+
+  function renderFeatures(){
+    document.getElementById('featuresGrid').innerHTML = features.map(function(f, i){
+      var x = editable ? '<button type="button" class="f-x" data-i="' + i + '" aria-label="삭제">×</button>' : '';
+      return '<div class="f-card">' + x + '<div class="f-icon">' + escapeHtml(f.icon) + '</div><h3>' + escapeHtml(f.title) + '</h3><p>' + escapeHtml(f.desc) + '</p></div>';
+    }).join('');
+  }
+
+  function renderCrew(){
+    document.getElementById('crewList').innerHTML = crew.map(function(n, i){
+      var x = editable ? '<button type="button" class="crew-x" data-i="' + i + '" aria-label="' + escapeHtml(n) + ' 삭제">×</button>' : '';
+      return '<span>' + escapeHtml(n) + x + '</span>';
+    }).join('');
+  }
+
+  function applyEditableUi(){
+    document.getElementById('featureForm').hidden = !editable;
+    document.getElementById('crewForm').hidden = !editable;
+    document.getElementById('crewNote').hidden = !editable;
+  }
+
+  renderStats(); renderFeatures(); renderCrew(); applyEditableUi();
+
+  function setControlsDisabled(disabled){
+    var sel = ['#featuresGrid .f-x', '#crewList .crew-x', '#statsSaveBtn', '#featureForm button', '#crewForm button'];
+    document.querySelectorAll(sel.join(',')).forEach(function(el){ el.disabled = disabled; });
+  }
+
+  function b64EncodeUtf8(str){
+    var bytes = new TextEncoder().encode(str);
+    var binary = '';
+    for (var i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    return btoa(binary);
+  }
+  function b64DecodeUtf8(b64){
+    var binary = atob(b64.replace(/\s/g, ''));
+    var bytes = new Uint8Array(binary.length);
+    for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return new TextDecoder('utf-8').decode(bytes);
+  }
+  function replaceScriptBlock(html, id, newJsonString){
+    var re = new RegExp('(<script id="' + id + '" type="application\\/json">)([\\s\\S]*?)(<\\/script>)');
+    return html.replace(re, function(_, open, oldJson, close){
+      return open + newJsonString.replace(/</g, '\\u003c') + close;
     });
   }
-
-  function showDashboard(){
-    document.getElementById("gateScreen").style.display = "none";
-    document.getElementById("dashboard").style.display = "block";
-    loadData();
+  function ghHeaders(token, extra){
+    var h = {'Authorization':'token ' + token, 'Accept':'application/vnd.github+json'};
+    if (extra) for (var k in extra) h[k] = extra[k];
+    return h;
   }
 
-  if (sessionStorage.getItem(SESSION_KEY) === "1") {
-    showDashboard();
+  // 크루/기능/버전 편집은 이 파일(docs/index.html) 자체를 GitHub에 커밋하는 방식으로 저장됩니다.
+  // Claude 아티팩트를 벗어나 순수 정적 파일로 옮기면서, 게시-충돌로 편집이 씹히던 문제 자체가 없어졌습니다.
+  async function saveSite(){
+    if (busy) return;
+    var token = localStorage.getItem(TOKEN_KEY);
+    if (!token) { alert('먼저 하단 "콘텐츠 편집" 패널에서 GitHub 토큰을 저장해주세요.'); return; }
+    busy = true;
+    setControlsDisabled(true);
+    try {
+      var getRes = await fetch('https://api.github.com/repos/' + GH_OWNER + '/' + GH_REPO + '/contents/' + GH_PAGE_PATH + '?ref=' + GH_BRANCH, {headers: ghHeaders(token)});
+      if (!getRes.ok) throw new Error('현재 파일을 불러오지 못했습니다 (' + getRes.status + ')');
+      var fileData = await getRes.json();
+      var html = b64DecodeUtf8(fileData.content);
+      html = replaceScriptBlock(html, 'meta-data', JSON.stringify(meta));
+      html = replaceScriptBlock(html, 'features-data', JSON.stringify(features));
+      html = replaceScriptBlock(html, 'crew-data', JSON.stringify(crew));
+      var putRes = await fetch('https://api.github.com/repos/' + GH_OWNER + '/' + GH_REPO + '/contents/' + GH_PAGE_PATH, {
+        method: 'PUT',
+        headers: ghHeaders(token, {'Content-Type': 'application/json'}),
+        body: JSON.stringify({message: '사이트 콘텐츠 업데이트', content: b64EncodeUtf8(html), sha: fileData.sha, branch: GH_BRANCH})
+      });
+      if (!putRes.ok) { var t = await putRes.text(); throw new Error('저장 실패 (' + putRes.status + '): ' + t.slice(0, 200)); }
+    } catch (err) {
+      alert('저장하지 못했습니다: ' + (err && err.message ? err.message : err) + '\n(다른 곳에서 방금 저장했다면, 새로고침 후 다시 시도해주세요.)');
+      throw err;
+    } finally {
+      busy = false;
+      setControlsDisabled(false);
+    }
   }
 
-  document.getElementById("unlockBtn").addEventListener("click", function(){
-    var pw = document.getElementById("pwInput").value;
-    sha256Hex(pw).then(function(hash){
-      if (hash === PW_HASH) {
-        sessionStorage.setItem(SESSION_KEY, "1");
-        showDashboard();
-      } else {
-        document.getElementById("pwErr").textContent = "비밀번호가 올바르지 않습니다.";
+  document.getElementById('statsSaveBtn').addEventListener('click', function(){
+    meta.launcher = document.getElementById('statLauncher').value.trim() || meta.launcher;
+    meta.patch = document.getElementById('statPatch').value.trim() || meta.patch;
+    meta.install = document.getElementById('statInstall').value.trim() || meta.install;
+    renderStats();
+    saveSite().catch(function(){});
+  });
+
+  document.getElementById('featuresGrid').addEventListener('click', function(e){
+    var btn = e.target.closest('.f-x');
+    if (!btn || busy) return;
+    var i = parseInt(btn.getAttribute('data-i'), 10);
+    features = features.slice(0, i).concat(features.slice(i + 1));
+    renderFeatures();
+    saveSite().catch(function(){});
+  });
+
+  document.getElementById('featureForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    if (busy) return;
+    var icon = document.getElementById('fIcon').value.trim();
+    var title = document.getElementById('fTitle').value.trim();
+    var desc = document.getElementById('fDesc').value.trim();
+    if (!icon || !title || !desc) return;
+    features = features.concat([{icon: icon, title: title, desc: desc}]);
+    renderFeatures();
+    var form = this;
+    var btn = this.querySelector('button'); btn.textContent = '추가 중...';
+    saveSite().then(function(){ form.reset(); }).catch(function(){}).finally(function(){ btn.textContent = '기능 추가'; });
+  });
+
+  document.getElementById('crewList').addEventListener('click', function(e){
+    var btn = e.target.closest('.crew-x');
+    if (!btn || busy) return;
+    var i = parseInt(btn.getAttribute('data-i'), 10);
+    crew = crew.slice(0, i).concat(crew.slice(i + 1));
+    renderCrew();
+    saveSite().catch(function(){});
+  });
+
+  document.getElementById('crewForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    if (busy) return;
+    var input = document.getElementById('crewInput');
+    var name = input.value.trim();
+    if (!name || crew.indexOf(name) !== -1) { input.value = ''; return; }
+    crew = crew.concat([name]);
+    renderCrew();
+    var btn = this.querySelector('button'); btn.textContent = '추가 중...';
+    saveSite().then(function(){ input.value = ''; }).catch(function(){}).finally(function(){ btn.textContent = '추가'; });
+  });
+
+  function logLine(msg){
+    var el = document.getElementById('adminLog');
+    el.textContent = (el.textContent === '대기 중...' ? '' : el.textContent + '\n') + msg;
+    el.scrollTop = el.scrollHeight;
+  }
+  function refreshTokenStatus(){
+    var t = localStorage.getItem(TOKEN_KEY);
+    document.getElementById('tokenStatus').textContent = t ? '저장된 토큰 있음 (' + t.slice(0, 4) + '••••)' : '저장된 토큰 없음';
+  }
+  refreshTokenStatus();
+  document.getElementById('adminToggle').addEventListener('click', function(){
+    var p = document.getElementById('adminPanel');
+    p.hidden = !p.hidden;
+  });
+  document.getElementById('tokenSaveBtn').addEventListener('click', function(){
+    var v = document.getElementById('tokenInput').value.trim();
+    if (!v) return;
+    localStorage.setItem(TOKEN_KEY, v);
+    document.getElementById('tokenInput').value = '';
+    refreshTokenStatus();
+    editable = true;
+    renderStats(); renderFeatures(); renderCrew(); applyEditableUi();
+    logLine('토큰이 이 브라우저에 저장되었습니다. 이제 위에서 바로 추가/삭제할 수 있습니다.');
+  });
+  document.getElementById('tokenClearBtn').addEventListener('click', function(){
+    localStorage.removeItem(TOKEN_KEY);
+    refreshTokenStatus();
+    editable = false;
+    renderStats(); renderFeatures(); renderCrew(); applyEditableUi();
+    logLine('토큰을 삭제했습니다.');
+  });
+
+  async function uploadAsset(file, assetName){
+    var token = localStorage.getItem(TOKEN_KEY);
+    if (!token) { logLine('GitHub 토큰을 먼저 저장해주세요.'); return; }
+    if (!file) { logLine('파일을 선택해주세요.'); return; }
+    try {
+      logLine('릴리즈 정보 확인 중...');
+      var relRes = await fetch('https://api.github.com/repos/' + GH_OWNER + '/' + GH_REPO + '/releases/tags/' + GH_TAG, {headers: ghHeaders(token)});
+      if (!relRes.ok) throw new Error('릴리즈 조회 실패 (' + relRes.status + ')');
+      var rel = await relRes.json();
+      var existing = (rel.assets || []).filter(function(a){ return a.name === assetName; })[0];
+      if (existing) {
+        logLine('기존 ' + assetName + ' 삭제 중...');
+        var delRes = await fetch('https://api.github.com/repos/' + GH_OWNER + '/' + GH_REPO + '/releases/assets/' + existing.id, {method: 'DELETE', headers: ghHeaders(token)});
+        if (!delRes.ok && delRes.status !== 404) throw new Error('기존 파일 삭제 실패 (' + delRes.status + ')');
       }
-    });
+      logLine('업로드 중... (' + (file.size / 1024 / 1024).toFixed(1) + 'MB)');
+      var uploadUrl = rel.upload_url.replace('{?name,label}', '') + '?name=' + encodeURIComponent(assetName);
+      var buf = await file.arrayBuffer();
+      var upRes = await fetch(uploadUrl, {method: 'POST', headers: ghHeaders(token, {'Content-Type': 'application/octet-stream'}), body: buf});
+      if (!upRes.ok) { var t = await upRes.text(); throw new Error('업로드 실패 (' + upRes.status + '): ' + t.slice(0, 200)); }
+      logLine('완료: ' + assetName + ' 업로드됨.');
+    } catch (err) {
+      logLine('오류: ' + (err && err.message ? err.message : err));
+    }
+  }
+  document.getElementById('uploadLauncherBtn').addEventListener('click', function(){
+    uploadAsset(document.getElementById('fileLauncher').files[0], 'SC-KR-Launcher.exe');
   });
-  document.getElementById("pwInput").addEventListener("keydown", function(e){
-    if (e.key === "Enter") document.getElementById("unlockBtn").click();
+  document.getElementById('uploadPatchBtn').addEventListener('click', function(){
+    uploadAsset(document.getElementById('filePatch').files[0], 'sc-kr-v1.zip');
   });
-  document.getElementById("logoutBtn").addEventListener("click", function(){
-    sessionStorage.removeItem(SESSION_KEY);
-    location.reload();
-  });
-
-  function loadData(){
-    fetch("https://raw.githubusercontent.com/" + REPO + "/main/launcher_version.txt")
-      .then(function(r){ return r.text(); })
-      .then(function(t){ document.getElementById("statVersion").textContent = "v" + t.trim(); })
-      .catch(function(){ document.getElementById("statVersion").textContent = "확인 실패"; });
-
-    fetch("https://api.github.com/repos/" + REPO + "/releases")
-      .then(function(r){ return r.json(); })
-      .then(function(releases){
-        renderQuickLinks(releases);
-        renderReleases(releases);
-      })
-      .catch(function(err){
-        document.getElementById("releaseList").textContent = "릴리스 목록을 불러오지 못했습니다: " + err;
-        document.getElementById("quickLinks").textContent = "불러오지 못했습니다.";
-      });
-
-    fetch("https://api.github.com/repos/" + REPO + "/issues?state=open&per_page=15")
-      .then(function(r){ return r.json(); })
-      .then(renderIssues)
-      .catch(function(err){
-        document.getElementById("issueList").textContent = "이슈 목록을 불러오지 못했습니다: " + err;
-      });
-
-    fetch("https://api.github.com/repos/" + REPO + "/commits?per_page=8")
-      .then(function(r){ return r.json(); })
-      .then(renderCommits)
-      .catch(function(err){
-        document.getElementById("commitList").textContent = "커밋 목록을 불러오지 못했습니다: " + err;
-      });
-  }
-
-  function renderQuickLinks(releases){
-    var el = document.getElementById("quickLinks");
-    if (!Array.isArray(releases) || releases.length === 0) {
-      el.textContent = "릴리스가 없습니다.";
-      return;
-    }
-    var latest = releases[0];
-    var assets = latest.assets || [];
-    if (assets.length === 0) {
-      el.innerHTML = '<a class="btn" href="' + latest.html_url + '" target="_blank" rel="noopener">릴리스 페이지 열기</a>';
-      return;
-    }
-    el.innerHTML = assets.map(function(a){
-      return '<a class="btn" href="' + a.browser_download_url + '">' + escapeHtml(a.name) + ' 받기</a>';
-    }).join("");
-  }
-
-  function timeAgoKo(iso){
-    var diffMs = Date.now() - new Date(iso).getTime();
-    var mins = Math.floor(diffMs / 60000);
-    if (mins < 60) return mins + "분 전";
-    var hours = Math.floor(mins / 60);
-    if (hours < 24) return hours + "시간 전";
-    var days = Math.floor(hours / 24);
-    if (days < 30) return days + "일 전";
-    return new Date(iso).toLocaleDateString("ko-KR");
-  }
-
-  function renderIssues(issues){
-    var el = document.getElementById("issueList");
-    if (!Array.isArray(issues)) {
-      el.textContent = "이슈 목록을 불러오지 못했습니다.";
-      return;
-    }
-    var real = issues.filter(function(it){ return !it.pull_request; });
-    document.getElementById("issueCount").textContent = real.length + "개";
-    if (real.length === 0) {
-      el.textContent = "열려있는 이슈가 없습니다.";
-      return;
-    }
-    el.innerHTML = real.map(function(it){
-      var labelsHtml = (it.labels || []).map(function(l){
-        return '<span class="label-chip" style="' + (l.color ? "border-color:#" + l.color : "") + '">' + escapeHtml(l.name) + '</span>';
-      }).join("");
-      return '<div class="issue">' +
-        '<div class="title"><a href="' + it.html_url + '" target="_blank" rel="noopener">#' + it.number + ' ' + escapeHtml(it.title) + '</a></div>' +
-        '<div class="meta">' + escapeHtml(it.user ? it.user.login : "?") + ' · ' + timeAgoKo(it.created_at) + ' ' + labelsHtml + '</div>' +
-        '</div>';
-    }).join("");
-  }
-
-  function renderCommits(commits){
-    var el = document.getElementById("commitList");
-    if (!Array.isArray(commits)) {
-      el.textContent = "커밋 목록을 불러오지 못했습니다.";
-      return;
-    }
-    if (commits.length === 0) {
-      el.textContent = "커밋이 없습니다.";
-      return;
-    }
-    el.innerHTML = commits.map(function(c){
-      var msg = (c.commit.message || "").split("\n")[0];
-      var author = (c.commit.author && c.commit.author.name) || "?";
-      var date = c.commit.author ? timeAgoKo(c.commit.author.date) : "";
-      return '<div class="commit">' +
-        '<a href="' + c.html_url + '" target="_blank" rel="noopener">' + escapeHtml(msg) + '</a>' +
-        '<div class="meta">' + escapeHtml(author) + ' · ' + date + ' · ' + c.sha.slice(0, 7) + '</div>' +
-        '</div>';
-    }).join("");
-  }
-
-  function escapeHtml(s){
-    return String(s || "").replace(/[&<>"]/g, function(c){
-      return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c];
-    });
-  }
-
-  function renderReleases(releases){
-    var listEl = document.getElementById("releaseList");
-    if (!Array.isArray(releases) || releases.length === 0) {
-      listEl.textContent = "게시된 릴리스가 없습니다.";
-      document.getElementById("assetTotals").textContent = "게시된 릴리스가 없습니다.";
-      document.getElementById("statTotalDownloads").textContent = "0";
-      return;
-    }
-    document.getElementById("releaseCount").textContent = releases.length + "개";
-    document.getElementById("statLatestTag").textContent = releases[0].tag_name || "-";
-
-    // Totals per asset filename across every release, plus a grand total.
-    var totalsByName = {};
-    var grandTotal = 0;
-    releases.forEach(function(rel){
-      (rel.assets || []).forEach(function(a){
-        totalsByName[a.name] = (totalsByName[a.name] || 0) + a.download_count;
-        grandTotal += a.download_count;
-      });
-    });
-    document.getElementById("statTotalDownloads").textContent = grandTotal.toLocaleString("ko-KR") + "회";
-
-    var totalNames = Object.keys(totalsByName).sort(function(a, b){ return totalsByName[b] - totalsByName[a]; });
-    if (totalNames.length === 0) {
-      document.getElementById("assetTotals").textContent = "다운로드 가능한 파일이 없습니다.";
-    } else {
-      var totalsHtml = '<div class="stat-row">' + totalNames.map(function(name){
-        return '<div class="stat"><div class="label">' + escapeHtml(name) + '</div>' +
-          '<div class="value">' + totalsByName[name].toLocaleString("ko-KR") + '회</div></div>';
-      }).join("") + '</div>';
-      document.getElementById("assetTotals").innerHTML = totalsHtml;
-    }
-
-    function renderList(filterTerm){
-      var term = (filterTerm || "").trim().toLowerCase();
-      var filtered = !term ? releases : releases.filter(function(rel){
-        var hay = ((rel.name || "") + " " + (rel.tag_name || "") + " " + (rel.body || "")).toLowerCase();
-        return hay.indexOf(term) !== -1;
-      });
-      if (filtered.length === 0) {
-        listEl.textContent = "검색 결과가 없습니다.";
-        return;
-      }
-      var html = "";
-      filtered.forEach(function(rel){
-        var date = rel.published_at ? new Date(rel.published_at).toLocaleString("ko-KR") : "-";
-        var assetsHtml = (rel.assets || []).map(function(a){
-          return '<span>' + escapeHtml(a.name) + ' (' + a.download_count.toLocaleString("ko-KR") + '회 다운로드)</span>';
-        }).join("");
-        html += '<div class="release">' +
-          '<div class="title"><a href="' + rel.html_url + '" target="_blank" rel="noopener">' +
-            escapeHtml(rel.name || rel.tag_name) + '</a></div>' +
-          '<div class="meta">' + escapeHtml(rel.tag_name) + ' · ' + date + '</div>' +
-          (rel.body ? '<div class="body">' + escapeHtml(rel.body) + '</div>' : '') +
-          (assetsHtml ? '<div class="assets">' + assetsHtml + '</div>' : '') +
-          '</div>';
-      });
-      listEl.innerHTML = html;
-    }
-
-    renderList("");
-    var searchEl = document.getElementById("releaseSearch");
-    searchEl.addEventListener("input", function(){ renderList(searchEl.value); });
-  }
 })();
 </script>
-
 </body>
 </html>

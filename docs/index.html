@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SC-KR 런처</title>
+<title>SC-KR 런처 — Star Citizen 한국어 패치</title>
 <meta name="google-site-verification" content="tBMgRo0Jec2mZM2pR3CCrNEXkmzmRyWBoW_yagR_U3c" />
 <meta name="description" content="Star Citizen 한국어 번역 패치와 게임 채팅 한글 입력을 지원하는 비공식 커뮤니티 런처. 자동 다운로드·적용, 커뮤니티 번역, 한글 채팅을 하나의 프로그램에 담았습니다.">
 <link rel="canonical" href="https://doku-web.github.io/sc-kr/">
@@ -11,500 +11,283 @@
 <meta property="og:title" content="SC-KR 런처 — Star Citizen 한국어 패치">
 <meta property="og:description" content="Star Citizen 한국어 번역과 게임 채팅 한글 입력을 지원하는 비공식 커뮤니티 런처.">
 <meta property="og:url" content="https://doku-web.github.io/sc-kr/">
+<meta name="theme-color" content="#070B18">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28' fill='none'%3E%3Ccircle cx='14' cy='14' r='5.5' fill='%235CD3F5'/%3E%3Cellipse cx='14' cy='14' rx='12.5' ry='5' transform='rotate(-24 14 14)' stroke='%235CD3F5' stroke-width='1.6'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<style>
-  :root{--void:#070605;--panel:#121009;--panel-2:#17140c;--line:rgba(242,183,41,.14);--line-soft:rgba(255,255,255,.08);--gold:#f2b705;--gold-hi:#ffd75e;--gold-deep:#b5790a;--text-hi:#f6f1e4;--text-mid:#b3aa96;--text-dim:#786f5c;--danger:#e05a4d;--ok:#5fbf7a;}
-  *{box-sizing:border-box;}
-  html{background:var(--void);}
-  body{margin:0;background:var(--void);color:var(--text-hi);font-family:"Noto Sans KR",sans-serif;font-weight:400;line-height:1.7;-webkit-font-smoothing:antialiased;}
-  ::selection{background:var(--gold);color:#1a1400;}
-  a{color:var(--gold);}
-  a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:3px;}
-  .wrap{max-width:1120px;margin:0 auto;padding:0 32px;}
-  .eyebrow{font-size:12.5px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--text-mid);display:flex;align-items:center;gap:10px;}
-  .eyebrow .led{width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px var(--gold);flex:none;}
-  header{position:sticky;top:0;z-index:30;background:rgba(7,6,5,.7);backdrop-filter:blur(14px);border-bottom:1px solid var(--line-soft);}
-  .nav{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;max-width:1120px;margin:0 auto;}
-  .brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
-  .brand .mark{width:32px;height:32px;border-radius:10px;background:linear-gradient(150deg,var(--gold-hi),var(--gold-deep));display:flex;align-items:center;justify-content:center;font-family:"Black Han Sans",sans-serif;font-size:14px;color:#1a1400;}
-  .brand .word{font-family:"Black Han Sans",sans-serif;font-size:20px;color:var(--text-hi);letter-spacing:.01em;}
-  .navlinks{display:flex;align-items:center;gap:30px;font-size:14px;color:var(--text-mid);}
-  .navlinks a{color:var(--text-mid);text-decoration:none;font-weight:500;}
-  .navlinks a:hover{color:var(--gold);}
-  .nav-cta{font-size:13.5px;font-weight:700;color:#1a1400;background:linear-gradient(150deg,var(--gold-hi),var(--gold));padding:10px 20px;border-radius:999px;text-decoration:none;transition:filter .15s ease, transform .15s ease;}
-  .nav-cta:hover{filter:brightness(1.08);transform:translateY(-1px);}
-  .hero{position:relative;overflow:hidden;padding:120px 0 90px;}
-  .hero-bg{position:absolute;inset:0;z-index:0;background:radial-gradient(1100px 620px at 50% -8%, rgba(242,183,41,.16), transparent 60%),radial-gradient(900px 500px at 82% 8%, rgba(242,183,41,.10), transparent 55%),radial-gradient(700px 460px at 8% 30%, rgba(242,183,41,.06), transparent 60%),var(--void);}
-  .hero-stars{position:absolute;inset:0;z-index:0;opacity:.55;background-image:radial-gradient(1.6px 1.6px at 12% 22%, #fff, transparent),radial-gradient(1.2px 1.2px at 28% 68%, #fff, transparent),radial-gradient(1.8px 1.8px at 44% 14%, #fff, transparent),radial-gradient(1.1px 1.1px at 63% 44%, #fff, transparent),radial-gradient(1.4px 1.4px at 76% 76%, #fff, transparent),radial-gradient(1.1px 1.1px at 91% 26%, #fff, transparent),radial-gradient(1.6px 1.6px at 8% 82%, #fff, transparent),radial-gradient(1.2px 1.2px at 55% 88%, #fff, transparent),radial-gradient(1.3px 1.3px at 97% 62%, #fff, transparent),radial-gradient(1.1px 1.1px at 35% 40%, #fff, transparent);background-repeat:no-repeat;}
-  .hero-vignette{position:absolute;inset:0;z-index:0;background:linear-gradient(180deg, transparent 0%, transparent 60%, var(--void) 100%);}
-  .hero-inner{position:relative;z-index:1;text-align:center;}
-  .hero-inner .eyebrow{justify-content:center;margin-bottom:26px;}
-  h1{font-family:"Black Han Sans",sans-serif;font-weight:400;font-size:clamp(48px,8vw,104px);line-height:.96;margin:0 0 22px;letter-spacing:.01em;text-wrap:balance;}
-  h1 .accent{background:linear-gradient(150deg,var(--gold-hi),var(--gold) 55%,var(--gold-deep));-webkit-background-clip:text;background-clip:text;color:transparent;}
-  .sub{font-size:18.5px;font-weight:500;color:var(--text-hi);margin:0 auto 14px;max-width:44ch;}
-  .desc{color:var(--text-mid);max-width:52ch;font-size:15px;margin:0 auto 40px;font-weight:400;}
-  .cta-row{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-bottom:56px;}
-  .btn{font-family:"Noto Sans KR",sans-serif;font-weight:700;font-size:15px;padding:16px 30px;border-radius:999px;text-decoration:none;display:inline-flex;align-items:center;gap:10px;border:1px solid transparent;transition:transform .16s ease, filter .16s ease, border-color .16s ease, background .16s ease;cursor:pointer;}
-  .btn:hover{transform:translateY(-2px);}
-  .btn-primary{background:linear-gradient(150deg,var(--gold-hi),var(--gold) 60%,var(--gold-deep));color:#1a1400;box-shadow:0 14px 34px -14px rgba(242,183,41,.55);}
-  .btn-primary:hover{filter:brightness(1.06);}
-  .btn-primary:disabled{opacity:.6;cursor:default;transform:none;}
-  .btn-ghost{border-color:rgba(255,255,255,.18);color:var(--text-hi);background:rgba(255,255,255,.03);}
-  .btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
-  .btn-sm{padding:9px 18px;font-size:13px;border-radius:999px;}
-  .stats{display:flex;justify-content:center;gap:0;border-top:1px solid var(--line-soft);padding-top:32px;max-width:640px;margin:0 auto;position:relative;}
-  .stat{flex:1;padding:0 24px;position:relative;}
-  .stat + .stat::before{content:"";position:absolute;left:0;top:4px;bottom:4px;width:1px;background:var(--line-soft);}
-  .stat .k{font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px;}
-  .stat .v{font-family:"Black Han Sans",sans-serif;font-size:20px;color:var(--gold-hi);}
-  .stat input{width:100%;background:var(--panel);border:1px solid var(--line-soft);border-radius:8px;color:var(--gold-hi);font-family:"Black Han Sans",sans-serif;font-size:16px;padding:6px 8px;text-align:center;}
-  .stats-save{display:none;margin:18px auto 0;}
-  .stats-save.show{display:inline-flex;}
-  section{padding:96px 0;}
-  h2{font-family:"Black Han Sans",sans-serif;font-weight:400;font-size:clamp(30px,3.6vw,44px);margin:10px 0 14px;text-wrap:balance;}
-  .section-head{max-width:56ch;margin:0 auto 56px;text-align:center;}
-  .section-head .eyebrow{justify-content:center;}
-  .section-head p{color:var(--text-mid);margin:0;font-size:15.5px;}
-  .grid-features{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
-  .f-card{background:var(--panel);border:1px solid var(--line-soft);border-radius:20px;padding:30px 26px;position:relative;}
-  .f-card .f-icon{width:44px;height:44px;border-radius:14px;background:linear-gradient(150deg,rgba(242,183,41,.22),rgba(242,183,41,.06));display:flex;align-items:center;justify-content:center;font-family:"Black Han Sans",sans-serif;color:var(--gold-hi);font-size:16px;margin-bottom:18px;}
-  .f-card h3{font-size:16.5px;margin:0 0 10px;color:var(--text-hi);font-weight:700;}
-  .f-card p{margin:0;color:var(--text-mid);font-size:14px;}
-  .f-x{position:absolute;top:14px;right:14px;border:none;background:rgba(255,255,255,.08);color:var(--text-mid);width:22px;height:22px;border-radius:50%;font-size:13px;cursor:pointer;}
-  .f-x:hover{background:var(--danger);color:#fff;}
-  .f-add{background:var(--panel);border:1px dashed var(--line-soft);border-radius:20px;padding:22px;margin-top:20px;display:grid;gap:10px;grid-template-columns:80px 1fr;}
-  .f-add input,.f-add textarea{font-family:"Noto Sans KR",sans-serif;font-size:13.5px;color:var(--text-hi);background:var(--void);border:1px solid var(--line-soft);border-radius:10px;padding:9px 12px;width:100%;resize:vertical;}
-  .f-add .f-add-title{grid-column:2;}
-  .f-add .f-add-desc{grid-column:1/3;min-height:52px;}
-  .f-add .f-add-btn{grid-column:1/3;justify-self:start;}
-  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
-  .step{background:var(--panel);border:1px solid var(--line-soft);border-radius:20px;padding:26px 22px;}
-  .step .num{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:999px;background:rgba(242,183,41,.14);color:var(--gold-hi);font-family:"Black Han Sans",sans-serif;font-size:14px;margin-bottom:16px;}
-  .step h3{font-size:15.5px;margin:0 0 8px;color:var(--text-hi);font-weight:700;}
-  .step p{margin:0;color:var(--text-mid);font-size:13.5px;}
-  .crew{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-bottom:22px;}
-  .crew span{font-size:14px;font-weight:600;color:var(--text-hi);border:1px solid var(--line-soft);border-radius:999px;padding:10px 20px;background:var(--panel);display:inline-flex;align-items:center;gap:9px;}
-  .crew-x{border:none;background:rgba(255,255,255,.08);color:var(--text-mid);width:17px;height:17px;border-radius:50%;font-size:12px;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0;}
-  .crew-x:hover{background:var(--gold);color:#1a1400;}
-  .crew-add{display:flex;justify-content:center;gap:10px;}
-  .crew-add input{font-family:"Noto Sans KR",sans-serif;font-size:14px;color:var(--text-hi);background:var(--panel);border:1px solid var(--line-soft);border-radius:999px;padding:12px 20px;width:220px;outline:none;}
-  .crew-add input:focus{border-color:var(--gold);}
-  .crew-add button{font-family:"Noto Sans KR",sans-serif;font-weight:700;font-size:14px;color:#1a1400;background:linear-gradient(150deg,var(--gold-hi),var(--gold));border:none;border-radius:999px;padding:12px 22px;cursor:pointer;}
-  .crew-add button:disabled{opacity:.6;cursor:default;}
-  .crew-note{text-align:center;color:var(--text-dim);font-size:12px;margin-top:14px;}
-  footer{border-top:1px solid var(--line-soft);padding:44px 0 52px;}
-  .foot-grid{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;}
-  .foot-links{display:flex;gap:24px;font-size:13.5px;}
-  .foot-links a{color:var(--text-mid);text-decoration:none;font-weight:500;}
-  .foot-links a:hover{color:var(--gold);}
-  .foot-links button.linklike{background:none;border:none;font:inherit;color:var(--text-mid);cursor:pointer;padding:0;}
-  .foot-links button.linklike:hover{color:var(--gold);}
-  .disclaimer{color:var(--text-dim);font-size:11.5px;max-width:64ch;margin-top:20px;}
-  .regid{font-size:12px;color:var(--text-dim);}
-  .admin{max-width:640px;margin:28px auto 0;background:var(--panel-2);border:1px solid var(--line-soft);border-radius:18px;padding:24px 26px;}
-  .admin h4{margin:0 0 4px;font-size:14px;color:var(--gold-hi);}
-  .admin .hint{color:var(--text-dim);font-size:12px;margin:0 0 16px;}
-  .admin-row{display:flex;gap:10px;margin-bottom:14px;}
-  .admin-row input[type=password],.admin-row input[type=text]{flex:1;font-family:"Noto Sans KR",sans-serif;font-size:13.5px;color:var(--text-hi);background:var(--void);border:1px solid var(--line-soft);border-radius:10px;padding:10px 14px;}
-  .admin-upload{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line-soft);}
-  .admin-upload label{flex:1;font-size:13px;color:var(--text-mid);}
-  .admin-upload input[type=file]{flex:1;font-size:12px;color:var(--text-mid);}
-  .admin-log{margin-top:14px;background:var(--void);border:1px solid var(--line-soft);border-radius:10px;padding:12px 14px;font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--text-mid);max-height:140px;overflow-y:auto;white-space:pre-wrap;}
-  .admin-status{font-size:11.5px;color:var(--text-dim);margin-top:6px;}
-  @media (max-width:900px){.grid-features{grid-template-columns:1fr 1fr;}.steps{grid-template-columns:1fr 1fr;}}
-  @media (max-width:640px){.navlinks{display:none;}.grid-features{grid-template-columns:1fr;}.steps{grid-template-columns:1fr;}.stats{max-width:100%;}.crew-add{flex-direction:column;align-items:center;}.crew-add input{width:100%;max-width:280px;}.f-add{grid-template-columns:1fr;}.f-add .f-add-title,.f-add .f-add-desc,.f-add .f-add-btn{grid-column:1;}}
-  @media (prefers-reduced-motion:reduce){.btn,.nav-cta{transition:none;}}
-</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Sora:wght@600;700&display=swap">
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<header>
-  <div class="nav">
-    <a class="brand" href="#top"><span class="mark">KR</span><span class="word">SC-KR</span></a>
-    <nav class="navlinks">
-      <a href="#features">기능</a>
-      <a href="#install">설치</a>
-      <a href="#crew">번역팀</a>
+<div class="page" id="top">
+  <div class="bg" aria-hidden="true"></div>
+
+  <!-- 헤더 -->
+  <header class="site-header">
+    <nav class="nav container" aria-label="주요 메뉴" data-i18n-attr="aria-label:nav.label">
+      <a href="#top" class="brand">
+        <svg class="logo" width="26" height="26" viewBox="0 0 28 28" fill="none" aria-hidden="true"><circle cx="14" cy="14" r="5.5" fill="currentColor"/><ellipse cx="14" cy="14" rx="12.5" ry="5" transform="rotate(-24 14 14)" stroke="currentColor" stroke-width="1.6"/></svg>
+        <span class="brand-name">SC-KR</span>
+      </a>
+      <div class="nav-links" id="nav-links">
+        <a href="#features" data-i18n="nav.features">기능</a>
+        <a href="#how" data-i18n="nav.how">설치 방법</a>
+        <a href="#crew" data-i18n="nav.crew">번역팀</a>
+        <a href="#partners" data-i18n="nav.partners">파트너</a>
+        <a href="#discord" data-i18n="nav.discord">디스코드</a>
+      </div>
+      <div class="nav-actions">
+        <div class="lang-switch" role="group" aria-label="언어 선택">
+          <button type="button" data-lang="ko" aria-pressed="true">KO</button>
+          <button type="button" data-lang="en" aria-pressed="false">EN</button>
+        </div>
+        <a href="https://github.com/DOKU-web/sc-kr/releases/latest/download/SC-KR-Launcher.exe" class="btn btn-primary btn-sm js-download" data-i18n="cta.download">런처 다운로드</a>
+        <button type="button" class="menu-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="메뉴 열기">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+      </div>
     </nav>
-    <a class="nav-cta" href="https://github.com/DOKU-web/sc-kr/releases/latest/download/SC-KR-Launcher.exe">다운로드</a>
-  </div>
-</header>
-<main id="top">
-  <section class="hero">
-    <div class="hero-bg"></div>
-    <div class="hero-stars"></div>
-    <div class="hero-vignette"></div>
-    <div class="wrap hero-inner">
-      <div class="eyebrow"><span class="led"></span>STAR CITIZEN · 비공식 커뮤니티 패치</div>
-      <h1>PLAY IN<br><span class="accent">한국어</span>.</h1>
-      <p class="sub">번역 적용부터 한글 채팅까지, 런처 하나로.</p>
-      <p class="desc">Star Citizen 한국어 번역과 게임 채팅창에 직접 한글을 입력하는 기능을 하나의 런처에 담았습니다. 게임이 업데이트될 때마다 번역팀이 계속 손보고, 실행할 때마다 최신 버전을 스스로 확인합니다.</p>
-      <div class="cta-row">
-        <a class="btn btn-primary" href="https://github.com/DOKU-web/sc-kr/releases/latest/download/SC-KR-Launcher.exe">런처 다운로드 ↓</a>
-      </div>
-      <div class="stats" id="statsRow"></div>
-      <button type="button" class="btn btn-ghost btn-sm stats-save" id="statsSaveBtn">버전 정보 저장</button>
-    </div>
-  </section>
-  <section id="features" class="wrap">
-    <div class="section-head">
-      <div class="eyebrow"><span class="led"></span>MODULES</div>
-      <h2>탑재 기능</h2>
-      <p>패치 적용기부터 한글 채팅, 데이터 뷰어까지 — 런처 하나로 처리합니다.</p>
-    </div>
-    <div class="grid-features" id="featuresGrid"></div>
-    <form class="f-add" id="featureForm" hidden>
-      <input class="f-add-icon" id="fIcon" maxlength="2" placeholder="아이콘" required>
-      <input class="f-add-title" id="fTitle" placeholder="기능 이름" required>
-      <textarea class="f-add-desc" id="fDesc" placeholder="설명" required></textarea>
-      <button type="submit" class="btn btn-primary btn-sm f-add-btn">기능 추가</button>
-    </form>
-  </section>
-  <section id="install" class="wrap">
-    <div class="section-head">
-      <div class="eyebrow"><span class="led"></span>SETUP</div>
-      <h2>설치 순서</h2>
-      <p>설치 프로그램이 따로 없습니다. exe 하나만 받으면 됩니다.</p>
-    </div>
-    <div class="steps">
-      <div class="step"><div class="num">1</div><h3>다운로드</h3><p>SC-KR-Launcher.exe를 받아 원하는 폴더에 둡니다.</p></div>
-      <div class="step"><div class="num">2</div><h3>폴더 지정</h3><p>스타시티즌 LIVE 폴더 경로를 확인·지정합니다.</p></div>
-      <div class="step"><div class="num">3</div><h3>적용</h3><p>"자동 다운로드 및 적용" 버튼을 누릅니다.</p></div>
-      <div class="step"><div class="num">4</div><h3>실행</h3><p>게임을 켜면 한국어로 표시됩니다.</p></div>
-    </div>
-  </section>
-  <section id="crew" class="wrap">
-    <div class="section-head">
-      <div class="eyebrow"><span class="led"></span>TRANSLATION CREW</div>
-      <h2>번역팀</h2>
-      <p>게임이 업데이트될 때마다 새로 생기는 텍스트를 자원해서 번역하고 있습니다.</p>
-    </div>
-    <div class="crew" id="crewList"></div>
-    <form class="crew-add" id="crewForm" hidden>
-      <input id="crewInput" type="text" placeholder="이름 추가" maxlength="40" autocomplete="off" required>
-      <button type="submit">추가</button>
-    </form>
-    <p class="crew-note" id="crewNote" hidden>이 페이지에서 바로 추가/삭제한 내용은 전체 방문자에게 반영됩니다 (GitHub 저장소에 직접 커밋됩니다).</p>
-  </section>
-</main>
-<footer>
-  <div class="wrap">
-    <div class="foot-grid">
-      <div>
-        <a class="brand" href="#top"><span class="mark">KR</span><span class="word" style="font-size:17px;">SC-KR</span></a>
-        <div class="regid" style="margin-top:10px;">DOKU-web/sc-kr · 런처 <span id="footLauncherVer">v1.18</span> · 언어팩 <span id="footPatchVer">v2.0</span></div>
-      </div>
-      <div class="foot-links">
-        <a href="https://discord.gg/EzAdtpCRJV">Discord</a>
-        <a href="https://github.com/DOKU-web/sc-kr/releases/latest/download/SC-KR-Launcher.exe">다운로드</a>
-        <a href="admin.html">관리자 대시보드</a>
-        <button type="button" class="linklike" id="adminToggle">콘텐츠 편집</button>
-      </div>
-    </div>
-    <p class="disclaimer">이 프로젝트는 비공식 커뮤니티 팬 제작물이며, Cloud Imperium Games / Roberts Space Industries와 관련이 없습니다. Star Citizen은 Cloud Imperium Rights LLC의 상표입니다.</p>
-    <div class="admin" id="adminPanel" hidden>
-      <div id="adminGate">
-        <h4>콘텐츠 편집 잠금 해제</h4>
-        <p class="hint">번역팀/운영진만 아는 비밀번호를 입력하세요.</p>
-        <div class="admin-row">
-          <input type="password" id="gatePwInput" placeholder="비밀번호">
-          <button type="button" class="btn btn-ghost btn-sm" id="gateUnlockBtn">확인</button>
+  </header>
+
+  <main>
+    <!-- 히어로 -->
+    <section id="download" class="hero container">
+      <div class="hero-copy">
+        <div class="eyebrow mono"><span class="dot"></span>STAR CITIZEN KOREAN PATCH</div>
+        <h1 data-i18n-html="hero.title">스타시티즌,<br>이제 <span class="accent">한국어로.</span></h1>
+        <p class="lead" data-i18n="hero.lead">한국어 번역 적용부터 게임 채팅 한글 입력까지, SC-KR 런처 하나로 끝납니다. 번역팀이 게임 업데이트를 계속 따라가고, 런처는 실행할 때마다 최신 버전을 스스로 확인해요.</p>
+        <div class="btn-row">
+          <a href="https://github.com/DOKU-web/sc-kr/releases/latest/download/SC-KR-Launcher.exe" class="btn btn-primary btn-lg js-download">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg>
+            <span data-i18n="cta.download">런처 다운로드</span>
+          </a>
+          <a href="https://discord.gg/Nmg6R6sagZ" target="_blank" rel="noopener" class="btn btn-ghost btn-lg">
+            <span data-i18n="cta.discord">디스코드 참여</span>
+          </a>
         </div>
-        <div class="admin-status" id="gateErr"></div>
+        <dl class="meta">
+          <div><dt data-i18n="meta.launcher">런처</dt><dd class="mono js-version">v1.21</dd></div>
+          <div><dt data-i18n="meta.patch">언어팩</dt><dd class="mono js-patch-version">v2.3</dd></div>
+          <div class="js-filesize-wrap" hidden><dt data-i18n="meta.size">파일 크기</dt><dd class="mono js-filesize"></dd></div>
+          <div><dt data-i18n="meta.os">지원</dt><dd class="mono">Windows</dd></div>
+        </dl>
       </div>
-      <div id="adminBody" hidden>
-        <h4>사이트 콘텐츠 · GitHub 릴리즈 관리</h4>
-        <p class="hint">토큰은 이 브라우저에만 저장되고 페이지에는 절대 포함되지 않습니다. 이 저장소(DOKU-web/sc-kr)에 커밋 권한이 있는 Personal Access Token이 필요합니다. 위 번역팀/기능 목록 추가·삭제는 저장 즉시 이 저장소의 docs/index.html에 직접 커밋됩니다.</p>
-        <div class="admin-row">
-          <input type="password" id="tokenInput" placeholder="GitHub Personal Access Token">
-          <button type="button" class="btn btn-ghost btn-sm" id="tokenSaveBtn">토큰 저장</button>
-          <button type="button" class="btn btn-ghost btn-sm" id="tokenClearBtn">삭제</button>
+
+      <div class="hero-visual">
+        <!-- 런처 미리보기 -->
+        <div class="launcher" role="img" aria-label="SC-KR 런처 화면 미리보기" data-i18n-attr="aria-label:launcher.label">
+          <div class="launcher-bar">
+            <div class="mono launcher-title">SC-KR LAUNCHER</div>
+            <div class="launcher-winctl" aria-hidden="true">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+            </div>
+          </div>
+          <div class="launcher-head">
+            <svg class="launcher-logo" width="44" height="44" viewBox="0 0 28 28" fill="none" aria-hidden="true"><circle cx="14" cy="14" r="5.5" fill="currentColor"/><ellipse cx="14" cy="14" rx="12.5" ry="5" transform="rotate(-24 14 14)" stroke="currentColor" stroke-width="1.4"/></svg>
+            <div class="launcher-name">SC-KR</div>
+            <div class="launcher-sub" data-i18n="launcher.sub">스타시티즌 한국어 패치</div>
+          </div>
+          <div class="launcher-status">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.8 2.8L16 10"/></svg>
+            <div class="grow">
+              <div class="small muted" data-i18n="launcher.status">언어팩 상태</div>
+              <div class="status-value" data-i18n="launcher.applied">적용 완료</div>
+            </div>
+            <div class="mono tiny dim js-patch-version">v2.3</div>
+          </div>
+          <div class="launcher-field">
+            <div class="small muted" data-i18n="launcher.path">게임 경로</div>
+            <div class="path-box">
+              <div class="path-text mono">D:\Roberts Space Industries\StarCitizen\LIVE</div>
+              <div class="path-btn" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg>
+              </div>
+            </div>
+          </div>
+          <div class="launcher-toggle-row">
+            <div>
+              <div class="toggle-title" data-i18n="launcher.chat">한국어 채팅</div>
+              <div class="small muted" data-i18n="launcher.chatDesc">한영키로 게임 채팅에 한글 입력</div>
+            </div>
+            <div class="switch" aria-hidden="true"><span></span></div>
+          </div>
+          <div class="launcher-cta" data-i18n="launcher.apply">자동 다운로드 및 적용</div>
+          <div class="launcher-foot mono">LAUNCHER <span class="js-version">v1.21</span></div>
         </div>
-        <div class="admin-status" id="tokenStatus">저장된 토큰 없음</div>
-        <div class="admin-upload">
-          <label>런처 EXE (SC-KR-Launcher.exe)</label>
-          <input type="file" id="fileLauncher" accept=".exe">
-          <button type="button" class="btn btn-primary btn-sm" id="uploadLauncherBtn">업로드</button>
+      </div>
+    </section>
+
+    <!-- 기능 -->
+    <section id="features" class="section container">
+      <div class="section-head">
+        <div class="kicker mono">01 — FEATURES</div>
+        <h2 data-i18n="features.title">런처 하나로 처리합니다</h2>
+      </div>
+      <div class="features" id="featuresGrid"></div>
+      <form class="edit-form" id="featureForm" hidden>
+        <div class="edit-form-title">기능 추가</div>
+        <div class="edit-grid">
+          <label>아이콘<select id="fIcon" required></select></label>
+          <label>기능 이름<input id="fTitle" maxlength="40" required></label>
+          <label class="span-2">설명<textarea id="fDesc" rows="2" required></textarea></label>
+          <label>영문 이름 (선택)<input id="fTitleEn" maxlength="60"></label>
+          <label>영문 설명 (선택)<input id="fDescEn"></label>
         </div>
-        <div class="admin-upload">
-          <label>패치 ZIP (sc-kr-v1.zip)</label>
-          <input type="file" id="filePatch" accept=".zip">
-          <button type="button" class="btn btn-primary btn-sm" id="uploadPatchBtn">업로드</button>
+        <button type="submit" class="btn btn-primary btn-sm">기능 추가</button>
+      </form>
+    </section>
+
+    <!-- 설치 방법 -->
+    <section id="how" class="section container">
+      <div class="section-head">
+        <div class="kicker mono">02 — SETUP</div>
+        <h2 data-i18n="how.title">네 단계면 준비 끝</h2>
+        <p class="section-lead" data-i18n="how.lead">설치 프로그램이 따로 없습니다. exe 하나만 받으면 됩니다.</p>
+      </div>
+      <ol class="steps">
+        <li>
+          <div class="step-num mono">01</div>
+          <h3 data-i18n="how.s1.title">다운로드</h3>
+          <p data-i18n="how.s1.body">SC-KR-Launcher.exe를 받아 원하는 폴더에 둡니다.</p>
+        </li>
+        <li>
+          <div class="step-num mono">02</div>
+          <h3 data-i18n="how.s2.title">폴더 지정</h3>
+          <p data-i18n="how.s2.body">스타시티즌 LIVE 폴더 경로를 확인·지정합니다.</p>
+        </li>
+        <li>
+          <div class="step-num mono">03</div>
+          <h3 data-i18n="how.s3.title">적용</h3>
+          <p data-i18n="how.s3.body">‘자동 다운로드 및 적용’ 버튼을 누릅니다.</p>
+        </li>
+        <li>
+          <div class="step-num mono">04</div>
+          <h3 data-i18n="how.s4.title">실행</h3>
+          <p data-i18n="how.s4.body">게임을 켜면 한국어로 표시됩니다.</p>
+        </li>
+      </ol>
+    </section>
+
+    <!-- 번역팀 -->
+    <section id="crew" class="section container">
+      <div class="split">
+        <div class="section-head">
+          <div class="kicker mono">03 — TRANSLATION CREW</div>
+          <h2 data-i18n="crew.title">번역팀</h2>
+          <p class="section-lead" data-i18n="crew.lead">게임이 업데이트될 때마다 새로 생기는 텍스트를 자원해서 번역하고 있습니다.</p>
         </div>
-        <div class="admin-log" id="adminLog">대기 중...</div>
+        <div>
+          <ul class="crew" id="crewList"></ul>
+          <form class="crew-add" id="crewForm" hidden>
+            <input id="crewInput" type="text" placeholder="이름 추가" maxlength="40" autocomplete="off" required>
+            <button type="submit" class="btn btn-primary btn-sm">추가</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- 파트너 -->
+    <section id="partners" class="section container">
+      <div class="section-head-row">
+        <div class="section-head">
+          <div class="kicker mono">04 — PARTNERS</div>
+          <h2 data-i18n="partners.title">파트너 스트리머</h2>
+          <p class="section-lead" data-i18n="partners.lead">SC-KR과 함께 한국어로 스타시티즌을 즐기는 스트리머들을 만나보세요.</p>
+        </div>
+        <a href="https://discord.gg/Nmg6R6sagZ" target="_blank" rel="noopener" class="text-link">
+          <span data-i18n="partners.contact">파트너 문의하기</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+        </a>
+      </div>
+      <div class="partners" id="partnerList"></div>
+      <form class="edit-form" id="partnerForm" hidden>
+        <div class="edit-form-title">파트너 스트리머 추가</div>
+        <div class="edit-grid">
+          <label>이름<input id="pName" maxlength="40" required></label>
+          <label>플랫폼<input id="pPlatform" maxlength="20" placeholder="CHZZK / SOOP / YouTube / Twitch" required></label>
+          <label>채널 주소<input id="pUrl" type="url" placeholder="https://" required></label>
+          <label>프로필 이미지 주소 (선택)<input id="pAvatar" type="url" placeholder="https://"></label>
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm">파트너 추가</button>
+      </form>
+    </section>
+
+    <!-- 디스코드 -->
+    <section id="discord" class="section container">
+      <div class="cta-panel">
+        <div class="kicker mono">05 — COMMUNITY</div>
+        <h2 data-i18n-html="discord.title">디스코드에서 함께 플레이해요</h2>
+        <p data-i18n="discord.lead">패치노트와 언어팩 배포 소식을 가장 먼저 받고, 같이 비행할 파티도 찾아보세요. 번역 오류나 버그 제보도 디스코드 티켓으로 받고 있어요.</p>
+        <a href="https://discord.gg/Nmg6R6sagZ" target="_blank" rel="noopener" class="btn btn-primary btn-lg">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z"/></svg>
+          <span data-i18n="discord.join">디스코드 참여하기</span>
+        </a>
+        <div class="mono dim small-13">discord.gg/Nmg6R6sagZ</div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-row">
+        <div class="footer-brand">
+          <svg class="logo" width="22" height="22" viewBox="0 0 28 28" fill="none" aria-hidden="true"><circle cx="14" cy="14" r="5.5" fill="currentColor"/><ellipse cx="14" cy="14" rx="12.5" ry="5" transform="rotate(-24 14 14)" stroke="currentColor" stroke-width="1.6"/></svg>
+          <span class="brand-name">SC-KR</span>
+          <span class="dim small-13 mono">DOKU-web/sc-kr</span>
+        </div>
+        <div class="footer-links">
+          <a href="https://github.com/DOKU-web/sc-kr/releases/latest/download/SC-KR-Launcher.exe" class="js-download" data-i18n="cta.download">런처 다운로드</a>
+          <a href="https://discord.gg/Nmg6R6sagZ" target="_blank" rel="noopener">Discord</a>
+          <a href="admin.html" data-i18n="footer.admin">관리자 대시보드</a>
+          <button type="button" class="linklike" id="adminToggle" aria-expanded="false" aria-controls="adminPanel" data-i18n="footer.edit">콘텐츠 편집</button>
+        </div>
+      </div>
+      <p class="disclaimer"><span data-i18n="footer.disclaimer">SC-KR은 비공식 커뮤니티 팬 프로젝트로 Cloud Imperium Games 및 Roberts Space Industries와 관련이 없습니다. Star Citizen®은 Cloud Imperium Rights LLC의 등록 상표입니다.</span><br>© <span class="js-year">2026</span> SC-KR</p>
+
+      <!-- 콘텐츠 편집 (운영진 전용) -->
+      <div class="admin" id="adminPanel" hidden>
+        <div id="adminGate">
+          <h4>콘텐츠 편집 잠금 해제</h4>
+          <p class="hint">번역팀/운영진만 아는 비밀번호를 입력하세요.</p>
+          <div class="admin-row">
+            <input type="password" id="gatePwInput" placeholder="비밀번호" autocomplete="current-password">
+            <button type="button" class="btn btn-ghost btn-sm" id="gateUnlockBtn">확인</button>
+          </div>
+          <div class="admin-status" id="gateErr"></div>
+        </div>
+        <div id="adminBody" hidden>
+          <h4>사이트 콘텐츠 · GitHub 릴리즈 관리</h4>
+          <p class="hint">토큰은 이 브라우저에만 저장되고 페이지에는 절대 포함되지 않습니다. 이 저장소(DOKU-web/sc-kr)에 커밋 권한이 있는 Personal Access Token이 필요합니다. 토큰을 저장하면 위의 기능 · 번역팀 · 파트너 섹션에서 바로 추가/삭제할 수 있고, 변경 사항은 docs/index.html에 커밋되어 1~2분 뒤 모든 방문자에게 반영됩니다.</p>
+          <div class="admin-row">
+            <input type="password" id="tokenInput" placeholder="GitHub Personal Access Token" autocomplete="off">
+            <button type="button" class="btn btn-ghost btn-sm" id="tokenSaveBtn">토큰 저장</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="tokenClearBtn">삭제</button>
+          </div>
+          <div class="admin-status" id="tokenStatus">저장된 토큰 없음</div>
+          <div class="admin-upload">
+            <label for="fileLauncher">런처 EXE (SC-KR-Launcher.exe)</label>
+            <input type="file" id="fileLauncher" accept=".exe">
+            <button type="button" class="btn btn-primary btn-sm" id="uploadLauncherBtn">업로드</button>
+          </div>
+          <div class="admin-upload">
+            <label for="filePatch">패치 ZIP (sc-kr-v1.zip)</label>
+            <input type="file" id="filePatch" accept=".zip">
+            <button type="button" class="btn btn-primary btn-sm" id="uploadPatchBtn">업로드</button>
+          </div>
+          <div class="admin-log" id="adminLog">대기 중...</div>
+        </div>
       </div>
     </div>
-  </div>
-</footer>
-<script id="meta-data" type="application/json">{"launcher":"v1.18","patch":"v2.0","install":"단일 EXE"}</script>
-<script id="features-data" type="application/json">[{"icon":"↓","title":"자동 다운로드 및 적용","desc":"최신 한국어 패치를 받아 지정한 스타시티즌 LIVE 폴더에 바로 적용합니다. 버튼 한 번이면 끝입니다."},{"icon":"가","title":"한국어 채팅","desc":"한영키로 게임 채팅창에서 직접 한글을 조합해 입력합니다. 패치를 쓰는 다른 플레이어 화면에는 정상적인 한글로 보입니다."},{"icon":"✓","title":"커뮤니티 번역","desc":"자원 번역팀이 게임 업데이트를 따라가며 번역을 계속 다듬습니다. 빠진 항목은 영어 원문으로 채워 빈칸이 없도록 합니다."},{"icon":"▤","title":"아이템 데이터 뷰어","desc":"Data.p4k에서 함선·부품 데이터베이스를 직접 추출해 표로 확인하고 검색할 수 있습니다."},{"icon":"↻","title":"자동 업데이트 확인","desc":"런처를 켤 때마다 런처 자체와 언어팩 버전을 각각 확인해, 새 버전이 있으면 바로 알려줍니다."},{"icon":"★","title":"RSI 계정 연동","desc":"함선 즐겨찾기를 불러와 정리하고 확인할 수 있습니다."}]</script>
+  </footer>
+</div>
+
+<!-- 콘텐츠 데이터 — '콘텐츠 편집'에서 수정하면 이 블록들이 GitHub에 커밋됩니다. -->
+<script id="features-data" type="application/json">[{"icon":"download","title":"자동 다운로드 및 적용","desc":"최신 한국어 패치를 받아 지정한 스타시티즌 LIVE 폴더에 바로 적용합니다. 버튼 한 번이면 끝입니다.","titleEn":"Auto download & apply","descEn":"Grabs the latest Korean patch and applies it straight to your Star Citizen LIVE folder. One button and you're done."},{"icon":"chat","title":"한국어 채팅","desc":"한영키로 게임 채팅창에서 직접 한글을 조합해 입력합니다. 패치를 쓰는 다른 플레이어 화면에는 정상적인 한글로 보입니다.","titleEn":"Korean chat","descEn":"Type Hangul directly in the in-game chat with the Korean/English key. Other players using the patch see proper Korean text."},{"icon":"check","title":"커뮤니티 번역","desc":"자원 번역팀이 게임 업데이트를 따라가며 번역을 계속 다듬습니다. 빠진 항목은 영어 원문으로 채워 빈칸이 없도록 합니다.","titleEn":"Community translation","descEn":"A volunteer crew keeps polishing the translation with every game update. Missing lines fall back to English so nothing is blank."},{"icon":"table","title":"아이템 데이터 뷰어","desc":"Data.p4k에서 함선·부품 데이터베이스를 직접 추출해 표로 확인하고 검색할 수 있습니다.","titleEn":"Item data viewer","descEn":"Extracts the ship and component database from Data.p4k so you can browse and search it as a table."},{"icon":"refresh","title":"자동 업데이트 확인","desc":"런처를 켤 때마다 런처 자체와 언어팩 버전을 각각 확인해, 새 버전이 있으면 바로 알려줍니다.","titleEn":"Update checks","descEn":"Every time it starts, the launcher checks both its own version and the language pack, and tells you when something new is out."},{"icon":"star","title":"RSI 계정 연동","desc":"함선 즐겨찾기를 불러와 정리하고 확인할 수 있습니다.","titleEn":"RSI account link","descEn":"Load your ship favorites to organize and review them."}]</script>
 <script id="crew-data" type="application/json">["DOKKU","syasya","neogyuring"]</script>
-<script>
-(function(){
-  function escapeHtml(s){return String(s).replace(/[&<>"']/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+<script id="partners-data" type="application/json">[]</script>
 
-  var meta = JSON.parse(document.getElementById('meta-data').textContent);
-  var features = JSON.parse(document.getElementById('features-data').textContent);
-  var crew = JSON.parse(document.getElementById('crew-data').textContent);
-
-  var GH_OWNER = 'DOKU-web', GH_REPO = 'sc-kr', GH_TAG = 'v1', GH_BRANCH = 'main';
-  var GH_PAGE_PATH = 'docs/index.html';
-  var TOKEN_KEY = 'sckr_admin_token';
-  var PANEL_PW_HASH = '37c66be91d5d0f54ec96b7e06716de186143de3590b718ea527f6e13da67c128';
-  var PANEL_UNLOCK_KEY = 'sckr_panel_unlocked';
-
-  function sha256Hex(text){
-    var enc = new TextEncoder().encode(text);
-    return crypto.subtle.digest('SHA-256', enc).then(function(buf){
-      return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2, '0'); }).join('');
-    });
-  }
-
-  // editable(추가/삭제 UI 노출)은 비밀번호 게이트를 통과해야만 열리는 adminBody 안의
-  // 토큰 저장 버튼을 거쳐야만 켤 수 있다 - 몰라서 아무 값이나 넣어 켜지는 걸 막는다.
-  var editable = !!localStorage.getItem(TOKEN_KEY);
-  var busy = false;
-
-  function renderStats(){
-    document.getElementById('statsRow').innerHTML =
-      '<div class="stat"><div class="k">런처</div>' + (editable ? '<input id="statLauncher" value="' + escapeHtml(meta.launcher) + '">' : '<div class="v">' + escapeHtml(meta.launcher) + '</div>') + '</div>' +
-      '<div class="stat"><div class="k">언어팩</div>' + (editable ? '<input id="statPatch" value="' + escapeHtml(meta.patch) + '">' : '<div class="v">' + escapeHtml(meta.patch) + '</div>') + '</div>' +
-      '<div class="stat"><div class="k">설치</div>' + (editable ? '<input id="statInstall" value="' + escapeHtml(meta.install) + '">' : '<div class="v">' + escapeHtml(meta.install) + '</div>') + '</div>';
-    document.getElementById('statsSaveBtn').classList.toggle('show', editable);
-    var lv = document.getElementById('footLauncherVer'); if (lv) lv.textContent = meta.launcher;
-    var pv = document.getElementById('footPatchVer'); if (pv) pv.textContent = meta.patch;
-  }
-
-  function renderFeatures(){
-    document.getElementById('featuresGrid').innerHTML = features.map(function(f, i){
-      var x = editable ? '<button type="button" class="f-x" data-i="' + i + '" aria-label="삭제">×</button>' : '';
-      return '<div class="f-card">' + x + '<div class="f-icon">' + escapeHtml(f.icon) + '</div><h3>' + escapeHtml(f.title) + '</h3><p>' + escapeHtml(f.desc) + '</p></div>';
-    }).join('');
-  }
-
-  function renderCrew(){
-    document.getElementById('crewList').innerHTML = crew.map(function(n, i){
-      var x = editable ? '<button type="button" class="crew-x" data-i="' + i + '" aria-label="' + escapeHtml(n) + ' 삭제">×</button>' : '';
-      return '<span>' + escapeHtml(n) + x + '</span>';
-    }).join('');
-  }
-
-  function applyEditableUi(){
-    document.getElementById('featureForm').hidden = !editable;
-    document.getElementById('crewForm').hidden = !editable;
-    document.getElementById('crewNote').hidden = !editable;
-  }
-
-  renderStats(); renderFeatures(); renderCrew(); applyEditableUi();
-
-  function setControlsDisabled(disabled){
-    var sel = ['#featuresGrid .f-x', '#crewList .crew-x', '#statsSaveBtn', '#featureForm button', '#crewForm button'];
-    document.querySelectorAll(sel.join(',')).forEach(function(el){ el.disabled = disabled; });
-  }
-
-  function b64EncodeUtf8(str){
-    var bytes = new TextEncoder().encode(str);
-    var binary = '';
-    for (var i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
-    return btoa(binary);
-  }
-  function b64DecodeUtf8(b64){
-    var binary = atob(b64.replace(/\s/g, ''));
-    var bytes = new Uint8Array(binary.length);
-    for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-    return new TextDecoder('utf-8').decode(bytes);
-  }
-  function replaceScriptBlock(html, id, newJsonString){
-    var re = new RegExp('(<script id="' + id + '" type="application\\/json">)([\\s\\S]*?)(<\\/script>)');
-    return html.replace(re, function(_, open, oldJson, close){
-      return open + newJsonString.replace(/</g, '\\u003c') + close;
-    });
-  }
-  function ghHeaders(token, extra){
-    var h = {'Authorization':'token ' + token, 'Accept':'application/vnd.github+json'};
-    if (extra) for (var k in extra) h[k] = extra[k];
-    return h;
-  }
-
-  // 크루/기능/버전 편집은 이 파일(docs/index.html) 자체를 GitHub에 커밋하는 방식으로 저장됩니다.
-  // Claude 아티팩트를 벗어나 순수 정적 파일로 옮기면서, 게시-충돌로 편집이 씹히던 문제 자체가 없어졌습니다.
-  async function saveSite(){
-    if (busy) return;
-    var token = localStorage.getItem(TOKEN_KEY);
-    if (!token) { alert('먼저 하단 "콘텐츠 편집" 패널에서 GitHub 토큰을 저장해주세요.'); return; }
-    busy = true;
-    setControlsDisabled(true);
-    try {
-      for (var attempt = 1; attempt <= 3; attempt++) {
-        var getRes = await fetch('https://api.github.com/repos/' + GH_OWNER + '/' + GH_REPO + '/contents/' + GH_PAGE_PATH + '?ref=' + GH_BRANCH, {headers: ghHeaders(token)});
-        if (!getRes.ok) throw new Error('현재 파일을 불러오지 못했습니다 (' + getRes.status + ')');
-        var fileData = await getRes.json();
-        var html = b64DecodeUtf8(fileData.content);
-        html = replaceScriptBlock(html, 'meta-data', JSON.stringify(meta));
-        html = replaceScriptBlock(html, 'features-data', JSON.stringify(features));
-        html = replaceScriptBlock(html, 'crew-data', JSON.stringify(crew));
-        var putRes = await fetch('https://api.github.com/repos/' + GH_OWNER + '/' + GH_REPO + '/contents/' + GH_PAGE_PATH, {
-          method: 'PUT',
-          headers: ghHeaders(token, {'Content-Type': 'application/json'}),
-          body: JSON.stringify({message: '사이트 콘텐츠 업데이트', content: b64EncodeUtf8(html), sha: fileData.sha, branch: GH_BRANCH})
-        });
-        if (putRes.ok) return;
-        // 409 = 그 사이 다른 편집이 먼저 반영됨. 최신 파일을 다시 받아서 그 위에 내 변경을 다시 얹어 재시도.
-        if (putRes.status !== 409 || attempt === 3) {
-          var t = await putRes.text();
-          throw new Error('저장 실패 (' + putRes.status + '): ' + t.slice(0, 200));
-        }
-      }
-    } catch (err) {
-      alert('저장하지 못했습니다: ' + (err && err.message ? err.message : err));
-      throw err;
-    } finally {
-      busy = false;
-      setControlsDisabled(false);
-    }
-  }
-
-  document.getElementById('statsSaveBtn').addEventListener('click', function(){
-    meta.launcher = document.getElementById('statLauncher').value.trim() || meta.launcher;
-    meta.patch = document.getElementById('statPatch').value.trim() || meta.patch;
-    meta.install = document.getElementById('statInstall').value.trim() || meta.install;
-    renderStats();
-    saveSite().catch(function(){});
-  });
-
-  document.getElementById('featuresGrid').addEventListener('click', function(e){
-    var btn = e.target.closest('.f-x');
-    if (!btn || busy) return;
-    var i = parseInt(btn.getAttribute('data-i'), 10);
-    features = features.slice(0, i).concat(features.slice(i + 1));
-    renderFeatures();
-    saveSite().catch(function(){});
-  });
-
-  document.getElementById('featureForm').addEventListener('submit', function(e){
-    e.preventDefault();
-    if (busy) return;
-    var icon = document.getElementById('fIcon').value.trim();
-    var title = document.getElementById('fTitle').value.trim();
-    var desc = document.getElementById('fDesc').value.trim();
-    if (!icon || !title || !desc) return;
-    features = features.concat([{icon: icon, title: title, desc: desc}]);
-    renderFeatures();
-    var form = this;
-    var btn = this.querySelector('button'); btn.textContent = '추가 중...';
-    saveSite().then(function(){ form.reset(); }).catch(function(){}).finally(function(){ btn.textContent = '기능 추가'; });
-  });
-
-  document.getElementById('crewList').addEventListener('click', function(e){
-    var btn = e.target.closest('.crew-x');
-    if (!btn || busy) return;
-    var i = parseInt(btn.getAttribute('data-i'), 10);
-    crew = crew.slice(0, i).concat(crew.slice(i + 1));
-    renderCrew();
-    saveSite().catch(function(){});
-  });
-
-  document.getElementById('crewForm').addEventListener('submit', function(e){
-    e.preventDefault();
-    if (busy) return;
-    var input = document.getElementById('crewInput');
-    var name = input.value.trim();
-    if (!name || crew.indexOf(name) !== -1) { input.value = ''; return; }
-    crew = crew.concat([name]);
-    renderCrew();
-    var btn = this.querySelector('button'); btn.textContent = '추가 중...';
-    saveSite().then(function(){ input.value = ''; }).catch(function(){}).finally(function(){ btn.textContent = '추가'; });
-  });
-
-  function logLine(msg){
-    var el = document.getElementById('adminLog');
-    el.textContent = (el.textContent === '대기 중...' ? '' : el.textContent + '\n') + msg;
-    el.scrollTop = el.scrollHeight;
-  }
-  function refreshTokenStatus(){
-    var t = localStorage.getItem(TOKEN_KEY);
-    document.getElementById('tokenStatus').textContent = t ? '저장된 토큰 있음 (' + t.slice(0, 4) + '••••)' : '저장된 토큰 없음';
-  }
-  refreshTokenStatus();
-
-  function showAdminBody(){
-    document.getElementById('adminGate').hidden = true;
-    document.getElementById('adminBody').hidden = false;
-  }
-  document.getElementById('adminToggle').addEventListener('click', function(){
-    var p = document.getElementById('adminPanel');
-    p.hidden = !p.hidden;
-    if (!p.hidden && sessionStorage.getItem(PANEL_UNLOCK_KEY) === '1') {
-      showAdminBody();
-    }
-  });
-  document.getElementById('gateUnlockBtn').addEventListener('click', function(){
-    var pw = document.getElementById('gatePwInput').value;
-    sha256Hex(pw).then(function(hash){
-      if (hash === PANEL_PW_HASH) {
-        sessionStorage.setItem(PANEL_UNLOCK_KEY, '1');
-        document.getElementById('gateErr').textContent = '';
-        document.getElementById('gatePwInput').value = '';
-        showAdminBody();
-      } else {
-        document.getElementById('gateErr').textContent = '비밀번호가 올바르지 않습니다.';
-      }
-    });
-  });
-  document.getElementById('gatePwInput').addEventListener('keydown', function(e){
-    if (e.key === 'Enter') document.getElementById('gateUnlockBtn').click();
-  });
-  document.getElementById('tokenSaveBtn').addEventListener('click', function(){
-    var v = document.getElementById('tokenInput').value.trim();
-    if (!v) return;
-    localStorage.setItem(TOKEN_KEY, v);
-    document.getElementById('tokenInput').value = '';
-    refreshTokenStatus();
-    editable = true;
-    renderStats(); renderFeatures(); renderCrew(); applyEditableUi();
-    logLine('토큰이 이 브라우저에 저장되었습니다. 이제 위에서 바로 추가/삭제할 수 있습니다.');
-  });
-  document.getElementById('tokenClearBtn').addEventListener('click', function(){
-    localStorage.removeItem(TOKEN_KEY);
-    refreshTokenStatus();
-    editable = false;
-    renderStats(); renderFeatures(); renderCrew(); applyEditableUi();
-    logLine('토큰을 삭제했습니다.');
-  });
-
-  async function uploadAsset(file, assetName){
-    var token = localStorage.getItem(TOKEN_KEY);
-    if (!token) { logLine('GitHub 토큰을 먼저 저장해주세요.'); return; }
-    if (!file) { logLine('파일을 선택해주세요.'); return; }
-    try {
-      logLine('릴리즈 정보 확인 중...');
-      var relRes = await fetch('https://api.github.com/repos/' + GH_OWNER + '/' + GH_REPO + '/releases/tags/' + GH_TAG, {headers: ghHeaders(token)});
-      if (!relRes.ok) throw new Error('릴리즈 조회 실패 (' + relRes.status + ')');
-      var rel = await relRes.json();
-      var existing = (rel.assets || []).filter(function(a){ return a.name === assetName; })[0];
-      if (existing) {
-        logLine('기존 ' + assetName + ' 삭제 중...');
-        var delRes = await fetch('https://api.github.com/repos/' + GH_OWNER + '/' + GH_REPO + '/releases/assets/' + existing.id, {method: 'DELETE', headers: ghHeaders(token)});
-        if (!delRes.ok && delRes.status !== 404) throw new Error('기존 파일 삭제 실패 (' + delRes.status + ')');
-      }
-      logLine('업로드 중... (' + (file.size / 1024 / 1024).toFixed(1) + 'MB)');
-      var uploadUrl = rel.upload_url.replace('{?name,label}', '') + '?name=' + encodeURIComponent(assetName);
-      var buf = await file.arrayBuffer();
-      var upRes = await fetch(uploadUrl, {method: 'POST', headers: ghHeaders(token, {'Content-Type': 'application/octet-stream'}), body: buf});
-      if (!upRes.ok) { var t = await upRes.text(); throw new Error('업로드 실패 (' + upRes.status + '): ' + t.slice(0, 200)); }
-      logLine('완료: ' + assetName + ' 업로드됨.');
-    } catch (err) {
-      logLine('오류: ' + (err && err.message ? err.message : err));
-    }
-  }
-  document.getElementById('uploadLauncherBtn').addEventListener('click', function(){
-    uploadAsset(document.getElementById('fileLauncher').files[0], 'SC-KR-Launcher.exe');
-  });
-  document.getElementById('uploadPatchBtn').addEventListener('click', function(){
-    uploadAsset(document.getElementById('filePatch').files[0], 'sc-kr-v1.zip');
-  });
-})();
-</script>
+<script src="script.js"></script>
+<script src="editor.js"></script>
 </body>
 </html>

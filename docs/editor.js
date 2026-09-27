@@ -9,7 +9,7 @@
   var GH_OWNER = 'DOKU-web', GH_REPO = 'sc-kr', GH_TAG = 'v1', GH_BRANCH = 'main';
   var GH_PAGE_PATH = 'docs/index.html';
   var TOKEN_KEY = 'sckr_admin_token';
-  var PANEL_PW_HASH = '37c66be91d5d0f54ec96b7e06716de186143de3590b718ea527f6e13da67c128';
+  var PANEL_PW_HASH = '8a548962eb71ff11e65399d6f84badf0a05909ce1ff7dd2e9c5fad7ca612ece2';
   var PANEL_UNLOCK_KEY = 'sckr_panel_unlocked';
   var DATA_BLOCKS = { features: 'features-data', crew: 'crew-data', partners: 'partners-data' };
 

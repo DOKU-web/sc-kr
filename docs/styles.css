@@ -353,6 +353,56 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--a
 .reveal.in { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } }
 
+/* ========== 배경음 ========== */
+.icon-btn {
+  position: relative; display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line);
+  background: transparent; color: var(--dim); cursor: pointer;
+  transition: color .15s ease, border-color .15s ease, background-color .15s ease;
+}
+.icon-btn:hover { color: var(--text); border-color: var(--line-strong); }
+.bgm-btn .ic-on { display: none; }
+.bgm-btn.on { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, transparent); background: var(--accent-soft); }
+.bgm-btn.on .ic-on { display: block; }
+.bgm-btn.on .ic-off { display: none; }
+/* 이전에 켜 두었고 첫 클릭을 기다리는 중 */
+.bgm-btn.pending::after {
+  content: ""; position: absolute; top: 3px; right: 3px; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 8px var(--accent);
+}
+
+.bgm-dock {
+  position: fixed; left: 20px; bottom: 20px; z-index: 60;
+  width: 356px; max-width: calc(100vw - 32px);
+  border-radius: 14px; overflow: hidden;
+  background: var(--surface-2); border: 1px solid var(--line-strong);
+  box-shadow: 0 24px 60px -24px rgba(0,0,0,.9);
+}
+.bgm-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 8px 8px 12px; }
+.bgm-title { display: flex; align-items: center; gap: 10px; min-width: 0; font-size: 12.5px; color: var(--muted); }
+.bgm-title > span:last-child { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.bgm-title a { color: var(--text); text-decoration: none; }
+.bgm-title a:hover { text-decoration: underline; }
+.bgm-close {
+  flex-shrink: 0; width: 28px; height: 28px; border: 0; border-radius: 50%;
+  background: transparent; color: var(--muted); font-size: 18px; line-height: 1; cursor: pointer;
+}
+.bgm-close:hover { background: rgba(255,255,255,.06); color: var(--text); }
+.bgm-frame { position: relative; aspect-ratio: 16 / 9; min-height: 200px; background: #000; }
+.bgm-frame iframe, .bgm-frame > div { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+.bgm-eq { display: inline-flex; align-items: flex-end; gap: 2px; height: 12px; flex-shrink: 0; }
+.bgm-eq i { width: 3px; height: 100%; border-radius: 1px; background: var(--accent); animation: eq 1s ease-in-out infinite; transform-origin: bottom; }
+.bgm-eq i:nth-child(2) { animation-delay: -.35s; }
+.bgm-eq i:nth-child(3) { animation-delay: -.7s; }
+@keyframes eq { 0%, 100% { transform: scaleY(.3); } 50% { transform: scaleY(1); } }
+@media (prefers-reduced-motion: reduce) { .bgm-eq i { animation: none; transform: scaleY(.6); } }
+
+@media (max-width: 600px) {
+  .bgm-dock { left: 16px; right: 16px; bottom: 16px; width: auto; }
+  .nav-actions { gap: 8px; }
+}
+
 /* ========== 반응형 ========== */
 @media (max-width: 1040px) {
   .hero { grid-template-columns: minmax(0, 1fr); gap: 56px; padding-top: 56px; padding-bottom: 88px; }

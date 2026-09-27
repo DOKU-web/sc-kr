@@ -79,6 +79,10 @@
         <a href="#discord" data-i18n="nav.discord">디스코드</a>
       </div>
       <div class="nav-actions">
+        <button type="button" class="icon-btn bgm-btn" id="bgmToggle" aria-pressed="false" aria-label="배경음 켜기" title="배경음 켜기">
+          <svg class="ic-off" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4Z"/><path d="m16 9.5 5 5M21 9.5l-5 5"/></svg>
+          <svg class="ic-on" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4Z"/><path d="M16 9a4.5 4.5 0 0 1 0 6"/><path d="M18.5 6.5a8 8 0 0 1 0 11"/></svg>
+        </button>
         <div class="lang-switch" role="group" aria-label="언어 선택">
           <button type="button" data-lang="ko" aria-pressed="true">KO</button>
           <button type="button" data-lang="en" aria-pressed="false">EN</button>
@@ -329,7 +333,20 @@
 <script id="crew-data" type="application/json">["DOKKU","syasya","neogyuring"]</script>
 <script id="partners-data" type="application/json">[{"name":"너귤잉","platform":"CHZZK","url":"https://chzzk.naver.com/7ea15bd4274b4995a4572f6f19983a3c"}]</script>
 
+<!-- 배경음 플레이어 (YouTube 정책상 재생 중에는 보이도록 둠) -->
+<aside class="bgm-dock" id="bgmDock" hidden aria-label="배경음 플레이어">
+  <div class="bgm-head">
+    <div class="bgm-title">
+      <span class="bgm-eq" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span><a href="https://www.youtube.com/watch?v=MLK-GoRQetE" target="_blank" rel="noopener">스타시티즌할때 듣는 노래</a> · AUTUMM</span>
+    </div>
+    <button type="button" class="bgm-close" id="bgmClose" aria-label="배경음 끄기">×</button>
+  </div>
+  <div class="bgm-frame"><div id="bgmPlayer"></div></div>
+</aside>
+
 <script src="script.js"></script>
 <script src="editor.js"></script>
+<script src="bgm.js"></script>
 </body>
 </html>

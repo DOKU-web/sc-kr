@@ -1,6 +1,6 @@
 /* SC-KR 배경음 — YouTube 공식 임베드 플레이어 사용
- * 브라우저가 소리 자동재생을 막기 때문에 기본은 꺼짐. 헤더의 버튼으로 켜고 끄며, 켠 상태와 재생 위치를 기억했다가
- * 다음 방문 때 첫 클릭/키 입력에 이어서 재생합니다.
+ * 기본은 켜짐. 브라우저가 클릭 전 소리 재생을 막기 때문에, 방문자의 첫 클릭/터치/키 입력 순간 재생을 시작합니다.
+ * 헤더 버튼으로 끄면 그 방문자에게는 다음 방문에도 꺼진 상태로 유지되고, 재생 위치도 기억합니다.
  * YouTube 정책상 플레이어를 숨길 수 없어서, 재생 중에는 화면 구석에 작은 플레이어가 보입니다. */
 (function () {
   'use strict';
@@ -18,7 +18,7 @@
 
   function isKo() { return document.documentElement.lang !== 'en'; }
   function savePref(on) { try { localStorage.setItem(PREF_KEY, on ? 'on' : 'off'); } catch (_) {} }
-  function loadPref() { try { return localStorage.getItem(PREF_KEY) === 'on'; } catch (_) { return false; } }
+  function loadPref() { try { return localStorage.getItem(PREF_KEY) !== 'off'; } catch (_) { return true; } }  // 기본 켜짐
   function savePos() {
     if (!ready || !player.getCurrentTime) return;
     try { localStorage.setItem(POS_KEY, String(Math.floor(player.getCurrentTime()))); } catch (_) {}
@@ -106,7 +106,22 @@
     setUi(false);
   }
 
+  var pending = false;   // 켜짐 상태지만 첫 상호작용을 기다리는 중
+  function clearPending() {
+    pending = false;
+    btn.classList.remove('pending');
+    window.removeEventListener('pointerdown', resume, true);
+    window.removeEventListener('keydown', resume, true);
+    window.removeEventListener('touchstart', resume, true);
+  }
+  function resume(e) {
+    if (e && e.target && e.target.closest && e.target.closest('#bgmToggle, #bgmDock')) return; // 버튼은 아래에서 처리
+    clearPending();
+    if (!playing) start();
+  }
+
   btn.addEventListener('click', function () {
+    if (pending) { clearPending(); setUi(false); savePref(false); return; }   // 재생 전에 끄기
     if (playing) { stop(); savePref(false); } else { start(); savePref(true); }
   });
   document.getElementById('bgmClose').addEventListener('click', function () { stop(); savePref(false); btn.focus(); });
@@ -117,18 +132,16 @@
   });
   window.addEventListener('pagehide', savePos);
 
-  // 이전에 켜 두었다면 첫 상호작용에 이어서 재생 (브라우저 자동재생 정책)
+  // 켜짐 상태면 첫 상호작용에 재생 시작 (브라우저 자동재생 정책)
   setUi(false);
   if (loadPref()) {
-    btn.classList.add('pending');
-    var resume = function (e) {
-      if (e && e.target && e.target.closest && e.target.closest('#bgmToggle, #bgmDock')) return;
-      window.removeEventListener('pointerdown', resume, true);
-      window.removeEventListener('keydown', resume, true);
-      btn.classList.remove('pending');
-      if (!playing) start();
-    };
+    pending = true;
+    btn.classList.add('pending', 'on');
+    btn.setAttribute('aria-pressed', 'true');
+    btn.setAttribute('aria-label', isKo() ? '배경음 끄기' : 'Mute background music');
+    btn.title = btn.getAttribute('aria-label');
     window.addEventListener('pointerdown', resume, true);
     window.addEventListener('keydown', resume, true);
+    window.addEventListener('touchstart', resume, true);
   }
 })();

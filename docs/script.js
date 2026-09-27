@@ -133,46 +133,59 @@
     });
   }
   function safeUrl(u) { return /^https?:\/\//i.test(u || '') ? u : ''; }
-  function delBtn(kind, i, label) {
-    return editable ? '<button type="button" class="del-btn" data-kind="' + kind + '" data-i="' + i + '" aria-label="' + esc(label) + ' 삭제">×</button>' : '';
+  function delBtn(o, kind, i, label) {
+    return o.editable ? '<button type="button" class="del-btn" data-kind="' + kind + '" data-i="' + i + '" aria-label="' + esc(label) + ' 삭제">×</button>' : '';
   }
+  function tl(key, l) { return (I18N[l] && I18N[l][key]) || I18N.ko[key] || ''; }
 
-  /* ========== 렌더링 ========== */
-  function renderFeatures() {
-    document.getElementById('featuresGrid').innerHTML = data.features.map(function (f, i) {
-      var title = lang === 'en' && f.titleEn ? f.titleEn : f.title;
-      var desc = lang === 'en' && f.descEn ? f.descEn : f.desc;
-      return '<article class="feature">' + delBtn('features', i, f.title) +
+  /* ========== 렌더링 ==========
+   * 목록 HTML은 editor.js가 저장할 때 index.html에도 미리 넣어 둡니다 (JS를 실행하지 않는 검색 로봇용). */
+  function featuresHtml(o) {
+    return data.features.map(function (f, i) {
+      var title = o.lang === 'en' && f.titleEn ? f.titleEn : f.title;
+      var desc = o.lang === 'en' && f.descEn ? f.descEn : f.desc;
+      return '<article class="feature">' + delBtn(o, 'features', i, f.title) +
         '<div class="icon-box">' + iconHtml(f.icon) + '</div>' +
         '<h3>' + esc(title) + '</h3><p>' + esc(desc) + '</p></article>';
     }).join('');
   }
 
-  function renderCrew() {
-    document.getElementById('crewList').innerHTML = data.crew.map(function (n, i) {
-      return '<li>' + esc(n) + delBtn('crew', i, n) + '</li>';
+  function crewHtml(o) {
+    return data.crew.map(function (n, i) {
+      return '<li>' + esc(n) + delBtn(o, 'crew', i, n) + '</li>';
     }).join('');
   }
 
-  function renderPartners() {
-    var list = document.getElementById('partnerList');
+  function partnersHtml(o) {
     if (!data.partners.length) {
-      list.innerHTML = '<div class="partners-empty"><strong>' + esc(t('partners.emptyTitle')) + '</strong><span>' + esc(t('partners.emptyBody')) + '</span></div>';
-      return;
+      return '<div class="partners-empty"><strong>' + esc(tl('partners.emptyTitle', o.lang)) + '</strong><span>' + esc(tl('partners.emptyBody', o.lang)) + '</span></div>';
     }
-    list.innerHTML = data.partners.map(function (p, i) {
+    return data.partners.map(function (p, i) {
       var avatarUrl = safeUrl(p.avatar);
       var url = safeUrl(p.url);
-      var avatar = avatarUrl ? '<img src="' + esc(avatarUrl) + '" alt="" loading="lazy">' : PERSON;
-      var link = url ? '<a class="text-link" href="' + esc(url) + '" target="_blank" rel="noopener"><span>' + esc(t('partners.channel')) + '</span>' + ARROW + '</a>' : '';
-      return '<article class="partner">' + delBtn('partners', i, p.name) +
+      var avatar = avatarUrl ? '<img src="' + esc(avatarUrl) + '" alt="' + esc(p.name) + '" loading="lazy">' : PERSON;
+      var link = url ? '<a class="text-link" href="' + esc(url) + '" target="_blank" rel="noopener"><span>' + esc(tl('partners.channel', o.lang)) + '</span>' + ARROW + '</a>' : '';
+      return '<article class="partner">' + delBtn(o, 'partners', i, p.name) +
         '<div class="avatar">' + avatar + '</div>' +
         '<h3>' + esc(p.name) + '</h3>' +
         '<div class="platform">' + esc(p.platform) + '</div>' + link + '</article>';
     }).join('');
   }
 
-  function renderAll() { renderFeatures(); renderCrew(); renderPartners(); }
+  var RENDERERS = {
+    features: { id: 'featuresGrid', html: featuresHtml },
+    crew: { id: 'crewList', html: crewHtml },
+    partners: { id: 'partnerList', html: partnersHtml },
+  };
+
+  function renderAll() {
+    var o = { lang: lang, editable: editable };
+    Object.keys(RENDERERS).forEach(function (k) {
+      document.getElementById(RENDERERS[k].id).innerHTML = RENDERERS[k].html(o);
+    });
+  }
+  // 검색 로봇용 정적 HTML (한국어, 편집 버튼 없음)
+  function staticHtml(kind) { return RENDERERS[kind].html({ lang: 'ko', editable: false }); }
 
   /* ========== 언어 전환 ========== */
   function setLang(next) {
@@ -307,5 +320,6 @@
     iconKeys: Object.keys(ICON_PATHS),
     iconLabels: ICON_LABELS,
     toast: toast,
+    staticHtml: staticHtml,
   };
 })();

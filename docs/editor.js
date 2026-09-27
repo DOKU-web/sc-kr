@@ -39,6 +39,11 @@
     if (!re.test(html)) throw new Error('데이터 블록(' + id + ')을 찾지 못했습니다.');
     return html.replace(re, function (_, open, old, close) { return open + json.replace(/</g, '\\u003c') + close; });
   }
+  // <!--static:kind--> ... <!--/static:kind--> 사이의 미리 렌더링된 HTML 교체 (검색 로봇용)
+  function replaceStaticBlock(html, kind, inner) {
+    var re = new RegExp('(<!--static:' + kind + '-->)([\\s\\S]*?)(<!--\\/static:' + kind + '-->)');
+    return html.replace(re, function (_, open, old, close) { return open + inner + close; });
+  }
   function ghHeaders(token, extra) {
     var h = { Authorization: 'token ' + token, Accept: 'application/vnd.github+json' };
     if (extra) for (var k in extra) h[k] = extra[k];
@@ -76,6 +81,7 @@
         var html = b64DecodeUtf8(fileData.content);
         Object.keys(DATA_BLOCKS).forEach(function (k) {
           html = replaceScriptBlock(html, DATA_BLOCKS[k], JSON.stringify(S.data[k]));
+          html = replaceStaticBlock(html, k, S.staticHtml(k));
         });
         var putRes = await fetch('https://api.github.com/repos/' + GH_OWNER + '/' + GH_REPO + '/contents/' + GH_PAGE_PATH, {
           method: 'PUT',

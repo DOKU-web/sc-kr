@@ -289,7 +289,7 @@
           <button type="button" class="linklike" id="adminToggle" aria-expanded="false" aria-controls="adminPanel" data-i18n="footer.edit">콘텐츠 편집</button>
         </div>
       </div>
-      <p class="disclaimer"><span data-i18n="footer.disclaimer">SC-KR은 비공식 커뮤니티 팬 프로젝트로 Cloud Imperium Games 및 Roberts Space Industries와 관련이 없습니다. Star Citizen®은 Cloud Imperium Rights LLC의 등록 상표입니다.</span><br>© <span class="js-year">2026</span> SC-KR</p>
+      <p class="disclaimer"><span data-i18n="footer.disclaimer">SC-KR은 비공식 커뮤니티 팬 프로젝트로 Cloud Imperium Games 및 Roberts Space Industries와 관련이 없습니다. Star Citizen®은 Cloud Imperium Rights LLC의 등록 상표입니다.</span><br>© <span class="js-year">2026</span> SC-KR · <span data-i18n="footer.music">배경음</span>: “<a href="https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1500030" target="_blank" rel="noopener">Jellyfish in Space</a>” Kevin MacLeod (incompetech.com), <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a></p>
 
       <!-- 콘텐츠 편집 (운영진 전용) -->
       <div class="admin" id="adminPanel" hidden>
@@ -333,17 +333,12 @@
 <script id="crew-data" type="application/json">["DOKKU","syasya","neogyuring"]</script>
 <script id="partners-data" type="application/json">[{"name":"너귤잉","platform":"CHZZK","url":"https://chzzk.naver.com/7ea15bd4274b4995a4572f6f19983a3c"}]</script>
 
-<!-- 배경음 플레이어 (YouTube 정책상 재생 중에는 보이도록 둠) -->
-<aside class="bgm-dock" id="bgmDock" hidden aria-label="배경음 플레이어">
-  <div class="bgm-head">
-    <div class="bgm-title">
-      <span class="bgm-eq" aria-hidden="true"><i></i><i></i><i></i></span>
-      <span><strong>스타시티즌할때 듣는 노래</strong> · AUTUMM</span>
-    </div>
-    <button type="button" class="bgm-close" id="bgmClose" aria-label="배경음 끄기">×</button>
-  </div>
-  <div class="bgm-frame"><div id="bgmPlayer"></div></div>
-</aside>
+<!-- 배경음 — 재생 중에 곡 이름만 표시 (누르면 끄기) -->
+<button type="button" class="bgm-dock" id="bgmDock" hidden aria-label="배경음 끄기" title="배경음 끄기">
+  <span class="bgm-eq" aria-hidden="true"><i></i><i></i><i></i></span>
+  <span class="bgm-name">♪ Jellyfish in Space</span>
+  <span class="bgm-artist">Kevin MacLeod</span>
+</button>
 
 <script src="script.js"></script>
 <script src="editor.js"></script>

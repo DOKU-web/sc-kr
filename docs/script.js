@@ -150,9 +150,45 @@
     }).join('');
   }
 
+  /* 번역팀 역할 — 콘텐츠 편집에서 선택지로 나옴. 목록에 없는 역할은 '직접 입력'으로 추가 가능 */
+  var CREW_ROLES = [
+    { ko: '런처 개발자', en: 'Launcher developer' },
+    { ko: '번역팀', en: 'Translation' },
+    { ko: '의역팀', en: 'Localization' },
+    { ko: '검수팀', en: 'Proofreading' },
+    { ko: '운영진', en: 'Operations' },
+    { ko: '디자이너', en: 'Design' },
+  ];
+  var NO_ROLE = { ko: '팀원', en: 'Members' };
+
+  // 예전 형식("이름")과 새 형식({name, role}) 모두 지원
+  function crewItem(c) { return typeof c === 'string' ? { name: c, role: '' } : { name: c.name || '', role: c.role || '' }; }
+  function roleLabel(role, l) {
+    if (!role) return l === 'en' ? NO_ROLE.en : NO_ROLE.ko;
+    for (var i = 0; i < CREW_ROLES.length; i++) if (CREW_ROLES[i].ko === role) return l === 'en' ? CREW_ROLES[i].en : role;
+    return role;
+  }
+
   function crewHtml(o) {
-    return data.crew.map(function (n, i) {
-      return '<li>' + esc(n) + delBtn(o, 'crew', i, n) + '</li>';
+    // 역할별로 묶기: 기본 역할 순서 → 직접 입력한 역할(처음 나온 순서) → 역할 없음
+    var groups = {}, order = [];
+    data.crew.forEach(function (c, i) {
+      var it = crewItem(c);
+      if (!groups[it.role]) { groups[it.role] = []; order.push(it.role); }
+      groups[it.role].push({ name: it.name, i: i });
+    });
+    var rank = function (r) {
+      if (!r) return 1000;
+      for (var k = 0; k < CREW_ROLES.length; k++) if (CREW_ROLES[k].ko === r) return k;
+      return 100 + order.indexOf(r);
+    };
+    order.sort(function (a, b) { return rank(a) - rank(b); });
+    return order.map(function (role) {
+      return '<div class="crew-group"><div class="crew-role mono">' + esc(roleLabel(role, o.lang)) + '</div><ul class="crew">' +
+        groups[role].map(function (m) {
+          var edit = o.editable ? '<button type="button" class="edit-btn" data-kind="crew" data-i="' + m.i + '" aria-label="' + esc(m.name) + ' 역할 수정">✎</button>' : '';
+          return '<li>' + esc(m.name) + edit + delBtn(o, 'crew', m.i, m.name) + '</li>';
+        }).join('') + '</ul></div>';
     }).join('');
   }
 
@@ -280,7 +316,7 @@
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
     }, { threshold: 0.1 });
-    document.querySelectorAll('.section-head, .features, .steps, .crew, .partners, .cta-panel').forEach(function (el) {
+    document.querySelectorAll('.section-head, .features, .steps, .crew-groups, .partners, .cta-panel').forEach(function (el) {
       el.classList.add('reveal');
       io.observe(el);
     });
@@ -321,5 +357,7 @@
     iconLabels: ICON_LABELS,
     toast: toast,
     staticHtml: staticHtml,
+    crewRoles: CREW_ROLES,
+    crewItem: crewItem,
   };
 })();

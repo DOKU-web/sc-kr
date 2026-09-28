@@ -58,7 +58,7 @@
     S.setEditable(editable);
   }
   function setControlsDisabled(disabled) {
-    document.querySelectorAll('.del-btn, .edit-form button, #crewForm button').forEach(function (el) { el.disabled = disabled; });
+    document.querySelectorAll('.del-btn, .edit-btn, .edit-form button, #crewForm button').forEach(function (el) { el.disabled = disabled; });
   }
 
   // 아이콘 선택지
@@ -153,12 +153,74 @@
     withBusyLabel(this, '추가 중...', commit('features', S.data.features.concat([f]), f.title + ' 추가'));
   });
 
+  /* ---- 번역팀: 이름 + 역할 (추가 / 수정) ---- */
+  var CUSTOM = '__custom__';
+  var crewEditing = -1;   // 수정 중인 멤버 인덱스 (-1 = 새로 추가)
+  $('crewRole').innerHTML = S.crewRoles.map(function (r) {
+    return '<option value="' + r.ko + '">' + r.ko + '</option>';
+  }).join('') + '<option value="">역할 없음 (팀원)</option><option value="' + CUSTOM + '">직접 입력…</option>';
+  $('crewRole').value = '번역팀';
+
+  function syncCustomRole() {
+    var custom = $('crewRole').value === CUSTOM;
+    $('crewRoleCustom').hidden = !custom;
+    $('crewRoleCustom').required = custom;
+    if (custom) $('crewRoleCustom').focus();
+  }
+  $('crewRole').addEventListener('change', syncCustomRole);
+
+  function resetCrewForm() {
+    crewEditing = -1;
+    $('crewForm').reset();
+    $('crewRole').value = '번역팀';
+    syncCustomRole();
+    $('crewFormTitle').textContent = '번역팀 추가';
+    $('crewSubmit').textContent = '추가';
+    $('crewCancel').hidden = true;
+  }
+  $('crewCancel').addEventListener('click', resetCrewForm);
+  // 수정 중에 멤버를 삭제하면 순서가 바뀌므로 폼 초기화
+  document.addEventListener('click', function (e) {
+    if (crewEditing >= 0 && e.target.closest('.del-btn[data-kind="crew"]')) resetCrewForm();
+  }, true);
+
+  // ✎ 버튼: 폼에 불러와서 수정
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('.edit-btn[data-kind="crew"]');
+    if (!btn || busy || !editable) return;
+    var i = parseInt(btn.getAttribute('data-i'), 10);
+    var it = S.crewItem(S.data.crew[i]);
+    crewEditing = i;
+    $('crewInput').value = it.name;
+    var preset = !it.role || S.crewRoles.some(function (r) { return r.ko === it.role; });
+    $('crewRole').value = preset ? it.role : CUSTOM;
+    $('crewRoleCustom').value = preset ? '' : it.role;
+    syncCustomRole();
+    $('crewFormTitle').textContent = '"' + it.name + '" 수정';
+    $('crewSubmit').textContent = '수정 저장';
+    $('crewCancel').hidden = false;
+    $('crewForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    $('crewInput').focus();
+  });
+
   $('crewForm').addEventListener('submit', function (e) {
     e.preventDefault();
     if (busy) return;
     var name = $('crewInput').value.trim();
-    if (!name || S.data.crew.indexOf(name) !== -1) { $('crewInput').value = ''; return; }
-    withBusyLabel(this, '추가 중...', commit('crew', S.data.crew.concat([name]), '번역팀 ' + name + ' 추가'));
+    var role = $('crewRole').value === CUSTOM ? $('crewRoleCustom').value.trim() : $('crewRole').value;
+    if (!name) return;
+    var entry = role ? { name: name, role: role } : { name: name };
+    var list = S.data.crew.slice();
+    var dup = list.some(function (c, i) { return i !== crewEditing && S.crewItem(c).name === name; });
+    if (dup) { alert('"' + name + '"은(는) 이미 번역팀에 있습니다.'); return; }
+    var summary;
+    if (crewEditing >= 0) { list[crewEditing] = entry; summary = '번역팀 ' + name + ' 수정'; }
+    else { list.push(entry); summary = '번역팀 ' + name + ' 추가'; }
+    var form = this, btn = $('crewSubmit'), orig = btn.textContent;
+    btn.textContent = '저장 중...';
+    commit('crew', list, summary).then(resetCrewForm).catch(function () {}).finally(function () {
+      if (btn.textContent === '저장 중...') btn.textContent = orig;
+    });
   });
 
   $('partnerForm').addEventListener('submit', function (e) {

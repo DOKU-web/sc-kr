@@ -58,7 +58,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Sora:wght@600;700&display=swap">
-<link rel="stylesheet" href="styles.css?v=20260928b">
+<link rel="stylesheet" href="styles.css?v=20260928d">
 </head>
 <body>
 <div class="page" id="top">
@@ -224,10 +224,18 @@
           <p class="section-lead" data-i18n="crew.lead">게임이 업데이트될 때마다 새로 생기는 텍스트를 자원해서 번역하고 있습니다.</p>
         </div>
         <div>
-          <ul class="crew" id="crewList"><!--static:crew--><li>DOKKU</li><li>syasya</li><li>neogyuring</li><!--/static:crew--></ul>
+          <div class="crew-groups" id="crewList"><!--static:crew--><div class="crew-group"><div class="crew-role mono">팀원</div><ul class="crew"><li>DOKKU</li><li>syasya</li><li>neogyuring</li></ul></div><!--/static:crew--></div>
           <form class="crew-add" id="crewForm" hidden>
-            <input id="crewInput" type="text" placeholder="이름 추가" maxlength="40" autocomplete="off" required>
-            <button type="submit" class="btn btn-primary btn-sm">추가</button>
+            <div class="edit-form-title" id="crewFormTitle">번역팀 추가</div>
+            <div class="crew-add-row">
+              <input id="crewInput" type="text" placeholder="이름" maxlength="40" autocomplete="off" required>
+              <select id="crewRole" aria-label="역할"></select>
+            </div>
+            <input id="crewRoleCustom" type="text" placeholder="역할 직접 입력 (예: 음성 번역)" maxlength="20" hidden>
+            <div class="crew-add-row">
+              <button type="submit" class="btn btn-primary btn-sm" id="crewSubmit">추가</button>
+              <button type="button" class="btn btn-ghost btn-sm" id="crewCancel" hidden>취소</button>
+            </div>
           </form>
         </div>
       </div>
@@ -346,8 +354,8 @@
   <div class="bgm-frame"><div id="bgmPlayer"></div></div>
 </aside>
 
-<script src="script.js?v=20260928b"></script>
-<script src="editor.js?v=20260928c"></script>
-<script src="bgm.js?v=20260928b"></script>
+<script src="script.js?v=20260928d"></script>
+<script src="editor.js?v=20260928d"></script>
+<script src="bgm.js?v=20260928d"></script>
 </body>
 </html>

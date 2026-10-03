@@ -49,6 +49,8 @@ CARD_IMAGE_OVERRIDES = {   # (파일, 꼬리표: 'reward' = 실제 보상 아이
     'Starfighter Inferno Special': ('Ares Inferno - Front Starboard.jpg', 'reward'),
     'Sneaky Stabber': ('F8C variants and paints x4 flying above clouds.jpg', 'reward'),
     'Where Wolf? Here Wolf': ('L-21 Wolf landed in hangar - cropped.png', 'reward'),
+    # 실제 위켈로 개조판 사진 (달 표면 위장 + 코피온 송곳니 = Fun Military Skull 에디션)
+    'Fun Military Skull Gun': ('Kopion Tooth Right.png', 'reward'),
     # 화폐 계약: 보상(Wikelo Favor)이 모두 같아서 '내는 재료' 이미지로 구분
     'Trade Merc Scrip for Favors?': ('Scrip star citizen.png', 'order', (0.04, 0.12, 0.50, 0.50)),     # 왼쪽 = 용병 길드 스크립
     'Trade Council Scrip for Favors?': ('Scrip star citizen.png', 'order', (0.50, 0.12, 0.50, 0.50)),  # 오른쪽 = The Council 스크립
@@ -372,6 +374,9 @@ def build():
         img = over.get(o[0].replace(' ', '_')) if len(o) == 2 else crop_image(o[0], o[2], slugify(c['name']))
         if img:
             c['img'], c['img_from'] = img, o[1]
+            m = main_reward(c, items)
+            if o[1] == 'reward' and m and not items[m['page']].get('img'):   # 실제 보상 사진이면 아이템 상세에도 사용
+                items[m['page']]['img'] = img
             card_imgs.setdefault(o[0].replace(' ', '_'), {k: v for k, v in img.items() if k != 'file'} | {'file': img['file']})
     n_img = sum(1 for c in contracts if c['img'])
     print('  카드 이미지 %d/%d, 아이템 이미지 %d/%d' % (n_img, len(contracts), sum(1 for i in items.values() if i['img']), len(items)))

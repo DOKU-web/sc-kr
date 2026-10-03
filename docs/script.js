@@ -15,7 +15,7 @@
   var I18N = {
     ko: {
       'nav.label': '주요 메뉴',
-      'nav.features': '기능', 'nav.how': '설치 방법', 'nav.crew': '번역팀', 'nav.partners': '파트너', 'nav.discord': '디스코드',
+      'nav.features': '기능', 'nav.how': '설치 방법', 'nav.crew': '번역팀', 'nav.partners': '파트너', 'nav.reviews': '리뷰', 'nav.discord': '디스코드',
       'cta.download': '런처 다운로드', 'cta.discord': '디스코드 참여',
       'hero.title': '스타시티즌,<br>이제 <span class="accent">한국어로.</span>',
       'hero.lead': '한국어 번역 적용부터 게임 채팅 한글 입력까지, SC-KR 런처 하나로 끝납니다. 번역팀이 게임 업데이트를 계속 따라가고, 런처는 실행할 때마다 최신 버전을 스스로 확인해요.',
@@ -38,6 +38,12 @@
       'partners.contact': '파트너 문의하기', 'partners.channel': '채널 바로가기',
       'partners.emptyTitle': '첫 파트너를 기다리고 있어요',
       'partners.emptyBody': 'SC-KR과 함께하고 싶은 스트리머라면 디스코드로 문의해 주세요.',
+      'reviews.title': '사용자 리뷰',
+      'reviews.lead': 'SC-KR을 써 본 소감을 자유롭게 남겨 주세요. 로그인 없이 누구나 작성할 수 있어요.',
+      'reviews.write': '리뷰 작성', 'reviews.nick': '닉네임', 'reviews.nickHint': '일부는 *로 가려져서 표시돼요',
+      'reviews.rating': '별점', 'reviews.content': '내용', 'reviews.placeholder': '번역 품질, 런처 사용감 등 자유롭게 적어 주세요.',
+      'reviews.submit': '리뷰 등록', 'reviews.more': '리뷰 더 보기',
+      'reviews.notice': '욕설·광고·개인정보가 담긴 리뷰는 운영진이 삭제할 수 있어요.',
       'discord.title': '디스코드에서 함께 플레이해요',
       'discord.lead': '패치노트와 언어팩 배포 소식을 가장 먼저 받고, 같이 비행할 파티도 찾아보세요. 번역 오류나 버그 제보도 디스코드 티켓으로 받고 있어요.',
       'discord.join': '디스코드 참여하기',
@@ -47,7 +53,7 @@
     },
     en: {
       'nav.label': 'Main menu',
-      'nav.features': 'Features', 'nav.how': 'Setup', 'nav.crew': 'Crew', 'nav.partners': 'Partners', 'nav.discord': 'Discord',
+      'nav.features': 'Features', 'nav.how': 'Setup', 'nav.crew': 'Crew', 'nav.partners': 'Partners', 'nav.reviews': 'Reviews', 'nav.discord': 'Discord',
       'cta.download': 'Download launcher', 'cta.discord': 'Join Discord',
       'hero.title': 'Star Citizen,<br>now in <span class="accent">Korean.</span>',
       'hero.lead': 'From applying the Korean translation to typing Hangul in game chat, the SC-KR launcher does it all. The crew keeps up with every game update, and the launcher checks for new versions each time it starts.',
@@ -70,6 +76,12 @@
       'partners.contact': 'Become a partner', 'partners.channel': 'Visit channel',
       'partners.emptyTitle': 'Waiting for our first partner',
       'partners.emptyBody': 'Streamers who want to team up with SC-KR, reach out on Discord.',
+      'reviews.title': 'User reviews',
+      'reviews.lead': 'Tell us what you think of SC-KR. Anyone can post — no login needed.',
+      'reviews.write': 'Write a review', 'reviews.nick': 'Nickname', 'reviews.nickHint': 'Part of it is hidden with *',
+      'reviews.rating': 'Rating', 'reviews.content': 'Review', 'reviews.placeholder': 'Translation quality, how the launcher feels — anything goes.',
+      'reviews.submit': 'Post review', 'reviews.more': 'Load more reviews',
+      'reviews.notice': 'Reviews with abuse, ads or personal info may be removed by the team.',
       'discord.title': 'Play together on Discord',
       'discord.lead': 'Get patch notes and language pack releases first, and find a crew to fly with. Translation errors and bug reports go through Discord tickets.',
       'discord.join': 'Join the Discord',
@@ -352,7 +364,12 @@
   window.SCKR = {
     data: data,
     render: renderAll,
-    setEditable: function (v) { editable = !!v; renderAll(); },
+    setEditable: function (v) {
+      editable = !!v;
+      renderAll();
+      document.dispatchEvent(new CustomEvent('sckr:editable', { detail: editable }));
+    },
+    isEditable: function () { return editable; },
     iconKeys: Object.keys(ICON_PATHS),
     iconLabels: ICON_LABELS,
     toast: toast,

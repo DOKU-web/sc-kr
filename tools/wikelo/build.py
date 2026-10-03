@@ -39,6 +39,17 @@ SECTIONS = [  # (위키 섹션 id, 표 순서, 키, 한글 이름, 설명)
     ('Ships_and_vehicles', 1, 'ship', '함선', '위켈로가 개조해 주는 함선. 대부분 A·B 등급 부품이 장착된 채로 지급됩니다.'),
     ('Other', 0, 'other', '기타', '그 밖의 교환 계약.'),
 ]
+# 자동으로 맞는 이미지를 못 찾는 계약은 직접 지정 (계약 이름: 위키 파일 이름) — 라이선스 확인은 그대로 거칩니다
+CARD_IMAGE_OVERRIDES = {   # (파일, 꼬리표: 'reward' = 실제 보상 아이템, 'related' = 관련 이미지)
+    'ATLS Cool Metal Color': ('ATLS series paints.jpg', 'related'),
+    'ATLS Orange Line': ('ATLS Safety Orange hangar cutout - Stripe BG SCT logo - Isometric.png', 'related'),
+    'ATLS Snowland Color': ('ATLS series paints 2.jpg', 'related'),
+    'Make ATLS shoot': ('ATLS GEO IKTI Front view pic 2.jpg', 'related'),
+    'Make jumpy ATLS shoot': ('ATLS GEO IKTI Jumping view pic 4.jpg', 'reward'),
+    'Starfighter Inferno Special': ('Ares Inferno - Front Starboard.jpg', 'reward'),
+    'Sneaky Stabber': ('F8C variants and paints x4 flying above clouds.jpg', 'reward'),
+    'Where Wolf? Here Wolf': ('L-21 Wolf landed in hangar - cropped.png', 'reward'),
+}
 CAT_KO = {k: ko for _, _, k, ko, _ in SECTIONS}
 _SVG = '<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">%s</svg>'
 CAT_ICON = {
@@ -316,6 +327,12 @@ def build():
                         best, score = it['img'], sc
             if best and score >= 1:
                 c['img'], c['img_from'] = best, 'related'
+    over = fetch_images([f for f, _ in CARD_IMAGE_OVERRIDES.values()], '', CARD_W)
+    card_imgs.update(over)
+    for c in contracts:
+        f, tag = CARD_IMAGE_OVERRIDES.get(c['name'], (None, None))
+        if f and over.get(f.replace(' ', '_')):
+            c['img'], c['img_from'] = over[f.replace(' ', '_')], tag
     n_img = sum(1 for c in contracts if c['img'])
     print('  카드 이미지 %d/%d, 아이템 이미지 %d/%d' % (n_img, len(contracts), sum(1 for i in items.values() if i['img']), len(items)))
 

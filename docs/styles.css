@@ -477,64 +477,6 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--a
   .nav-actions { gap: 8px; }
 }
 
-/* ========== 리뷰 ========== */
-.rv-stats { display: flex; align-items: baseline; gap: 10px; flex-shrink: 0; font-size: 14px; }
-.rv-avg { font-family: var(--font-display); font-size: 28px; font-weight: 700; color: #FFC94D; }
-.rv-layout { display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 32px; align-items: start; }
-.rv-form {
-  position: sticky; top: 88px;
-  display: flex; flex-direction: column; gap: 14px; padding: 22px;
-  border-radius: var(--radius); background: rgba(12, 19, 40, 0.72); border: 1px solid var(--line-strong);
-  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-}
-.rv-form .btn { align-self: flex-start; }
-.rv-form-title { font-size: 15px; font-weight: 700; }
-.rv-field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--muted); }
-.rv-field small { font-size: 11.5px; }
-.rv-preview { min-height: 16px; color: var(--accent); }
-.rv-count { align-self: flex-end; }
-.rv-hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
-.rv-rating { margin: 0; padding: 0; border: 0; font-size: 13px; color: var(--muted); }
-.rv-rating legend { padding: 0; margin-bottom: 4px; }
-/* 별점: 오른쪽부터 배치해서 hover/checked 시 왼쪽 별까지 채움 */
-.rv-rating-stars { display: inline-flex; flex-direction: row-reverse; gap: 2px; }
-.rv-rating-stars input { position: absolute; opacity: 0; width: 1px; height: 1px; }
-.rv-rating-stars label { font-size: 28px; line-height: 1; color: rgba(255,255,255,0.18); cursor: pointer; transition: color .1s ease, transform .1s ease; padding: 2px; }
-.rv-rating-stars label:hover, .rv-rating-stars label:hover ~ label,
-.rv-rating-stars input:checked ~ label { color: #FFC94D; }
-.rv-rating-stars label:hover { transform: scale(1.12); }
-.rv-rating-stars input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
-.rv-msg { min-height: 18px; font-size: 13px; color: var(--muted); }
-.rv-msg.ok { color: #7EE3B5; }
-.rv-msg.err { color: #FF8A8A; }
-.rv-notice { margin: 0; font-size: 11.5px; line-height: 1.6; }
-.rv-form :disabled { opacity: .55; cursor: not-allowed; }
-
-.rv-list-wrap { display: flex; flex-direction: column; gap: 16px; }
-.rv-list { display: flex; flex-direction: column; gap: 12px; }
-.rv-card {
-  position: relative; padding: 18px 20px; border-radius: var(--radius);
-  background: rgba(12, 19, 40, 0.62); border: 1px solid var(--line);
-  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-}
-.rv-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 8px; padding-right: 28px; }
-.rv-nick { font-size: 14px; font-weight: 500; color: var(--text); }
-.rv-stars { font-size: 14px; letter-spacing: 1px; color: rgba(255,255,255,0.18); }
-.rv-stars .on { color: #FFC94D; }
-.rv-date { margin-left: auto; font-size: 12px; color: var(--dim); }
-.rv-text { margin: 0; font-size: 15px; line-height: 1.75; color: var(--text-2); white-space: pre-wrap; overflow-wrap: anywhere; }
-.rv-empty {
-  padding: 40px 20px; border-radius: var(--radius); border: 1px dashed var(--line-strong);
-  text-align: center; color: var(--muted); font-size: 15px;
-}
-.rv-more { align-self: center; }
-.rv-card .rv-del { top: 12px; right: 12px; }
-
-@media (max-width: 1040px) {
-  .rv-layout { grid-template-columns: minmax(0, 1fr); }
-  .rv-form { position: static; }
-}
-
 /* ========== 반응형 ========== */
 @media (max-width: 1040px) {
   .hero { grid-template-columns: minmax(0, 1fr); gap: 56px; padding-top: 56px; padding-bottom: 88px; }

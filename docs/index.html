@@ -58,7 +58,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Sora:wght@600;700&display=swap">
-<link rel="stylesheet" href="styles.css?v=20261003c">
+<link rel="stylesheet" href="styles.css?v=20261003b">
 </head>
 <body>
 <div class="page" id="top">
@@ -81,7 +81,6 @@
         <a href="#how" data-i18n="nav.how">설치 방법</a>
         <a href="#crew" data-i18n="nav.crew">번역팀</a>
         <a href="#partners" data-i18n="nav.partners">파트너</a>
-        <a href="#reviews" data-i18n="nav.reviews">리뷰</a>
         <a href="#discord" data-i18n="nav.discord">디스코드</a>
       </div>
       <div class="nav-actions">
@@ -273,55 +272,10 @@
       </form>
     </section>
 
-    <!-- 리뷰 -->
-    <section id="reviews" class="section container">
-      <div class="section-head-row">
-        <div class="section-head">
-          <div class="kicker mono">05 — REVIEWS</div>
-          <h2 data-i18n="reviews.title">사용자 리뷰</h2>
-          <p class="section-lead" data-i18n="reviews.lead">SC-KR을 써 본 소감을 자유롭게 남겨 주세요. 로그인 없이 누구나 작성할 수 있어요.</p>
-        </div>
-        <div class="rv-stats" id="reviewStats" hidden></div>
-      </div>
-      <div class="rv-layout">
-        <form class="rv-form" id="reviewForm" novalidate>
-          <div class="rv-form-title" data-i18n="reviews.write">리뷰 작성</div>
-          <label class="rv-field">
-            <span><span data-i18n="reviews.nick">닉네임</span> <small class="dim" data-i18n="reviews.nickHint">일부는 *로 가려져서 표시돼요</small></span>
-            <input id="rvNick" name="nickname" maxlength="20" autocomplete="nickname" required>
-            <small class="rv-preview mono" id="rvNickPreview" aria-live="polite"></small>
-          </label>
-          <fieldset class="rv-rating">
-            <legend data-i18n="reviews.rating">별점</legend>
-            <div class="rv-rating-stars">
-              <input type="radio" id="rv5" name="rvRating" value="5"><label for="rv5" title="5">★</label>
-              <input type="radio" id="rv4" name="rvRating" value="4"><label for="rv4" title="4">★</label>
-              <input type="radio" id="rv3" name="rvRating" value="3"><label for="rv3" title="3">★</label>
-              <input type="radio" id="rv2" name="rvRating" value="2"><label for="rv2" title="2">★</label>
-              <input type="radio" id="rv1" name="rvRating" value="1"><label for="rv1" title="1">★</label>
-            </div>
-          </fieldset>
-          <label class="rv-field">
-            <span data-i18n="reviews.content">내용</span>
-            <textarea id="rvText" name="content" rows="4" maxlength="500" required data-i18n-attr="placeholder:reviews.placeholder" placeholder="번역 품질, 런처 사용감 등 자유롭게 적어 주세요."></textarea>
-            <small class="dim mono rv-count" id="rvCount">0 / 500</small>
-          </label>
-          <input class="rv-hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
-          <button type="submit" class="btn btn-primary btn-sm" data-i18n="reviews.submit">리뷰 등록</button>
-          <div class="rv-msg" id="reviewMsg" role="status" aria-live="polite"></div>
-          <p class="rv-notice dim" data-i18n="reviews.notice">욕설·광고·개인정보가 담긴 리뷰는 운영진이 삭제할 수 있어요.</p>
-        </form>
-        <div class="rv-list-wrap">
-          <div class="rv-list" id="reviewList"></div>
-          <button type="button" class="btn btn-ghost btn-sm rv-more" id="reviewMore" hidden data-i18n="reviews.more">리뷰 더 보기</button>
-        </div>
-      </div>
-    </section>
-
     <!-- 디스코드 -->
     <section id="discord" class="section container">
       <div class="cta-panel">
-        <div class="kicker mono">06 — COMMUNITY</div>
+        <div class="kicker mono">05 — COMMUNITY</div>
         <h2 data-i18n-html="discord.title">디스코드에서 함께 플레이해요</h2>
         <p data-i18n="discord.lead">패치노트와 언어팩 배포 소식을 가장 먼저 받고, 같이 비행할 파티도 찾아보세요. 번역 오류나 버그 제보도 디스코드 티켓으로 받고 있어요.</p>
         <a href="https://discord.gg/Nmg6R6sagZ" target="_blank" rel="noopener" class="btn btn-primary btn-lg">
@@ -405,10 +359,9 @@
   <div class="bgm-frame"><div id="bgmPlayer"></div></div>
 </aside>
 
-<script src="script.js?v=20261003c"></script>
-<script src="editor.js?v=20261003c"></script>
-<script src="bgm.js?v=20261003c"></script>
-<script src="space.js?v=20261003c"></script>
-<script src="reviews.js?v=20261003c"></script>
+<script src="script.js?v=20261003b"></script>
+<script src="editor.js?v=20261003b"></script>
+<script src="bgm.js?v=20261003b"></script>
+<script src="space.js?v=20261003b"></script>
 </body>
 </html>

@@ -39,6 +39,16 @@ SECTIONS = [  # (위키 섹션 id, 표 순서, 키, 한글 이름, 설명)
     ('Ships_and_vehicles', 1, 'ship', '함선', '위켈로가 개조해 주는 함선. 대부분 A·B 등급 부품이 장착된 채로 지급됩니다.'),
     ('Other', 0, 'other', '기타', '그 밖의 교환 계약.'),
 ]
+CAT_KO = {k: ko for _, _, k, ko, _ in SECTIONS}
+_SVG = '<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">%s</svg>'
+CAT_ICON = {
+    'currency': _SVG % '<circle cx="12" cy="12" r="8"/><path d="M14.5 9.5c-.5-1-1.5-1.5-2.5-1.5-1.5 0-2.5.9-2.5 2s1 1.7 2.5 2 2.5.9 2.5 2-1 2-2.5 2c-1 0-2-.5-2.5-1.5M12 6.5v1.5M12 16v1.5"/>',
+    'weapon': _SVG % '<path d="M3 10h13l2-2h3v4h-3l-1 1H9l-1 4H5l1-4H3Z"/>',
+    'armor': _SVG % '<path d="M12 3 5 6v6c0 4.4 3 7.6 7 9 4-1.4 7-4.6 7-9V6Z"/>',
+    'vehicle': _SVG % '<path d="M4 15h16l-2-5H6Z"/><circle cx="7.5" cy="17" r="1.8"/><circle cx="16.5" cy="17" r="1.8"/>',
+    'ship': _SVG % '<path d="M12 3c2.5 3 3.5 6.5 3.5 10l3 3v2l-4-1-1 2.5h-3l-1-2.5-4 1v-2l3-3c0-3.5 1-7 3.5-10Z"/><circle cx="12" cy="10" r="1.5"/>',
+    'other': _SVG % '<path d="M12 3 20 7.5v9L12 21l-8-4.5v-9Z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/>',
+}
 REP_KO = {'None': '없음', 'New Customer': '신규 고객', 'Very Good Customer': '아주 좋은 고객', 'Very Best Customer': '최고의 고객'}
 
 
@@ -186,24 +196,52 @@ def card(c):
     img = c.get('img')
     pic = ('<div class="wk-img"><img src="%s" alt="%s" loading="lazy">%s</div>' % (
         esc(img['file']), esc(c['rewards'][0]['name'] if c['rewards'] else c['name']),
-        {'reward': '<span class="wk-img-tag">보상 이미지</span>', 'order': '<span class="wk-img-tag">재료 이미지</span>'}.get(c.get('img_from'), ''))
-        if img else '<div class="wk-img wk-img-empty" aria-hidden="true"><span>W</span></div>')
+        {'reward': '<span class="wk-img-tag">보상 이미지</span>', 'order': '<span class="wk-img-tag">재료 이미지</span>',
+         'related': '<span class="wk-img-tag">관련 이미지</span>'}.get(c.get('img_from'), ''))
+        if img else '<div class="wk-img wk-img-empty" aria-hidden="true">%s<span>%s</span></div>' % (CAT_ICON.get(c['cat'], CAT_ICON['other']), esc(CAT_KO.get(c['cat'], ''))))
     search = ' '.join([c['name']] + [x['name'] for x in c['orders'] + c['rewards']]).lower()
     rep = '' if c['rep'] == 'None' else '<span class="wk-rep">%s 이상</span>' % esc(REP_KO.get(c['rep'], c['rep']))
-    return ('<article class="wk-card" data-cat="%s" data-search="%s">'
+    return ('<article class="wk-card" data-id="%s" data-cat="%s" data-search="%s">'
             '<button type="button" class="wk-card-open" data-contract="%s" aria-label="%s 자세히 보기">%s</button>'
             '<div class="wk-body"><h3><button type="button" class="wk-title-btn" data-contract="%s">%s</button></h3>%s'
             '<div class="wk-cols"><div><div class="wk-label">필요 재료 <small>· 눌러서 획득 방법 보기</small></div>%s</div>'
             '<div><div class="wk-label">보상</div>%s</div></div></div></article>') % (
-        c['cat'], esc(search), c['id'], esc(c['name']), pic, c['id'], esc(c['name']), rep,
+        c['id'], c['cat'], esc(search), c['id'], esc(c['name']), pic, c['id'], esc(c['name']), rep,
         items_html(c['orders'], 'wk-items'), items_html(c['rewards'], 'wk-items wk-rewards'))
+
+
+STOP = {'wikelo', 'special', 'war', 'work', 'sneak', 'speedy', 'savior', 'the', 'and', 'for', 'make', 'want', 'more', 'most', 'mod', 'you', 'ship'}
+VEHICLE_TYPES = ('Spacecraft', 'Ground vehicle', 'Gravlev', 'Vehicle')
+
+
+def _toks(s):
+    return set(re.findall(r'[a-z0-9][a-z0-9-]{2,}', (s or '').lower())) - STOP
+
+
+def main_reward(c, items):
+    """보상 중 계약을 대표하는 아이템 (이름이 계약명과 가장 비슷하고, 함선·차량 계약이면 함선·차량 우선)"""
+    best, best_sc = None, -1
+    for i, r in enumerate(c['rewards']):
+        it = r['page'] and items.get(r['page'])
+        if not it:
+            continue
+        sc = len(_toks(c['name']) & _toks(r['name'] + ' ' + it['title'])) * 2
+        typ = ' '.join(v for s in it.get('info', []) for k, v in s['items'] if k == 'Type')
+        if c['cat'] in ('ship', 'vehicle') and any(t in typ for t in VEHICLE_TYPES):
+            sc += 10
+        if re.search(r'magazine|battery|blueprint', r['name'], re.I):
+            sc -= 5   # 탄창·설계도는 대표 보상이 아님
+        sc -= i * 0.01   # 동점이면 앞쪽
+        if sc > best_sc:
+            best, best_sc = r, sc
+    return best
 
 
 def asset_version():
     """wikelo.js·css·data.json 내용으로 만든 버전 값 (바뀌면 브라우저가 새로 받음)"""
     import hashlib
     h = hashlib.md5()
-    for name in ('wikelo.js', 'wikelo.css', 'data.json'):
+    for name in ('wikelo.js', 'wikelo.css', 'planner.css', 'data.json'):
         path = os.path.join(OUT, name)
         if os.path.exists(path):
             h.update(open(path, 'rb').read())
@@ -218,6 +256,7 @@ def build():
 
     # 아이템 상세
     ko = json.load(open(os.path.join(HERE, 'ko.json'), encoding='utf-8'))
+    ko_desc = json.load(open(os.path.join(HERE, 'ko_desc.json'), encoding='utf-8'))
     roles = {}
     for c in contracts:
         for kind in ('orders', 'rewards'):
@@ -235,6 +274,8 @@ def build():
         it['wiki'] = WIKI + '/' + urllib.parse.quote(d['title'].replace(' ', '_'))
         if page in ko:
             it['lead_ko'] = ko[page]
+        if it.get('desc') in ko_desc:
+            it['desc_ko'] = ko_desc[it['desc']]
         it['used_in'] = roles[page]['orders']
         it['reward_of'] = roles[page]['rewards']
         items[page] = it
@@ -251,23 +292,30 @@ def build():
         own = card_imgs.get((c['image'] or '').replace(' ', '_'))
         c['img'], c['img_own'] = own, bool(own)
         c['img_from'] = 'own' if own else None
-        if not own:   # 계약 이미지가 없으면 대표 보상 아이템 이미지 사용
-            for r in c['rewards']:
-                if r['page'] and items.get(r['page'], {}).get('img'):
-                    c['img'], c['img_from'] = items[r['page']]['img'], 'reward'
-                    break
+        main = main_reward(c, items)
+        if not own and main and items[main['page']].get('img'):   # 계약 이미지가 없으면 '대표 보상'의 이미지
+            c['img'], c['img_from'] = items[main['page']]['img'], 'reward'
         if not c['img']:   # 그래도 없으면 보상과 이름이 가장 비슷한 재료 이미지 (예: 개조 전 기본 총기)
-            words = set(re.findall(r'[a-z0-9]{3,}', ' '.join(r['name'] for r in c['rewards'] + [{'name': c['name']}]).lower()))
+            words = _toks(' '.join(r['name'] for r in c['rewards'] + [{'name': c['name']}]))
             best, score = None, -1
             for o in c['orders']:
                 img = o['page'] and items.get(o['page'], {}).get('img')
                 if not img:
                     continue
-                sc = len(words & set(re.findall(r'[a-z0-9]{3,}', o['name'].lower())))
+                sc = len(words & _toks(o['name']))
                 if sc > score:
                     best, score = img, sc
-            if best:
+            if best and score >= 1:   # 이름이 겹치는 재료만 (관련 없는 이미지는 쓰지 않음)
                 c['img'], c['img_from'] = best, 'order'
+        if not c['img']:   # 마지막: 전체 아이템 중 이름이 가장 많이 겹치는 이미지 (예: Ares Inferno → Ares Ion)
+            best, score = None, 0
+            for it in items.values():
+                if it.get('img'):
+                    sc = len(words & _toks(it['title'] + ' ' + it['key']))
+                    if sc > score:
+                        best, score = it['img'], sc
+            if best and score >= 1:
+                c['img'], c['img_from'] = best, 'related'
     n_img = sum(1 for c in contracts if c['img'])
     print('  카드 이미지 %d/%d, 아이템 이미지 %d/%d' % (n_img, len(contracts), sum(1 for i in items.values() if i['img']), len(items)))
 

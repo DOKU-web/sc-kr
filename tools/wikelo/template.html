@@ -23,6 +23,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Sora:wght@600;700&display=swap">
 <link rel="stylesheet" href="../styles.css?v={{UPDATED}}">
 <link rel="stylesheet" href="wikelo.css?v={{VER}}">
+<link rel="stylesheet" href="planner.css?v={{VER}}">
 </head>
 <body>
 <div class="page" id="top">
@@ -112,6 +113,26 @@
       </div>
     </section>
 
+    <!-- 내 계약 플래너 -->
+    <section class="section container" id="planner">
+      <div class="section-head-row">
+        <div class="section-head">
+          <div class="kicker mono">MY PLANNER</div>
+          <h2>내 계약 플래너</h2>
+          <p class="section-lead">카드의 <b>☆</b>를 눌러 계약을 추적하고, 가진 재료 수량을 적어 두세요. 추적 중인 계약에 필요한 재료를 합쳐서 <b>앞으로 더 모아야 할 양</b>을 보여 줍니다. 기록은 이 브라우저에만 저장돼요.</p>
+        </div>
+        <div class="wk-plan-tools">
+          <button type="button" class="btn btn-ghost btn-sm" id="plCopy">📋 남은 재료 복사</button>
+          <button type="button" class="btn btn-ghost btn-sm" id="plExport">💾 백업</button>
+          <label class="btn btn-ghost btn-sm wk-file-btn">📂 불러오기<input type="file" id="plImport" accept="application/json,.json" hidden></label>
+          <button type="button" class="btn btn-ghost btn-sm" id="plReset">초기화</button>
+        </div>
+      </div>
+      <div class="wk-plan" id="planBody">
+        <div class="wk-plan-empty">아직 추적 중인 계약이 없어요. 아래 계약 카드의 <b>☆</b>를 눌러 추가해 보세요.</div>
+      </div>
+    </section>
+
     <!-- 계약 목록 -->
     <section class="section container" id="contracts">
       <div class="section-head">
@@ -125,6 +146,12 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
           <input type="search" id="wkSearch" placeholder="함선·아이템 이름 검색 (예: Polaris, Favor)" aria-label="계약 검색">
         </label>
+      </div>
+      <div class="wk-filters" role="group" aria-label="필터">
+        <button type="button" class="wk-filter" data-filter="tracked" aria-pressed="false">★ 추적 중</button>
+        <button type="button" class="wk-filter" data-filter="ready" aria-pressed="false">✓ 지금 완료 가능</button>
+        <button type="button" class="wk-filter" data-filter="hideDone" aria-pressed="false">완료한 계약 숨기기</button>
+        <span class="wk-kbd dim"><kbd>/</kbd> 검색</span>
       </div>
       <p class="wk-count dim" id="wkCount" aria-live="polite"></p>
       {{GROUPS}}

@@ -1,37 +1,10 @@
-/* 위켈로 페이지 — 분류 탭, 검색, 상세 보기(계약 · 아이템 · 획득 방법), 모바일 메뉴 */
+/* 위켈로 페이지
+ * - 분류 탭 · 검색 · 필터(추적 중 / 지금 완료 가능 / 완료 숨기기)
+ * - 상세 보기(계약 · 아이템 · 획득 방법)
+ * - 내 진행 기록: 보유 수량, ★ 추적, 완료 표시 (localStorage, 이 브라우저에만 저장)
+ * - 내 계약 플래너: 추적 계약의 남은 재료 합계, 복사, 백업/불러오기 */
 (function () {
   'use strict';
-
-  /* ========== 분류 · 검색 ========== */
-  var tabs = document.querySelectorAll('.wk-tab');
-  var search = document.getElementById('wkSearch');
-  var cards = document.querySelectorAll('.wk-card');
-  var groups = document.querySelectorAll('.wk-group');
-  var countEl = document.getElementById('wkCount');
-  var emptyEl = document.getElementById('wkEmpty');
-  var cat = 'all';
-
-  function apply() {
-    var q = (search.value || '').trim().toLowerCase();
-    var shown = 0;
-    cards.forEach(function (c) {
-      var ok = (cat === 'all' || c.dataset.cat === cat) && (!q || c.dataset.search.indexOf(q) !== -1);
-      c.classList.toggle('is-hidden', !ok);
-      if (ok) shown++;
-    });
-    groups.forEach(function (g) { g.classList.toggle('is-hidden', !g.querySelector('.wk-card:not(.is-hidden)')); });
-    countEl.textContent = (q || cat !== 'all') ? '계약 ' + shown + '개' : '';
-    emptyEl.hidden = shown > 0;
-  }
-  tabs.forEach(function (t) {
-    t.addEventListener('click', function () {
-      cat = t.dataset.cat;
-      tabs.forEach(function (b) { b.setAttribute('aria-pressed', String(b === t)); });
-      apply();
-    });
-  });
-  var timer;
-  search.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(apply, 120); });
 
   /* ========== 번역 표 ========== */
   var ACQ = { Mine: '채굴', Harvest: '채집', Buy: '구매', Loot: '전리품', Craft: '제작', Pledge: '후원(현금)', Rent: '대여', Salvage: '회수' };
@@ -49,32 +22,219 @@
     'Grade': '등급', 'Capacity': '용량', 'Temperature': '온도', 'Radiation': '방사선', 'Damage reduction': '피해 감소', 'Carrying capacity': '휴대 용량',
     'Weight': '무게', 'Volume': '부피', 'Mass': '질량', 'Length': '길이', 'Width': '너비', 'Height': '높이', 'Fire rate': '연사력', 'Magazine': '탄창',
     'Weapon': '무기', 'Fire modes': '사격 모드', 'Mining': '채굴', 'Consumable': '소모품', 'Armor': '방어구', 'Clothing': '의류', 'Ship': '함선',
-    'Vehicle': '차량', 'Overview': '개요', 'Acquisition': '획득 방식', 'Mining': '채굴', 'Harvesting': '채집', 'Crafting': '제작', 'Salvage': '회수', 'Hull': '선체', 'Speed': '속도', 'Single': '단발', 'Burst': '점사', 'Rapid': '연사', 'Charge': '충전' };
+    'Vehicle': '차량', 'Overview': '개요', 'Acquisition': '획득 방식', 'Harvesting': '채집', 'Crafting': '제작', 'Salvage': '회수',
+    'Hull': '선체', 'Speed': '속도', 'Single': '단발', 'Burst': '점사', 'Rapid': '연사', 'Charge': '충전' };
   var SUB = { 'Mineral': '광물', 'Misc item': '기타 아이템', 'Personal weapon': '개인 화기', 'Drink': '음료', 'Food': '음식',
     'Commodity': '원자재', 'Metal': '금속', 'Ore': '광석', 'Gem': '보석', 'Currency': '화폐', 'Helmet': '헬멧', 'Undersuit': '언더슈트',
     'Backpack': '배낭', 'Arms': '팔 방어구', 'Legs': '다리 방어구', 'Core': '코어 방어구', 'Magazine': '탄창', 'Vehicle weapon': '탑재 무기',
-    'Clothing': '의류', 'Hat': '모자', 'Arm armor': '팔 방어구', 'Torso armor': '몸통 방어구', 'Leg armor': '다리 방어구', 'Headgear': '모자', 'Collection': '컬렉션', 'Device': '장치', 'Unrefined ores': '원광', 'Cargo': '화물', 'Gun': '총기', 'Shirt': '셔츠', 'Jacket': '재킷', 'Organic': '유기물', 'Container': '용기', 'Medal': '메달' };
-  var RARITY = { common: '일반', uncommon: '고급', rare: '희귀', epic: '영웅', legendary: '전설' };
+    'Clothing': '의류', 'Hat': '모자', 'Arm armor': '팔 방어구', 'Torso armor': '몸통 방어구', 'Leg armor': '다리 방어구', 'Headgear': '모자',
+    'Collection': '컬렉션', 'Device': '장치', 'Unrefined ores': '원광', 'Cargo': '화물', 'Gun': '총기',
+    'Shirt': '셔츠', 'Jacket': '재킷', 'Organic': '유기물', 'Container': '용기', 'Medal': '메달' };
   var CELL = { 'Moon': '위성', 'Planet': '행성', 'Asteroid': '소행성', 'Asteroid field': '소행성대', 'Ring': '고리', 'Lagrange point': '라그랑주 점',
     'Station': '정거장', 'Outpost': '전초기지', 'Cave': '동굴', 'Yes': '예', 'No': '아니오' };
+  var RARITY = { common: '일반', uncommon: '고급', rare: '희귀', epic: '영웅', legendary: '전설' };
   function tr(map, s) { return map[s] || s; }
-
-  /* ========== 상세 보기 ========== */
-  var modal = document.getElementById('wkModal');
-  var body = document.getElementById('wkModalBody');
-  var backBtn = document.getElementById('wkModalBack');
-  var data = null, loading = null, stack = [];
-
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
   }
+  function fmt(n) { return (Math.round(n * 100) / 100).toLocaleString('ko-KR'); }
+
+  /* ========== 데이터 ========== */
+  var data = null, loading = null;
   function loadData() {
     if (data) return Promise.resolve(data);
-    if (!loading) loading = fetch('data.json?v=' + (document.documentElement.dataset.ver || '')).then(function (r) { return r.json(); }).then(function (d) { data = d; return d; });
+    if (!loading) {
+      loading = fetch('data.json?v=' + (document.documentElement.dataset.ver || ''))
+        .then(function (r) { return r.json(); })
+        .then(function (d) { data = d; return d; });
+    }
     return loading;
   }
+
+  /* ========== 내 진행 기록 (이 브라우저에 저장) ========== */
+  var STORE_KEY = 'sckr-wikelo-v1';
+  var st = { owned: {}, tracked: [], done: [] };
+  try {
+    var saved = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
+    if (saved && typeof saved === 'object') {
+      st.owned = saved.owned || {}; st.tracked = saved.tracked || []; st.done = saved.done || [];
+    }
+  } catch (_) {}
+  var saveTimer;
+  function save() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function () { try { localStorage.setItem(STORE_KEY, JSON.stringify(st)); } catch (_) {} }, 150);
+  }
+  function itemKey(it) { return it.page || it.name; }
+  function need(it) { var m = String(it.qty || '1').replace(/,/g, '').match(/[\d.]+/); return m ? parseFloat(m[0]) : 1; }
+  function unit(it) { return /SCU/i.test(it.qty || '') ? ' SCU' : ''; }
+  function owned(key) { return Number(st.owned[key]) || 0; }
+  function setOwned(key, v) {
+    v = Math.max(0, Math.round((Number(v) || 0) * 100) / 100);
+    if (v) st.owned[key] = v; else delete st.owned[key];
+    save();
+    refresh();
+  }
+  function isTracked(id) { return st.tracked.indexOf(id) !== -1; }
+  function isDone(id) { return st.done.indexOf(id) !== -1; }
+  function toggle(list, id) {
+    var i = list.indexOf(id);
+    if (i === -1) list.push(id); else list.splice(i, 1);
+    save();
+    refresh();
+  }
+  // 계약 진행률 (재료별로 필요량까지만 인정해 평균)
+  function progress(c) {
+    if (!c.orders.length) return { pct: 0, ready: false };
+    var sum = 0, ready = true;
+    c.orders.forEach(function (o) {
+      var n = need(o), h = owned(itemKey(o));
+      sum += Math.min(1, h / n);
+      if (h < n) ready = false;
+    });
+    return { pct: Math.round(sum / c.orders.length * 100), ready: ready };
+  }
+
+  /* ========== 카드 꾸미기 (★ · 진행률 · 보유 수량) ========== */
+  var cards = Array.prototype.slice.call(document.querySelectorAll('.wk-card'));
+  cards.forEach(function (card) {
+    var id = card.dataset.id;
+    var star = document.createElement('button');
+    star.type = 'button';
+    star.className = 'wk-star';
+    star.dataset.track = id;
+    card.appendChild(star);
+    var bar = document.createElement('div');
+    bar.className = 'wk-prog';
+    bar.innerHTML = '<div class="wk-prog-bar"><span></span></div><div class="wk-prog-row"><span class="wk-prog-text"></span>' +
+      '<button type="button" class="wk-done-btn" data-done="' + id + '"></button></div>';
+    card.querySelector('.wk-body').insertBefore(bar, card.querySelector('.wk-cols'));
+  });
+
+  function decorateCards() {
+    if (!data) return;
+    cards.forEach(function (card) {
+      var c = data.contracts[card.dataset.id];
+      if (!c) return;
+      var p = progress(c), t = isTracked(c.id), d = isDone(c.id);
+      var star = card.querySelector('.wk-star');
+      star.textContent = t ? '★' : '☆';
+      star.classList.toggle('on', t);
+      star.setAttribute('aria-pressed', String(t));
+      star.setAttribute('aria-label', t ? '추적 해제' : '추적하기');
+      star.title = t ? '추적 해제' : '플래너에 추적하기';
+      card.classList.toggle('is-done', d);
+      card.classList.toggle('is-ready', p.ready && !d);
+      card.querySelector('.wk-prog-bar span').style.width = (d ? 100 : p.pct) + '%';
+      card.querySelector('.wk-prog-text').textContent = d ? '✓ 완료한 계약' : (p.ready ? '✓ 재료 다 모음 — 납품 가능!' : (p.pct ? '재료 ' + p.pct + '% 모음' : '재료 0%'));
+      var db = card.querySelector('.wk-done-btn');
+      db.textContent = d ? '완료 취소' : '완료 표시';
+      db.setAttribute('aria-pressed', String(d));
+      // 재료 옆 보유 수량
+      card.querySelectorAll('.wk-items:not(.wk-rewards) li').forEach(function (li, i) {
+        var o = c.orders[i];
+        if (!o) return;
+        var h = owned(itemKey(o)), n = need(o);
+        var tag = li.querySelector('.wk-have');
+        if (!h) { if (tag) tag.remove(); return; }
+        if (!tag) { tag = document.createElement('span'); tag.className = 'wk-have mono'; li.appendChild(tag); }
+        tag.textContent = fmt(Math.min(h, n)) + '/' + fmt(n);
+        tag.classList.toggle('full', h >= n);
+      });
+    });
+  }
+
+  /* ========== 분류 · 검색 · 필터 ========== */
+  var tabs = document.querySelectorAll('.wk-tab');
+  var search = document.getElementById('wkSearch');
+  var groups = document.querySelectorAll('.wk-group');
+  var countEl = document.getElementById('wkCount');
+  var emptyEl = document.getElementById('wkEmpty');
+  var cat = 'all', filters = { tracked: false, ready: false, hideDone: false };
+
+  function apply() {
+    var q = (search.value || '').trim().toLowerCase();
+    var shown = 0, filtering = q || cat !== 'all' || filters.tracked || filters.ready || filters.hideDone;
+    cards.forEach(function (card) {
+      var id = card.dataset.id, ok = (cat === 'all' || card.dataset.cat === cat) && (!q || card.dataset.search.indexOf(q) !== -1);
+      if (ok && filters.tracked) ok = isTracked(id);
+      if (ok && filters.ready) ok = card.classList.contains('is-ready');
+      if (ok && filters.hideDone) ok = !isDone(id);
+      card.classList.toggle('is-hidden', !ok);
+      if (ok) shown++;
+    });
+    groups.forEach(function (g) { g.classList.toggle('is-hidden', !g.querySelector('.wk-card:not(.is-hidden)')); });
+    countEl.textContent = filtering ? '계약 ' + shown + '개' : '';
+    emptyEl.hidden = shown > 0;
+  }
+  tabs.forEach(function (t) {
+    t.addEventListener('click', function () {
+      cat = t.dataset.cat;
+      tabs.forEach(function (b) { b.setAttribute('aria-pressed', String(b === t)); });
+      apply();
+    });
+  });
+  document.querySelectorAll('.wk-filter').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var k = b.dataset.filter;
+      filters[k] = !filters[k];
+      b.setAttribute('aria-pressed', String(filters[k]));
+      apply();
+    });
+  });
+  var timer;
+  search.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(apply, 120); });
+  // "/" 키로 검색창 바로 가기
+  document.addEventListener('keydown', function (e) {
+    if (e.key === '/' && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName) && !modal.open) {
+      e.preventDefault();
+      search.focus();
+      search.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
+  });
+
+  /* ========== 수량 입력 ========== */
+  function stepper(key, n, u) {
+    var h = owned(key);
+    return '<span class="wk-step" data-key="' + esc(key) + '">' +
+      '<button type="button" class="wk-step-btn" data-step="-1" aria-label="1 빼기">−</button>' +
+      '<input type="number" class="wk-step-in mono" min="0" step="any" inputmode="decimal" value="' + (h || '') + '" placeholder="0" aria-label="보유 수량">' +
+      '<button type="button" class="wk-step-btn" data-step="1" aria-label="1 더하기">+</button>' +
+      (n != null ? '<span class="wk-step-need mono">/ ' + fmt(n) + esc(u || '') + '</span>' : '') +
+      (n != null ? '<button type="button" class="wk-step-max" data-max="' + n + '" title="필요한 만큼 채우기">MAX</button>' : '') +
+      '</span>';
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('.wk-step-btn, .wk-step-max');
+    if (!b) return;
+    var wrap = b.closest('.wk-step'), key = wrap.dataset.key;
+    if (b.dataset.max) setOwned(key, Number(b.dataset.max));
+    else setOwned(key, owned(key) + Number(b.dataset.step));
+    syncSteppers(key);
+  });
+  document.addEventListener('change', function (e) {
+    if (!e.target.classList.contains('wk-step-in')) return;
+    var key = e.target.closest('.wk-step').dataset.key;
+    setOwned(key, e.target.value);
+    syncSteppers(key);
+  });
+  function syncSteppers(key) {
+    document.querySelectorAll('.wk-step').forEach(function (w) {
+      if (w.dataset.key !== key) return;
+      var inp = w.querySelector('.wk-step-in');
+      if (document.activeElement !== inp) inp.value = owned(key) || '';
+      var row = w.closest('[data-need]');
+      if (row) row.classList.toggle('full', owned(key) >= Number(row.dataset.need));
+    });
+  }
+
+  /* ========== 상세 보기 ========== */
+  var modal = document.getElementById('wkModal');
+  var body = document.getElementById('wkModalBody');
+  var backBtn = document.getElementById('wkModalBack');
+  var stack = [];
 
   function itemList(list, kind) {
     return '<ul class="wk-m-items">' + list.map(function (it) {
@@ -82,7 +242,11 @@
       var thumb = info && info.img ? '<img src="' + esc(info.img.file) + '" alt="" loading="lazy">' : '<span class="wk-m-noimg">' + esc((it.name || '?')[0]) + '</span>';
       var hint = kind === 'orders' ? '<span class="wk-m-go">획득 방법 →</span>' : '<span class="wk-m-go">자세히 →</span>';
       var inner = '<span class="wk-m-thumb">' + thumb + '</span><span class="wk-m-qty mono">' + esc(it.qty) + '</span><span class="wk-m-name">' + esc(it.name) + '</span>' + (info ? hint : '');
-      return '<li>' + (info ? '<button type="button" class="wk-m-item" data-item="' + esc(it.page) + '">' + inner + '</button>' : '<div class="wk-m-item">' + inner + '</div>') + '</li>';
+      var btn = info ? '<button type="button" class="wk-m-item" data-item="' + esc(it.page) + '">' + inner + '</button>' : '<div class="wk-m-item">' + inner + '</div>';
+      if (kind !== 'orders') return '<li>' + btn + '</li>';
+      var n = need(it), key = itemKey(it);
+      return '<li class="wk-m-order' + (owned(key) >= n ? ' full' : '') + '" data-need="' + n + '">' + btn +
+        '<div class="wk-m-have"><span class="dim">보유</span>' + stepper(key, n, unit(it)) + '</div></li>';
     }).join('') + '</ul>';
   }
 
@@ -98,8 +262,17 @@
     if (!ids || !ids.length) return '';
     return '<div class="wk-m-sec"><h4>' + label + '</h4><div class="wk-m-chips">' + ids.map(function (id) {
       var c = data.contracts[id];
-      return c ? '<button type="button" class="wk-m-chip" data-contract="' + id + '">' + esc(c.name) + '</button>' : '';
+      return c ? '<button type="button" class="wk-m-chip" data-contract="' + id + '">' + (isTracked(id) ? '★ ' : '') + esc(c.name) + '</button>' : '';
     }).join('') + '</div></div>';
+  }
+
+  function contractActions(c) {
+    var t = isTracked(c.id), d = isDone(c.id), p = progress(c);
+    return '<div class="wk-m-actions">' +
+      '<button type="button" class="btn btn-sm ' + (t ? 'btn-primary' : 'btn-ghost') + '" data-track="' + c.id + '">' + (t ? '★ 추적 중' : '☆ 추적하기') + '</button>' +
+      '<button type="button" class="btn btn-sm btn-ghost" data-done="' + c.id + '">' + (d ? '✓ 완료함 (취소)' : '완료 표시') + '</button>' +
+      '<div class="wk-m-prog"><div class="wk-prog-bar"><span style="width:' + (d ? 100 : p.pct) + '%"></span></div>' +
+      '<span class="mono">' + (d ? '완료' : (p.ready ? '납품 가능!' : p.pct + '%')) + '</span></div></div>';
   }
 
   function renderContract(id) {
@@ -110,7 +283,8 @@
       '<div class="wk-m-kicker mono">' + esc(data.cats[c.cat] || '') + ' 계약</div>' +
       '<h3 class="wk-m-title" id="wkModalTitle">' + esc(c.name) + '</h3>' +
       '<div class="wk-m-meta"><span>필요 평판 <b>' + esc(rep) + '</b></span><span>재료 <b>' + c.orders.length + '종</b></span></div>' +
-      '<div class="wk-m-sec"><h4>필요 재료 <small>눌러서 어디서 구하는지 보기</small></h4>' + itemList(c.orders, 'orders') + '</div>' +
+      '<div class="wk-m-actions-slot">' + contractActions(c) + '</div>' +
+      '<div class="wk-m-sec"><h4>필요 재료 <small>보유 수량을 적어 두면 진행률이 계산돼요 · 이름을 누르면 획득 방법</small></h4>' + itemList(c.orders, 'orders') + '</div>' +
       '<div class="wk-m-sec"><h4>보상</h4>' + itemList(c.rewards, 'rewards') + '</div>' +
       '<p class="wk-m-note dim">재료를 모아 위켈로 엠포리엄의 화물 엘리베이터에 넣으면, 보상은 그 정거장의 로컬 인벤토리로 들어옵니다.</p>';
   }
@@ -127,16 +301,30 @@
     var lead = it.lead_ko || it.lead;
     if (lead) h += '<p class="wk-m-lead">' + esc(lead) + '</p>';
 
+    // 재료라면 보유 수량 + 추적 중 계약 기준 필요량
+    if (it.used_in && it.used_in.length) {
+      var total = 0, u = '';
+      st.tracked.forEach(function (id) {
+        var c = data.contracts[id];
+        if (!c || isDone(id)) return;
+        c.orders.forEach(function (o) { if (itemKey(o) === key) { total += need(o); u = unit(o); } });
+      });
+      h += '<div class="wk-m-mine"><div><div class="wk-m-subtitle">내 보유 수량</div>' + stepper(key, null) + '</div>' +
+        (total ? '<div class="wk-m-mine-need"><span class="dim">추적 중 계약에 필요</span><b class="mono">' + fmt(total) + u + '</b>' +
+          '<span class="dim">남음</span><b class="mono">' + fmt(Math.max(0, total - owned(key))) + u + '</b></div>' : '') + '</div>';
+    }
+
     // 획득 방법
     var acq = '';
     if (it.acq && Object.keys(it.acq).length) {
       acq += '<div class="wk-m-acq">' + Object.keys(it.acq).map(function (k) {
-        var st = it.acq[k];
-        return '<span class="wk-acq wk-acq-' + esc(st) + '"><span aria-hidden="true">' + (ACQ_ICON[k] || '•') + '</span>' + esc(tr(ACQ, k)) + ' <b>' + esc(STATE[st] || st) + '</b></span>';
+        var s = it.acq[k];
+        return '<span class="wk-acq wk-acq-' + esc(s) + '"><span aria-hidden="true">' + (ACQ_ICON[k] || '•') + '</span>' + esc(tr(ACQ, k)) + ' <b>' + esc(STATE[s] || s) + '</b></span>';
       }).join('') + '</div>';
     }
     (it.acq_lists || []).forEach(function (l) {
-      var t = l.title === 'Contract Lootables' ? '계약 전리품' : l.title;
+      var t = { 'Contract Lootables': '계약 전리품', 'Deposit one of the following at Wikelo Emporium': '위켈로 엠포리엄에 아래 중 하나를 납품',
+        'Lootables': '전리품', 'Contract rewards': '계약 보상', 'Rewards': '보상', 'Purchase': '구매', 'Sources': '출처' }[l.title] || l.title;
       acq += '<div class="wk-m-sub"><div class="wk-m-subtitle">' + esc(t) + '</div><ul class="wk-m-bullets">' + l.items.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div>';
     });
     (it.acq_cards || []).forEach(function (cd) {
@@ -150,15 +338,16 @@
     if (acq) h += '<div class="wk-m-sec"><h4>획득 방법</h4>' + acq + '</div>';
     else if (it.used_in && it.used_in.length) h += '<div class="wk-m-sec"><h4>획득 방법</h4><p class="dim">위키에 획득 방법 정보가 아직 없어요.</p></div>';
 
-    // 정보
     if (it.info && it.info.length) {
       h += '<div class="wk-m-sec"><h4>정보</h4>' + it.info.map(function (s) {
         return (s.label ? '<div class="wk-m-subtitle">' + esc(tr(INFO, s.label)) + '</div>' : '') + '<dl class="wk-m-dl">' +
           s.items.map(function (kv) { return '<div><dt>' + esc(tr(INFO, kv[0])) + '</dt><dd>' + esc(kv[1]) + '</dd></div>'; }).join('') + '</dl>';
       }).join('') + '</div>';
     }
-    if (it.desc) h += '<div class="wk-m-sec"><h4>게임 속 설명 <small>영문 원문</small></h4><p class="wk-m-desc">' + esc(it.desc) + '</p></div>';
-
+    if (it.desc) {
+      h += '<div class="wk-m-sec"><h4>게임 속 설명</h4><p class="wk-m-desc">' + esc(it.desc_ko || it.desc) + '</p>' +
+        (it.desc_ko ? '<details class="wk-m-orig"><summary>영문 원문 보기</summary><p>' + esc(it.desc) + '</p></details>' : '') + '</div>';
+    }
     h += contractLinks(it.used_in, '이 재료가 필요한 계약');
     h += contractLinks(it.reward_of, '이 아이템을 주는 계약');
     var credit = it.img ? '이미지: ' + esc(it.img.credit) + ' (' + esc(it.img.license) + ') · ' : '';
@@ -169,29 +358,40 @@
   function show(view, push) {
     loadData().then(function () {
       if (push !== false) stack.push(view);
-      var html = view.type === 'contract' ? renderContract(view.id) : renderItem(view.id);
-      body.innerHTML = html;
+      body.innerHTML = view.type === 'contract' ? renderContract(view.id) : renderItem(view.id);
       body.scrollTop = 0;
       backBtn.hidden = stack.length < 2;
       if (!modal.open) {
         if (modal.showModal) modal.showModal(); else modal.setAttribute('open', '');
         document.documentElement.classList.add('wk-modal-open');
       }
-    }).catch(function () {
-      alert('상세 정보를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.');
-    });
+    }).catch(function () { alert('상세 정보를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.'); });
   }
   function closeModal() {
     stack = [];
     if (modal.close) modal.close(); else modal.removeAttribute('open');
     document.documentElement.classList.remove('wk-modal-open');
   }
+  // 모달 안의 추적/완료 버튼과 진행률만 다시 그림 (스크롤 유지)
+  function refreshModal() {
+    var view = stack[stack.length - 1];
+    if (!modal.open || !view || !data) return;
+    if (view.type === 'contract') {
+      var slot = body.querySelector('.wk-m-actions-slot');
+      if (slot) slot.innerHTML = contractActions(data.contracts[view.id]);
+    }
+  }
 
   document.addEventListener('click', function (e) {
-    var c = e.target.closest('[data-contract]');
+    var tb = e.target.closest('[data-track]');
+    if (tb) { e.preventDefault(); toggle(st.tracked, tb.dataset.track); return; }
+    var db = e.target.closest('[data-done]');
+    if (db) { e.preventDefault(); toggle(st.done, db.dataset.done); return; }
+    if (e.target.closest('.wk-step')) return;
     var i = e.target.closest('[data-item]');
-    if (i) { e.preventDefault(); show({ type: 'item', id: i.getAttribute('data-item') }); }
-    else if (c) { e.preventDefault(); show({ type: 'contract', id: c.getAttribute('data-contract') }); }
+    if (i) { e.preventDefault(); show({ type: 'item', id: i.getAttribute('data-item') }); return; }
+    var c = e.target.closest('[data-contract]');
+    if (c) { e.preventDefault(); show({ type: 'contract', id: c.getAttribute('data-contract') }); }
   });
   backBtn.addEventListener('click', function () {
     stack.pop();
@@ -199,23 +399,159 @@
     if (prev) show(prev, false);
   });
   document.getElementById('wkModalClose').addEventListener('click', closeModal);
-  modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });   // 바깥 클릭
+  modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
   modal.addEventListener('close', function () { stack = []; document.documentElement.classList.remove('wk-modal-open'); });
 
-  // 카드에 마우스를 올리면 상세 데이터 미리 불러오기
-  document.querySelector('.wk-grid') && document.addEventListener('pointerover', function once(e) {
-    if (e.target.closest('.wk-card')) { loadData(); document.removeEventListener('pointerover', once); }
+  /* ========== 내 계약 플래너 ========== */
+  var planBody = document.getElementById('planBody');
+
+  function remaining() {
+    // 추적 중이고 완료하지 않은 계약의 재료 합계
+    var agg = {}, order = [];
+    st.tracked.forEach(function (id) {
+      var c = data.contracts[id];
+      if (!c || isDone(id)) return;
+      c.orders.forEach(function (o) {
+        var k = itemKey(o);
+        if (!agg[k]) { agg[k] = { key: k, name: o.name, page: o.page, need: 0, unit: unit(o), used: [] }; order.push(k); }
+        agg[k].need += need(o);
+        agg[k].used.push(c.name);
+      });
+    });
+    return order.map(function (k) {
+      var a = agg[k];
+      a.have = owned(k);
+      a.left = Math.max(0, a.need - a.have);
+      return a;
+    }).sort(function (x, y) { return (y.left > 0) - (x.left > 0) || y.left - x.left; });
+  }
+
+  function renderPlanner() {
+    if (!data) return;
+    var tracked = st.tracked.filter(function (id) { return data.contracts[id]; });
+    if (!tracked.length) {
+      planBody.innerHTML = '<div class="wk-plan-empty">아직 추적 중인 계약이 없어요. 아래 계약 카드의 <b>☆</b>를 눌러 추가해 보세요.' +
+        (Object.keys(st.owned).length ? '<br><span class="dim">기록해 둔 보유 재료 ' + Object.keys(st.owned).length + '종은 그대로 있어요.</span>' : '') + '</div>';
+      return;
+    }
+    var rows = remaining();
+    var leftCount = rows.filter(function (r) { return r.left > 0; }).length;
+    var readyCount = tracked.filter(function (id) { return !isDone(id) && progress(data.contracts[id]).ready; }).length;
+    var doneCount = tracked.filter(isDone).length;
+
+    var chips = tracked.map(function (id) {
+      var c = data.contracts[id], p = progress(c), d = isDone(id);
+      return '<div class="wk-plan-chip' + (d ? ' is-done' : (p.ready ? ' is-ready' : '')) + '">' +
+        '<button type="button" class="wk-plan-chip-name" data-contract="' + id + '">' + esc(c.name) + '</button>' +
+        '<div class="wk-prog-bar"><span style="width:' + (d ? 100 : p.pct) + '%"></span></div>' +
+        '<span class="wk-plan-chip-pct mono">' + (d ? '완료' : (p.ready ? '납품 가능' : p.pct + '%')) + '</span>' +
+        '<button type="button" class="wk-plan-chip-x" data-track="' + id + '" aria-label="추적 해제">×</button></div>';
+    }).join('');
+
+    var table = rows.length ? '<div class="wk-plan-table"><table><thead><tr><th>재료</th><th>필요</th><th>보유</th><th>남음</th></tr></thead><tbody>' +
+      rows.map(function (r) {
+        var info = r.page && data.items[r.page];
+        var thumb = info && info.img ? '<img src="' + esc(info.img.file) + '" alt="" loading="lazy">' : '<span>' + esc(r.name[0]) + '</span>';
+        var name = info ? '<button type="button" class="wk-plan-item" data-item="' + esc(r.page) + '" title="획득 방법 보기">' + esc(r.name) + '</button>' : esc(r.name);
+        return '<tr class="' + (r.left ? '' : 'full') + '" data-need="' + r.need + '">' +
+          '<td><div class="wk-plan-name"><span class="wk-m-thumb">' + thumb + '</span><div>' + name + '<div class="wk-plan-used dim">' + esc(r.used.join(' · ')) + '</div></div></div></td>' +
+          '<td class="mono">' + fmt(r.need) + esc(r.unit) + '</td>' +
+          '<td>' + stepper(r.key, null) + '</td>' +
+          '<td class="mono wk-plan-left">' + (r.left ? fmt(r.left) + esc(r.unit) : '✓') + '</td></tr>';
+      }).join('') + '</tbody></table></div>' : '<div class="wk-plan-empty">추적 중인 계약을 모두 완료했어요! 🎉</div>';
+
+    planBody.innerHTML =
+      '<div class="wk-plan-stats">' +
+        '<div><span class="dim">추적 중</span><b>' + tracked.length + '</b></div>' +
+        '<div><span class="dim">납품 가능</span><b class="ok">' + readyCount + '</b></div>' +
+        '<div><span class="dim">완료</span><b>' + doneCount + '</b></div>' +
+        '<div><span class="dim">더 모을 재료</span><b>' + leftCount + '종</b></div>' +
+      '</div>' +
+      '<div class="wk-plan-chips">' + chips + '</div>' + table;
+  }
+
+  function copyText() {
+    var rows = remaining().filter(function (r) { return r.left > 0; });
+    var tracked = st.tracked.filter(function (id) { return data.contracts[id] && !isDone(id); });
+    var lines = ['[위켈로 계약 플래너 — SC-KR]', '추적 중: ' + tracked.map(function (id) { return data.contracts[id].name; }).join(', '), ''];
+    if (rows.length) {
+      lines.push('더 모을 재료:');
+      rows.forEach(function (r) { lines.push('- ' + r.name + ': ' + fmt(r.left) + r.unit + ' (보유 ' + fmt(r.have) + ' / 필요 ' + fmt(r.need) + r.unit + ')'); });
+    } else {
+      lines.push('필요한 재료를 모두 모았어요!');
+    }
+    lines.push('', 'https://doku-web.github.io/sc-kr/wikelo/');
+    return lines.join('\n');
+  }
+  function toast(msg) {
+    var t = document.querySelector('.wk-toast');
+    if (!t) { t = document.createElement('div'); t.className = 'wk-toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._h);
+    t._h = setTimeout(function () { t.classList.remove('show'); }, 2200);
+  }
+  document.getElementById('plCopy').addEventListener('click', function () {
+    loadData().then(function () {
+      var text = copyText();
+      (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).then(function () {
+        toast('남은 재료 목록을 복사했어요. 디스코드나 메모에 붙여넣으세요.');
+      }).catch(function () { prompt('아래 내용을 복사하세요', text); });
+    });
   });
+  document.getElementById('plExport').addEventListener('click', function () {
+    var blob = new Blob([JSON.stringify({ app: 'sckr-wikelo', v: 1, savedAt: new Date().toISOString(), data: st }, null, 1)], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'sckr-wikelo-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    toast('백업 파일을 저장했어요. 다른 PC에서 불러오기로 옮길 수 있어요.');
+  });
+  document.getElementById('plImport').addEventListener('change', function () {
+    var f = this.files && this.files[0];
+    if (!f) return;
+    f.text().then(function (txt) {
+      var j = JSON.parse(txt), d = j && (j.data || j);
+      if (!d || typeof d.owned !== 'object') throw new Error('bad');
+      if (!confirm('현재 기록을 백업 파일 내용으로 바꿀까요?')) return;
+      st.owned = d.owned || {}; st.tracked = d.tracked || []; st.done = d.done || [];
+      save(); refresh();
+      toast('백업을 불러왔어요.');
+    }).catch(function () { alert('백업 파일을 읽지 못했어요.'); });
+    this.value = '';
+  });
+  document.getElementById('plReset').addEventListener('click', function () {
+    if (!confirm('보유 수량, 추적, 완료 기록을 모두 지울까요? (되돌릴 수 없어요)')) return;
+    st = { owned: {}, tracked: [], done: [] };
+    save(); refresh();
+  });
+
+  /* ========== 다시 그리기 ========== */
+  function refresh() {
+    if (!data) return;
+    decorateCards();
+    renderPlanner();
+    refreshModal();
+    apply();
+  }
+  // 다른 탭에서 바꿔도 맞춰 줌
+  window.addEventListener('storage', function (e) {
+    if (e.key !== STORE_KEY) return;
+    try { var d = JSON.parse(e.newValue || '{}'); st.owned = d.owned || {}; st.tracked = d.tracked || []; st.done = d.done || []; } catch (_) {}
+    refresh();
+  });
+  loadData().then(refresh);
 
   /* ========== 헤더 · 모바일 메뉴 ========== */
   var header = document.querySelector('.site-header');
-  var btn = document.querySelector('.menu-toggle');
+  var menuBtn = document.querySelector('.menu-toggle');
   function setOpen(open) {
     header.classList.toggle('open', open);
-    btn.setAttribute('aria-expanded', String(open));
-    btn.setAttribute('aria-label', open ? '메뉴 닫기' : '메뉴 열기');
+    menuBtn.setAttribute('aria-expanded', String(open));
+    menuBtn.setAttribute('aria-label', open ? '메뉴 닫기' : '메뉴 열기');
   }
-  btn.addEventListener('click', function () { setOpen(!header.classList.contains('open')); });
+  menuBtn.addEventListener('click', function () { setOpen(!header.classList.contains('open')); });
   document.addEventListener('click', function (e) { if (!header.contains(e.target)) setOpen(false); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setOpen(false); });
   function onScroll() { header.classList.toggle('scrolled', window.scrollY > 8); }

@@ -49,6 +49,11 @@ CARD_IMAGE_OVERRIDES = {   # (파일, 꼬리표: 'reward' = 실제 보상 아이
     'Starfighter Inferno Special': ('Ares Inferno - Front Starboard.jpg', 'reward'),
     'Sneaky Stabber': ('F8C variants and paints x4 flying above clouds.jpg', 'reward'),
     'Where Wolf? Here Wolf': ('L-21 Wolf landed in hangar - cropped.png', 'reward'),
+    # 화폐 계약: 보상(Wikelo Favor)이 모두 같아서 '내는 재료' 이미지로 구분
+    'Trade Merc Scrip for Favors?': ('Scrip star citizen.png', 'order', (0.04, 0.12, 0.50, 0.50)),     # 왼쪽 = 용병 길드 스크립
+    'Trade Council Scrip for Favors?': ('Scrip star citizen.png', 'order', (0.50, 0.12, 0.50, 0.50)),  # 오른쪽 = The Council 스크립
+    'Trade Worm Parts for Favors?': ('Valakkar.png', 'related'),
+    'Turn Things to Favor': ('Carinite.png', 'order'),
 }
 CAT_KO = {k: ko for _, _, k, ko, _ in SECTIONS}
 _SVG = '<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">%s</svg>'
@@ -158,6 +163,37 @@ def save_webp(raw, path, width):
                         '-c:v', 'libwebp', '-quality', '78', '-compression_level', '6', path], check=True)
     finally:
         os.unlink(tmp.name)
+
+
+def crop_image(name, box, slug):
+    """원본 이미지의 일부(x, y, w, h — 0~1 비율)를 잘라 카드용 WebP로 저장"""
+    res = get({'action': 'query', 'titles': 'File:' + name, 'prop': 'imageinfo', 'iiprop': 'url|extmetadata'})
+    p = res['query']['pages'][0]
+    if 'imageinfo' not in p:
+        return None
+    ii = p['imageinfo'][0]
+    meta = ii.get('extmetadata', {})
+    lic = (meta.get('LicenseShortName', {}).get('value') or '').strip()
+    if not license_ok(lic):
+        return None
+    os.makedirs(IMG_DIR, exist_ok=True)
+    path = os.path.join(IMG_DIR, 'crop-' + slug + '.webp')
+    if not os.path.exists(path) and shutil.which('ffmpeg'):
+        req = urllib.request.Request(ii['url'], headers={'User-Agent': UA})
+        with urllib.request.urlopen(req, timeout=60) as r, tempfile.NamedTemporaryFile(delete=False) as tmp:
+            tmp.write(r.read())
+        x, y, w, h = box
+        try:
+            subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', tmp.name, '-vf',
+                            "crop=iw*%s:ih*%s:iw*%s:ih*%s,scale='min(%d,iw)':-2" % (w, h, x, y, CARD_W),
+                            '-c:v', 'libwebp', '-quality', '78', path], check=True)
+        finally:
+            os.unlink(tmp.name)
+    if not os.path.exists(path):
+        return None
+    author = clean(meta.get('Artist', {}).get('value', '')) or 'Star Citizen Wiki'
+    return {'file': 'img/crop-' + slug + '.webp', 'credit': credit_of(lic, author), 'license': lic,
+            'page': WIKI + '/File:' + urllib.parse.quote(name.replace(' ', '_'))}
 
 
 def fetch_images(names, subdir, width):
@@ -327,12 +363,16 @@ def build():
                         best, score = it['img'], sc
             if best and score >= 1:
                 c['img'], c['img_from'] = best, 'related'
-    over = fetch_images([f for f, _ in CARD_IMAGE_OVERRIDES.values()], '', CARD_W)
+    over = fetch_images([o[0] for o in CARD_IMAGE_OVERRIDES.values() if len(o) == 2], '', CARD_W)
     card_imgs.update(over)
     for c in contracts:
-        f, tag = CARD_IMAGE_OVERRIDES.get(c['name'], (None, None))
-        if f and over.get(f.replace(' ', '_')):
-            c['img'], c['img_from'] = over[f.replace(' ', '_')], tag
+        o = CARD_IMAGE_OVERRIDES.get(c['name'])
+        if not o:
+            continue
+        img = over.get(o[0].replace(' ', '_')) if len(o) == 2 else crop_image(o[0], o[2], slugify(c['name']))
+        if img:
+            c['img'], c['img_from'] = img, o[1]
+            card_imgs.setdefault(o[0].replace(' ', '_'), {k: v for k, v in img.items() if k != 'file'} | {'file': img['file']})
     n_img = sum(1 for c in contracts if c['img'])
     print('  카드 이미지 %d/%d, 아이템 이미지 %d/%d' % (n_img, len(contracts), sum(1 for i in items.values() if i['img']), len(items)))
 

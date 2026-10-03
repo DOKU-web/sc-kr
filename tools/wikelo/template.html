@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko">
+<html lang="ko" data-ver="{{VER}}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -22,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Sora:wght@600;700&display=swap">
 <link rel="stylesheet" href="../styles.css?v={{UPDATED}}">
-<link rel="stylesheet" href="wikelo.css?v={{UPDATED}}">
+<link rel="stylesheet" href="wikelo.css?v={{VER}}">
 </head>
 <body>
 <div class="page" id="top">
@@ -117,7 +117,7 @@
       <div class="section-head">
         <div class="kicker mono">CONTRACTS</div>
         <h2>계약 목록</h2>
-        <p class="section-lead">필요 재료와 보상을 한눈에. 아이템 이름은 게임 속 영문 표기를 그대로 두었어요. 계약 이름을 누르면 위키 원문으로 이동합니다.</p>
+        <p class="section-lead">필요 재료와 보상을 한눈에. <strong>재료를 누르면 어디서 어떻게 구하는지</strong>, 보상이나 계약 이름을 누르면 상세 정보가 열려요. 아이템 이름은 게임 속 영문 표기를 그대로 두었습니다.</p>
       </div>
       <div class="wk-toolbar">
         <div class="wk-tabs" role="group" aria-label="분류">{{TABS}}</div>
@@ -174,7 +174,7 @@
     <!-- 출처 -->
     <section class="section container wk-credits">
       <div class="kicker mono">SOURCE · LICENSE</div>
-      <p>이 페이지는 <a href="https://starcitizen.tools/Wikelo" target="_blank" rel="noopener">Star Citizen Wiki — Wikelo</a> 문서(리비전 {{REVID}}, {{UPDATED}} 기준)를 번역·재구성한 것으로, 원문과 같은 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.ko" target="_blank" rel="noopener">CC BY-SA 4.0</a> 라이선스로 배포합니다. 게임 업데이트로 계약이 바뀌면 최신 내용은 위키 원문을 확인해 주세요.</p>
+      <p>이 페이지는 <a href="https://starcitizen.tools/Wikelo" target="_blank" rel="noopener">Star Citizen Wiki — Wikelo</a> 문서(리비전 {{REVID}}, {{UPDATED}} 기준)와 연결된 아이템 문서를 번역·재구성한 것으로, 원문과 같은 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.ko" target="_blank" rel="noopener">CC BY-SA 4.0</a> 라이선스로 배포합니다. 이미지는 각 작성자의 CC BY-SA 4.0 / CC0 이미지와, CIG 팬 콘텐츠 정책에 따라 사용하는 Cloud Imperium 공식 이미지(© Cloud Imperium Rights LLC)입니다. 게임 업데이트로 계약이 바뀌면 최신 내용은 위키 원문을 확인해 주세요.</p>
       <details>
         <summary>이미지 출처 보기</summary>
         <ul class="wk-credit-list">{{CREDITS}}</ul>
@@ -201,6 +201,17 @@
   </footer>
 </div>
 
+<!-- 상세 보기 -->
+<dialog class="wk-modal" id="wkModal" aria-labelledby="wkModalTitle">
+  <div class="wk-modal-inner">
+    <div class="wk-modal-bar">
+      <button type="button" class="wk-modal-back" id="wkModalBack" hidden aria-label="이전으로">← 이전</button>
+      <button type="button" class="wk-modal-close" id="wkModalClose" aria-label="닫기">×</button>
+    </div>
+    <div class="wk-modal-body" id="wkModalBody"></div>
+  </div>
+</dialog>
+
 <aside class="bgm-dock" id="bgmDock" hidden aria-label="배경음 플레이어">
   <div class="bgm-head">
     <div class="bgm-title">
@@ -213,7 +224,7 @@
   <div class="bgm-frame"><div id="bgmPlayer"></div></div>
 </aside>
 
-<script src="wikelo.js?v={{UPDATED}}"></script>
+<script src="wikelo.js?v={{VER}}"></script>
 <script src="../bgm.js?v={{UPDATED}}"></script>
 <script src="../space.js?v={{UPDATED}}"></script>
 </body>

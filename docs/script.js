@@ -15,7 +15,7 @@
   var I18N = {
     ko: {
       'nav.label': '주요 메뉴',
-      'nav.features': '기능', 'nav.how': '설치 방법', 'nav.crew': '번역팀', 'nav.partners': '파트너', 'nav.discord': '디스코드',
+      'nav.features': '기능', 'nav.how': '설치 방법', 'nav.crew': '번역팀', 'nav.partners': '파트너', 'nav.wikelo': '위켈로', 'nav.discord': '디스코드',
       'cta.download': '런처 다운로드', 'cta.discord': '디스코드 참여',
       'hero.title': '스타시티즌,<br>이제 <span class="accent">한국어로.</span>',
       'hero.lead': '한국어 번역 적용부터 게임 채팅 한글 입력까지, SC-KR 런처 하나로 끝납니다. 번역팀이 게임 업데이트를 계속 따라가고, 런처는 실행할 때마다 최신 버전을 스스로 확인해요.',
@@ -47,7 +47,7 @@
     },
     en: {
       'nav.label': 'Main menu',
-      'nav.features': 'Features', 'nav.how': 'Setup', 'nav.crew': 'Crew', 'nav.partners': 'Partners', 'nav.discord': 'Discord',
+      'nav.features': 'Features', 'nav.how': 'Setup', 'nav.crew': 'Crew', 'nav.partners': 'Partners', 'nav.wikelo': 'Wikelo', 'nav.discord': 'Discord',
       'cta.download': 'Download launcher', 'cta.discord': 'Join Discord',
       'hero.title': 'Star Citizen,<br>now in <span class="accent">Korean.</span>',
       'hero.lead': 'From applying the Korean translation to typing Hangul in game chat, the SC-KR launcher does it all. The crew keeps up with every game update, and the launcher checks for new versions each time it starts.',

@@ -258,11 +258,28 @@
       (tb.more ? '<div class="wk-m-more dim">외 ' + tb.more + '곳 더</div>' : '');
   }
 
+  // 계약 이름: 게임 속 한국어 (영어 원본)
+  function cKo(c) { return (c.game && c.game.ko) || c.name; }
+  function cName(c) { return c.game && c.game.ko ? c.game.ko + ' (' + c.name + ')' : c.name; }
+  function cNameHtml(c) {
+    return c.game && c.game.ko ? esc(c.game.ko) + ' <span class="wk-en-sub">(' + esc(c.name) + ')</span>' : esc(c.name);
+  }
+  // 게임 문자열 → HTML (글자 그대로의 \n은 줄바꿈, <EM> 태그는 강조)
+  function gameText(s) {
+    return esc(String(s || '').split('\\n').join('\n').replace(/\s+$/, ''))
+      .replace(/&lt;EM\d&gt;/g, '<b>').replace(/&lt;\/EM\d&gt;/g, '</b>');
+  }
+  function bilingual(ko, en, cls) {
+    if (!ko && !en) return '';
+    return '<div class="wk-game-text ' + (cls || '') + '">' + gameText(ko || en) + '</div>' +
+      (ko && en ? '<details class="wk-m-orig"><summary>영어 원본 보기</summary><div class="wk-game-text">' + gameText(en) + '</div></details>' : '');
+  }
+
   function contractLinks(ids, label) {
     if (!ids || !ids.length) return '';
     return '<div class="wk-m-sec"><h4>' + label + '</h4><div class="wk-m-chips">' + ids.map(function (id) {
       var c = data.contracts[id];
-      return c ? '<button type="button" class="wk-m-chip" data-contract="' + id + '">' + (isTracked(id) ? '★ ' : '') + esc(c.name) + '</button>' : '';
+      return c ? '<button type="button" class="wk-m-chip" data-contract="' + id + '">' + (isTracked(id) ? '★ ' : '') + cNameHtml(c) + '</button>' : '';
     }).join('') + '</div></div>';
   }
 
@@ -281,9 +298,16 @@
     var rep = c.rep === 'None' ? '없음' : (data.rep[c.rep] || c.rep) + ' 이상';
     return img +
       '<div class="wk-m-kicker mono">' + esc(data.cats[c.cat] || '') + ' 계약</div>' +
-      '<h3 class="wk-m-title" id="wkModalTitle">' + esc(c.name) + '</h3>' +
-      '<div class="wk-m-meta"><span>필요 평판 <b>' + esc(rep) + '</b></span><span>재료 <b>' + c.orders.length + '종</b></span></div>' +
+      '<h3 class="wk-m-title" id="wkModalTitle">' + esc(cKo(c)) + (c.game && c.game.ko ? '<span class="wk-m-title-en">' + esc(c.name) + '</span>' : '') + '</h3>' +
+      '<div class="wk-m-meta"><span>필요 평판 <b>' + esc(rep) + '</b></span><span>재료 <b>' + c.orders.length + '종</b></span>' +
+        (c.game && c.game.rep ? '<span>완료 시 평판 <b>+' + c.game.rep + '</b></span>' : '') + '</div>' +
       '<div class="wk-m-actions-slot">' + contractActions(c) + '</div>' +
+      '<div class="wk-m-sec"><h4>어디서 받나요?</h4><div class="wk-where">' +
+        '<div><span class="wk-where-k">의뢰인</span><b>위켈로 (Wikelo)</b> · 바누 상인</div>' +
+        '<div><span class="wk-where-k">수락 장소</span><b>위켈로 엠포리엄</b> 정거장의 바자(bazaar) — 다시(허스턴 근처) · 셀로(크루세이더 근처) · 킹가(마이크로텍 근처)</div>' +
+        '<div><span class="wk-where-k">납품</span>같은 정거장의 화물 엘리베이터 → 보상은 그 정거장 로컬 인벤토리</div>' +
+      '</div></div>' +
+      (c.game && (c.game.ko_desc || c.game.en_desc) ? '<div class="wk-m-sec"><h4>계약 내용 <small>게임 속 설명 · SC-KR 한국어 패치</small></h4>' + bilingual(c.game.ko_desc, c.game.en_desc, 'wk-contract-text') + '</div>' : '') +
       '<div class="wk-m-sec"><h4>필요 재료 <small>보유 수량을 적어 두면 진행률이 계산돼요 · 이름을 누르면 획득 방법</small></h4>' + itemList(c.orders, 'orders') + '</div>' +
       '<div class="wk-m-sec"><h4>보상</h4>' + itemList(c.rewards, 'rewards') + '</div>' +
       '<p class="wk-m-note dim">재료를 모아 위켈로 엠포리엄의 화물 엘리베이터에 넣으면, 보상은 그 정거장의 로컬 인벤토리로 들어옵니다.</p>';
@@ -347,6 +371,15 @@
     if (it.desc) {
       h += '<div class="wk-m-sec"><h4>게임 속 설명</h4><p class="wk-m-desc">' + esc(it.desc_ko || it.desc) + '</p>' +
         (it.desc_ko ? '<details class="wk-m-orig"><summary>영문 원문 보기</summary><p>' + esc(it.desc) + '</p></details>' : '') + '</div>';
+    }
+    if (it.missions && it.missions.length) {
+      h += '<div class="wk-m-sec"><h4>얻을 수 있는 미션 <small>눌러서 미션 내용 보기 · 위키 획득 정보 기준</small></h4><div class="wk-missions">' +
+        it.missions.map(function (m) {
+          var title = m.ko ? esc(m.ko) + (m.en ? ' <span class="wk-en-sub">(' + esc(m.en) + ')</span>' : '') : esc(m.en);
+          return '<details class="wk-mission"><summary><span class="wk-mission-title">' + title + '</span>' +
+            '<span class="wk-mission-meta">' + esc(m.giver_ko) + (m.giver_en ? ' (' + esc(m.giver_en) + ')' : '') + ' · ' + esc(m.where) + (m.rep ? ' · 평판 +' + m.rep : '') + '</span></summary>' +
+            '<div class="wk-mission-body">' + (bilingual(m.ko_desc, m.en_desc) || '<p class="dim">미션 설명이 없어요.</p>') + '</div></details>';
+        }).join('') + '</div></div>';
     }
     h += contractLinks(it.used_in, '이 재료가 필요한 계약');
     h += contractLinks(it.reward_of, '이 아이템을 주는 계약');
@@ -442,7 +475,7 @@
     var chips = tracked.map(function (id) {
       var c = data.contracts[id], p = progress(c), d = isDone(id);
       return '<div class="wk-plan-chip' + (d ? ' is-done' : (p.ready ? ' is-ready' : '')) + '">' +
-        '<button type="button" class="wk-plan-chip-name" data-contract="' + id + '">' + esc(c.name) + '</button>' +
+        '<button type="button" class="wk-plan-chip-name" data-contract="' + id + '" title="' + esc(cName(c)) + '">' + esc(cKo(c)) + '</button>' +
         '<div class="wk-prog-bar"><span style="width:' + (d ? 100 : p.pct) + '%"></span></div>' +
         '<span class="wk-plan-chip-pct mono">' + (d ? '완료' : (p.ready ? '납품 가능' : p.pct + '%')) + '</span>' +
         '<button type="button" class="wk-plan-chip-x" data-track="' + id + '" aria-label="추적 해제">×</button></div>';
@@ -473,7 +506,7 @@
   function copyText() {
     var rows = remaining().filter(function (r) { return r.left > 0; });
     var tracked = st.tracked.filter(function (id) { return data.contracts[id] && !isDone(id); });
-    var lines = ['[위켈로 계약 플래너 — SC-KR]', '추적 중: ' + tracked.map(function (id) { return data.contracts[id].name; }).join(', '), ''];
+    var lines = ['[위켈로 계약 플래너 — SC-KR]', '추적 중: ' + tracked.map(function (id) { return cName(data.contracts[id]); }).join(', '), ''];
     if (rows.length) {
       lines.push('더 모을 재료:');
       rows.forEach(function (r) { lines.push('- ' + r.name + ': ' + fmt(r.left) + r.unit + ' (보유 ' + fmt(r.have) + ' / 필요 ' + fmt(r.need) + r.unit + ')'); });

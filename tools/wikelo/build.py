@@ -21,6 +21,7 @@ from datetime import date
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import items as ITEMS  # noqa: E402
+import game_text as GAME  # noqa: E402
 
 API = 'https://starcitizen.tools/api.php'
 WIKI = 'https://starcitizen.tools'
@@ -248,14 +249,16 @@ def card(c):
         {'reward': '<span class="wk-img-tag">보상 이미지</span>', 'order': '<span class="wk-img-tag">재료 이미지</span>',
          'related': '<span class="wk-img-tag">관련 이미지</span>'}.get(c.get('img_from'), ''))
         if img else '<div class="wk-img wk-img-empty" aria-hidden="true">%s<span>%s</span></div>' % (CAT_ICON.get(c['cat'], CAT_ICON['other']), esc(CAT_KO.get(c['cat'], ''))))
-    search = ' '.join([c['name']] + [x['name'] for x in c['orders'] + c['rewards']]).lower()
+    ko = (c.get('game') or {}).get('ko')
+    search = ' '.join([c['name'], ko or ''] + [x['name'] for x in c['orders'] + c['rewards']]).lower()
+    title_html = ('%s<span class="wk-title-en">%s</span>' % (esc(ko), esc(c['name']))) if ko else esc(c['name'])
     rep = '' if c['rep'] == 'None' else '<span class="wk-rep">%s 이상</span>' % esc(REP_KO.get(c['rep'], c['rep']))
     return ('<article class="wk-card" data-id="%s" data-cat="%s" data-search="%s">'
             '<button type="button" class="wk-card-open" data-contract="%s" aria-label="%s 자세히 보기">%s</button>'
             '<div class="wk-body"><h3><button type="button" class="wk-title-btn" data-contract="%s">%s</button></h3>%s'
             '<div class="wk-cols"><div><div class="wk-label">필요 재료 <small>· 눌러서 획득 방법 보기</small></div>%s</div>'
             '<div><div class="wk-label">보상</div>%s</div></div></div></article>') % (
-        c['id'], c['cat'], esc(search), c['id'], esc(c['name']), pic, c['id'], esc(c['name']), rep,
+        c['id'], c['cat'], esc(search), c['id'], esc(ko or c['name']), pic, c['id'], title_html, rep,
         items_html(c['orders'], 'wk-items'), items_html(c['rewards'], 'wk-items wk-rewards'))
 
 
@@ -329,6 +332,21 @@ def build():
         it['reward_of'] = roles[page]['rewards']
         items[page] = it
 
+    gt = GAME.GameText()
+    if gt.ok:
+        for page, it in items.items():
+            ms = gt.missions_for(page)
+            if ms:
+                it['missions'] = ms
+        for c in contracts:
+            g = gt.contract(c['name'])
+            if g:
+                c['game'] = g
+        print('  게임 문자열: 계약 %d/%d개 한글 제목, 재료 획득 미션 %d개 연결' % (
+            sum(1 for c in contracts if c.get('game')), len(contracts), sum(1 for it in items.values() if it.get('missions'))))
+    else:
+        print('  게임 문자열(global.ini)을 찾지 못해 한글 계약 제목은 건너뜀:', GAME.KO_INI)
+
     print('이미지 확인/저장 중...')
     hero_img = 'Wikelo_Hologram_-_Alpha_4.1.0.jpg'
     card_imgs = fetch_images([c['image'] for c in contracts] + [hero_img], '', CARD_W)
@@ -384,7 +402,7 @@ def build():
     # 데이터 파일 (상세 보기용)
     os.makedirs(OUT, exist_ok=True)
     data = {
-        'contracts': {c['id']: {k: c[k] for k in ('id', 'cat', 'name', 'rep', 'orders', 'rewards', 'img')} for c in contracts},
+        'contracts': {c['id']: {k: c.get(k) for k in ('id', 'cat', 'name', 'rep', 'orders', 'rewards', 'img', 'game')} for c in contracts},
         'items': items,
         'rep': REP_KO,
         'cats': {k: ko_ for _, _, k, ko_, _ in SECTIONS},

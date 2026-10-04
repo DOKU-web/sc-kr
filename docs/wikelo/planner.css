@@ -120,3 +120,29 @@
   .wk-plan-name { min-width: 160px; }
   .wk-plan-tools .btn { flex: 1 1 auto; }
 }
+
+/* ========== 게임 속 한국어 / 영어 원본 ========== */
+.wk-title-en { display: block; margin-top: 2px; font-family: var(--font-sans); font-size: 12.5px; font-weight: 500; color: var(--dim); }
+.wk-en-sub { color: var(--dim); font-weight: 400; }
+.wk-m-title-en { display: block; margin-top: 4px; font-size: 14px; font-weight: 500; color: var(--dim); }
+.wk-m-chip .wk-en-sub { font-size: 12px; }
+.wk-where { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; border-radius: 12px; background: rgba(0,0,0,0.22); border: 1px solid var(--line); font-size: 14px; line-height: 1.6; color: var(--text-2); }
+.wk-where b { color: var(--text); font-weight: 600; }
+.wk-where-k { display: inline-block; min-width: 72px; margin-right: 8px; font-size: 12px; color: var(--accent); }
+.wk-game-text { white-space: pre-line; font-size: 14.5px; line-height: 1.75; color: var(--text-2); }
+.wk-game-text b { color: #FFC94D; font-weight: 600; }
+.wk-contract-text { padding: 14px 16px; border-radius: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--line); }
+.wk-m-orig .wk-game-text { margin-top: 8px; font-size: 13px; color: var(--muted); font-style: normal; }
+.wk-missions { display: flex; flex-direction: column; gap: 8px; }
+.wk-mission { border-radius: 12px; border: 1px solid var(--line-strong); background: rgba(255,255,255,0.02); overflow: hidden; }
+.wk-mission[open] { border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
+.wk-mission > summary {
+  display: flex; flex-direction: column; gap: 3px; padding: 12px 40px 12px 14px; cursor: pointer; list-style: none; position: relative;
+}
+.wk-mission > summary::-webkit-details-marker { display: none; }
+.wk-mission > summary::after { content: "+"; position: absolute; right: 14px; top: 12px; font-size: 18px; color: var(--dim); }
+.wk-mission[open] > summary::after { content: "−"; color: var(--accent); }
+.wk-mission > summary:hover .wk-mission-title { color: var(--accent); }
+.wk-mission-title { font-size: 14.5px; font-weight: 600; color: var(--text); }
+.wk-mission-meta { font-size: 12px; color: var(--muted); }
+.wk-mission-body { padding: 0 14px 14px; border-top: 1px solid var(--line); padding-top: 12px; }

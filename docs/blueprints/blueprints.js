@@ -44,6 +44,7 @@
     'Max Temp': '최고 온도', 'Min Temp': '최저 온도', 'Max. Distance': '최대 거리', 'Max. Volume': '최대 부피',
     'Radiation Dissipation': '방사선 방출', 'Recoil Handling': '반동 제어', 'Recoil Kick': '반동 세기', 'Recoil Smoothness': '반동 안정성' };
   function tr(map, s) { return (map && map[s]) || s; }
+  var REG = { Stanton: '스탠턴', Pyro: '파이로', Nyx: '닉스' };
 
   /* ========== 데이터 ========== */
   var D = null, detail = null, mdesc = null;
@@ -56,7 +57,7 @@
   function ingNameHtml(i) { var g = D.ing[i]; return g ? esc(g.k || g.n) + (g.k ? ' <span class="wk-en-sub">(' + esc(g.n) + ')</span>' : '') : '?'; }
   function bpName(b) { return b.k || b.n || b.u; }
   function bpNameFull(b) { return b.k ? b.k + ' (' + b.n + ')' : b.n; }
-  var PH = { TargetName: '대상', Location: '장소', Destination: '목적지', System: '성계', Ship: '함선', Item: '아이템', Contractor: '의뢰인' };
+  var PH = { TargetName: '대상', Location: '장소', Destination: '목적지', System: '성계', Ship: '함선', Item: '아이템', Contractor: '의뢰인', Danger: '위험도', Amount: '수량', Reward: '보상', Creature: '생물', Commodity: '화물', ObjectiveSetupItem: '목표 물품' };
   function koPH(t) { return String(t || '').replace(/\[([A-Za-z]+)\]/g, function (_, k) { return '[' + (PH[k] || k) + ']'; }); }
   function mName(m) { return m.k ? koPH(m.k) : m.n; }
   function catKo(c) { for (var i = 0; i < D.meta.cats.length; i++) if (D.meta.cats[i][0] === c) return D.meta.cats[i][1]; return c; }
@@ -97,7 +98,7 @@
   }
 
   /* ========== 목록 ========== */
-  var cat = 'all', sub = '', q = '', sort = 'name', filters = { tracked: false, owned: false, ready: false, mission: false, default: false };
+  var cat = 'all', sub = '', q = '', sort = 'name', filters = { tracked: false, owned: false, ready: false, mission: false, default: false }, region = '';
   var view = [], shown = 0;
   var CAT_ICON = {
     fps: '<path d="M3 10h13l2-2h3v4h-3l-1 1H9l-1 4H5l1-4H3Z"/>', attach: '<rect x="7" y="3" width="10" height="18" rx="2"/><path d="M10 7h4M10 11h4"/>',
@@ -136,6 +137,7 @@
       if (filters.ready && !canCraft(b)) return false;
       if (filters.mission && !b.m) return false;
       if (filters.default && !b.d) return false;
+      if (region && (!b.r || b.r.indexOf(region) === -1)) return false;
       for (var i = 0; i < words.length; i++) if (b._s.indexOf(words[i]) === -1) return false;
       return true;
     });
@@ -149,7 +151,7 @@
     shown = 0;
     $('bpGrid').innerHTML = '';
     more();
-    var filtering = words.length || cat !== 'all' || Object.keys(filters).some(function (k) { return filters[k]; });
+    var filtering = words.length || cat !== 'all' || region || Object.keys(filters).some(function (k) { return filters[k]; });
     $('bpCount').textContent = filtering ? '청사진 ' + view.length.toLocaleString('ko-KR') + '개' : '';
     $('bpEmpty').hidden = view.length > 0;
     if (!keepScroll && filtering && window.scrollY > $('list').offsetTop + 400) $('list').scrollIntoView({ block: 'start' });
@@ -164,13 +166,13 @@
     var src = b.d ? '<span class="bp-badge bp-badge-def">기본 제공</span>' : (b.m ? '<span class="bp-badge bp-badge-ms">🎯 미션 ' + b.m.length + '개</span>' : '<span class="bp-badge">획득처 정보 없음</span>');
     var tags = [typeKo(b), weightKo(b), b.x && b.x[1], b.g && b.g !== '1' ? b.g + '등급' : ''].filter(Boolean);
     return '<article class="bp-card' + (ready ? ' is-ready' : '') + (h ? ' is-have' : '') + '" data-u="' + b.u + '">' +
-      '<div class="bp-card-head"><span class="bp-icon">' + icon(b.c) + '</span>' +
+      '<div class="bp-card-head">' + (b.im ? '<button type="button" class="bp-thumb" data-bp="' + b.u + '" tabindex="-1" aria-hidden="true"><img src="' + esc(b.im) + '" alt="" loading="lazy" decoding="async" width="72" height="72"></button>' : '<span class="bp-icon">' + icon(b.c) + '</span>') +
         '<div class="bp-title"><button type="button" class="bp-open" data-bp="' + b.u + '">' + esc(bpName(b)) + '</button>' +
           (b.k ? '<span class="wk-title-en">' + esc(b.n) + '</span>' : '') +
           '<span class="bp-tags">' + esc(tags.join(' · ')) + '</span></div>' +
         '<button type="button" class="wk-star bp-star' + (t ? ' on' : '') + '" data-track="' + b.u + '" aria-pressed="' + !!t + '" title="' + (t ? '만들 목록에서 빼기' : '만들 목록에 추가') + '">' + (t ? '★' : '☆') + '</button></div>' +
       '<ul class="bp-ings">' + ings + '</ul>' +
-      '<div class="bp-card-foot">' + src + '<span class="bp-time mono" title="제작 시간">⏱ ' + fmtTime(b.tm) + '</span>' +
+      '<div class="bp-card-foot">' + src + regionBadges(b.r) + '<span class="bp-time mono" title="제작 시간">⏱ ' + fmtTime(b.tm) + '</span>' +
         '<button type="button" class="bp-have' + (h ? ' on' : '') + '" data-have="' + b.u + '" title="이 청사진을 가지고 있어요">' + (h ? '📘 보유' : '보유 표시') + '</button></div>' +
       (p && !ready ? '<div class="wk-prog-bar bp-prog"><span style="width:' + p + '%"></span></div>' : '') +
     '</article>';
@@ -212,16 +214,22 @@
     var bits = [];
     if (chance != null) bits.push(chance >= 1 ? '확정 지급' : '확률 ' + Math.round(chance * 100) + '%');
     if (m.type) bits.push(tr(D.meta.mtypeKo, m.type));
-    if (m.area) bits.push(m.area);
-    else if (m.sys && m.sys.length) bits.push(m.sys.join(', '));
     return bits.join(' · ');
+  }
+  // 미션 이름: 한국어(영어)
+  function missionTitleHtml(m) {
+    return m.k ? esc(koPH(m.k)) + '<span class="wk-en-sub">(' + esc(m.n) + ')</span>' : esc(m.n);
+  }
+  function regionBadges(list) {
+    return (list || []).map(function (s) { return '<span class="bp-reg bp-reg-' + s.toLowerCase() + '">' + REG[s] + '</span>'; }).join('');
   }
   function missionCard(idx, chance) {
     var m = D.ms[idx];
-    var title = m.k ? esc(koPH(m.k)) + ' <span class="wk-en-sub">(' + esc(m.n) + ')</span>' : esc(m.n);
+    var title = missionTitleHtml(m);
     var rows = [
       ['의뢰인', esc(m.giver || '-') + (m.fac && m.fac !== m.giver ? ' <span class="dim">· ' + esc(m.fac) + '</span>' : '') + (m.ill ? ' <span class="bp-ill">불법</span>' : '')],
-      m.area || (m.sys && m.sys.length) ? ['지역', esc(m.area || m.sys.join(', '))] : null,
+      m.sys && m.sys.length ? ['성계', m.sys.map(function (s) { return REG[s] + '(' + s + ')'; }).join(', ')] : null,
+      m.area ? ['작전 지역', esc(m.area)] : null,
       m.min ? ['필요 평판', esc(m.min)] : null,
       m.rep ? ['완료 평판', '+' + m.rep] : null,
       m.enemy ? ['적 수', m.enemy[0] + '–' + m.enemy[1]] : null,
@@ -230,8 +238,10 @@
     ].filter(Boolean);
     var others = (missionBps[idx] || []).filter(function (u) { return u; });
     return '<details class="wk-mission" data-mission="' + idx + '"><summary><span class="wk-mission-title">' + title + '</span>' +
-      '<span class="wk-mission-meta">' + esc(missionMeta(m, chance)) + '</span></summary>' +
+      '<span class="wk-mission-meta">' + regionBadges(m.sys) + esc(missionMeta(m, chance)) + '</span></summary>' +
       '<div class="wk-mission-body"><dl class="wk-m-dl bp-mdl">' + rows.map(function (r) { return '<div><dt>' + r[0] + '</dt><dd>' + r[1] + '</dd></div>'; }).join('') + '</dl>' +
+      (m.at && m.at.length ? '<div class="wk-m-subtitle">미션이 뜨는 곳' + (m.atn ? ' <span class="dim">(' + m.atn + '곳 중 일부)</span>' : '') + '</div><div class="wk-m-chips bp-locs">' +
+        m.at.map(function (l) { return '<span class="wk-m-chip bp-loc">📍 ' + esc(l) + '</span>'; }).join('') + '</div>' : '') +
       '<div class="bp-mdesc" data-desc="' + idx + '"><p class="dim">미션 설명 불러오는 중…</p></div>' +
       (others.length > 1 ? '<div class="wk-m-subtitle">이 미션으로 얻는 청사진 ' + others.length + '개</div><div class="wk-m-chips">' +
         others.slice(0, 40).map(function (u) { var b = byU[u]; return b ? '<button type="button" class="wk-m-chip" data-bp="' + u + '">' + esc(bpName(b)) + '</button>' : ''; }).join('') +
@@ -239,18 +249,22 @@
       '</div></details>';
   }
   function gameText(s) {
-    return esc(String(s || '').split('\\n').join('\n').replace(/\s+$/, ''))
+    // 게임 속 자리 표시(~mission(TargetName) 등) → [대상]
+    s = String(s || '').replace(/~mission\(([A-Za-z]+)[^)]*\)/g, function (_, k) { return '[' + (PH[k] || k) + ']'; });
+    return esc(s.split('\\n').join('\n').replace(/\s+$/, ''))
       .replace(/&lt;EM\d&gt;/g, '<b>').replace(/&lt;\/EM\d&gt;/g, '</b>');
   }
 
   function renderBp(u) {
     var b = byU[u], t = tracked(u), h = has(u), ready = canCraft(b, t || 1);
     var tags = [catKo(b.c), typeKo(b), weightKo(b)].concat(b.x || []).filter(Boolean);
-    var html = '<div class="bp-m-head"><span class="bp-icon bp-icon-lg">' + icon(b.c) + '</span><div>' +
+    var html = (b.im ? '<div class="wk-m-hero bp-m-hero"><img src="' + esc(b.im) + '" alt=""></div>' : '') +
+      '<div class="bp-m-head">' + (b.im ? '' : '<span class="bp-icon bp-icon-lg">' + icon(b.c) + '</span>') + '<div>' +
       '<div class="wk-m-kicker mono">' + esc(tags.join(' · ')) + '</div>' +
       '<h3 class="wk-m-title" id="wkModalTitle">' + esc(bpName(b)) + (b.k ? '<span class="wk-m-title-en">' + esc(b.n) + '</span>' : '') + '</h3></div></div>' +
       '<div class="wk-m-meta"><span>제작 시간 <b>' + fmtTime(b.tm) + '</b></span>' + (b.g ? '<span>등급 <b>' + esc(b.g) + '</b></span>' : '') +
-        '<span>획득 <b>' + (b.d ? '기본 제공' : (b.m ? '미션 ' + b.m.length + '개' : '정보 없음')) + '</b></span></div>' +
+        '<span>획득 <b>' + (b.d ? '기본 제공' : (b.m ? '미션 ' + b.m.length + '개' : '정보 없음')) + '</b></span>' +
+        (b.r ? '<span>미션 성계 ' + regionBadges(b.r) + '</span>' : '') + '</div>' +
       '<div class="wk-m-actions"><div class="bp-track"><button type="button" class="btn btn-sm ' + (t ? 'btn-primary' : 'btn-ghost') + '" data-track="' + u + '">' + (t ? '★ 만들 목록' : '☆ 만들 목록에 추가') + '</button>' +
         (t ? '<span class="bp-times"><button type="button" class="wk-step-btn" data-times="-1" data-u="' + u + '">−</button><b class="mono">×' + t + '</b><button type="button" class="wk-step-btn" data-times="1" data-u="' + u + '">+</button></span>' : '') + '</div>' +
         '<button type="button" class="btn btn-sm btn-ghost" data-have="' + u + '">' + (h ? '📘 보유한 청사진 (취소)' : '📘 이 청사진 보유') + '</button>' +
@@ -282,6 +296,8 @@
       if (!slot) return;
       var d = dt[u] || {};
       var h = '';
+      var src = body.querySelector('.wk-m-source');
+      if (d.ic && src && src.textContent.indexOf('이미지') === -1) src.insertAdjacentHTML('afterbegin', '이미지: ' + esc(d.ic[0]) + ' (' + esc(d.ic[1]) + ', Star Citizen Wiki) · ');
       if (d.slots && d.slots.length) {
         h += '<div class="wk-m-sec"><h4>재료 품질과 성능 <small>슬롯마다 넣는 재료의 품질(1~1000)에 따라 성능이 달라져요</small></h4>' +
           '<label class="bp-q"><span>재료 품질</span><input type="range" min="1" max="1000" value="500" id="bpQ" aria-label="재료 품질"><b class="mono" id="bpQv">500</b></label>' +
@@ -481,6 +497,11 @@
     if ((el = e.target.closest('[data-bp]'))) { e.preventDefault(); show({ type: 'bp', id: el.dataset.bp }); return; }
     if ((el = e.target.closest('.wk-tab[data-cat]'))) { cat = el.dataset.cat; sub = ''; renderCats(); apply(); return; }
     if ((el = e.target.closest('.bp-sub'))) { sub = el.dataset.sub; renderCats(); apply(); return; }
+    if ((el = e.target.closest('.bp-region'))) {
+      region = el.dataset.region;
+      document.querySelectorAll('.bp-region').forEach(function (r) { r.setAttribute('aria-pressed', String(r === el)); });
+      apply(); return;
+    }
     if ((el = e.target.closest('.wk-filter'))) { var k = el.dataset.filter; filters[k] = !filters[k]; el.setAttribute('aria-pressed', String(filters[k])); apply(); return; }
   });
   document.addEventListener('change', function (e) {
@@ -523,7 +544,7 @@
       byU[b.u] = b;
       b.i.forEach(function (x) { (ingUse[x[0]] = ingUse[x[0]] || []).push(b.u); });
       (b.m || []).forEach(function (x) { (missionBps[x[0]] = missionBps[x[0]] || []).push(b.u); });
-      b._s = [b.k, b.n, typeKo(b), b.t, weightKo(b), (b.x || []).join(' ')].concat(
+      b._s = [b.k, b.n, typeKo(b), b.t, weightKo(b), (b.x || []).join(' '), (b.r || []).map(function (r) { return REG[r] + ' ' + r; }).join(' ')].concat(
         b.i.map(function (x) { var g = D.ing[x[0]]; return (g.k || '') + ' ' + g.n; }),
         (b.m || []).map(function (x) { var m = D.ms[x[0]]; return (m.k || '') + ' ' + m.n + ' ' + (m.giver || ''); })
       ).join(' ').toLowerCase();

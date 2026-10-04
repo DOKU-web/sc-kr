@@ -213,6 +213,23 @@ def build():
         area = re.search(r'Area of Operation:\s*([^\n\\]+)', m.get('description') or '')
         if area:
             e['area'] = area.group(1).strip()
+        # 성계: star_systems → 내부 이름(…_Nyx_…) → 브리핑의 작전 지역 순으로 판단
+        systems = [s for s in ('Stanton', 'Pyro', 'Nyx') if s in e['sys']]
+        if not systems:
+            hint = (m.get('debug_name') or '') + ' ' + (e.get('area') or '')
+            systems = [s for s in ('Stanton', 'Pyro', 'Nyx') if re.search(r'(?i)(^|[_\s])' + s + r'([_\s]|$)', hint)]
+        e['sys'] = systems
+        # 미션이 뜨는 장소 (Availability)
+        locs, seen = [], set()
+        for loc in ((m.get('merged_locations') or {}).get('Availability') or []) if isinstance(m.get('merged_locations'), dict) else []:
+            nm = loc.get('name')
+            if nm and nm not in seen and nm.replace(' System', '') not in ('Stanton', 'Pyro', 'Nyx'):
+                seen.add(nm)
+                locs.append(nm)
+        if locs:
+            e['at'] = locs[:10]
+            if len(locs) > 10:
+                e['atn'] = len(locs)
         if ko:
             e['k'] = ko
         ms_index[mid] = len(ms_list)
@@ -250,6 +267,9 @@ def build():
                 ms.append([idx, m.get('chance')])
         if ms:
             bp['m'] = ms
+            regions = sorted({s for idx, _ in ms for s in ms_list[idx].get('sys', [])}, key=['Stanton', 'Pyro', 'Nyx'].index)
+            if regions:
+                bp['r'] = regions
         bps.append(bp)
 
         # 상세: 품질 슬롯과 스탯 변화
@@ -273,6 +293,17 @@ def build():
 
     if skipped:
         print('  미완성(PLACEHOLDER) 항목 %d개 제외' % skipped)
+
+    # 결과물 이미지 (위키 문서 대표 이미지, 라이선스 확인)
+    import images as IMG
+    found = IMG.find_images([b['n'] for b in bps])
+    files = IMG.download(found)
+    for b in bps:
+        f = files.get(b['n'])
+        if f:
+            b['im'] = f
+            details.setdefault(b['u'], {})['ic'] = [found[b['n']]['credit'], found[b['n']]['license'], found[b['n']]['wikifile']]
+    print('  이미지 %d/%d개' % (sum(1 for b in bps if b.get('im')), len(bps)))
     counts = {}
     for b in bps:
         counts[b['c']] = counts.get(b['c'], 0) + 1

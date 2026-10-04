@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="ko" data-ver="{{VER}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>청사진(Blueprint) 데이터베이스 — 스타시티즌 제작 | SC-KR</title>
+<meta name="description" content="스타시티즌 제작 청사진 {{TOTAL}}개를 한국어로. 필요한 재료와 수량, 제작 시간, 품질에 따른 성능 변화, 청사진을 주는 미션(의뢰인·지역·평판)까지 한눈에.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://doku-web.github.io/sc-kr/blueprints/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SC-KR">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:title" content="청사진 데이터베이스 — 스타시티즌 제작">
+<meta property="og:description" content="청사진 {{TOTAL}}개 — 재료, 제작 시간, 품질 효과, 획득 미션을 한국어로.">
+<meta property="og:url" content="https://doku-web.github.io/sc-kr/blueprints/">
+<meta property="og:image" content="https://doku-web.github.io/sc-kr/og-image.png">
+<meta name="theme-color" content="#070B18">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Sora:wght@600;700&display=swap">
+<link rel="stylesheet" href="../styles.css?v={{VER}}">
+<link rel="stylesheet" href="../wikelo/wikelo.css?v={{VER}}">
+<link rel="stylesheet" href="../wikelo/planner.css?v={{VER}}">
+<link rel="stylesheet" href="blueprints.css?v={{VER}}">
+<link rel="preload" href="bp.json?v={{VER}}" as="fetch" crossorigin>
+</head>
+<body>
+<div class="page" id="top">
+  <div class="space-nebula" aria-hidden="true"></div>
+  <canvas class="space-stars" id="spaceCanvas" aria-hidden="true"></canvas>
+  <div class="bg" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <nav class="nav container" aria-label="주요 메뉴">
+      <a href="../" class="brand">
+        <svg class="logo" width="26" height="26" viewBox="0 0 28 28" fill="none" aria-hidden="true"><circle cx="14" cy="14" r="5.5" fill="currentColor"/><ellipse cx="14" cy="14" rx="12.5" ry="5" transform="rotate(-24 14 14)" stroke="currentColor" stroke-width="1.6"/></svg>
+        <span class="brand-name">SC-KR</span>
+      </a>
+      <div class="nav-links" id="nav-links">
+        <a href="../#features">기능</a>
+        <a href="../#how">설치 방법</a>
+        <a href="../#crew">번역팀</a>
+        <a href="../wikelo/">위켈로</a>
+        <a href="./" aria-current="page">청사진</a>
+        <a href="../#discord">디스코드</a>
+      </div>
+      <div class="nav-actions">
+        <a href="https://github.com/DOKU-web/sc-kr/releases/latest/download/SC-KR-Launcher.exe" class="btn btn-primary btn-sm">런처 다운로드</a>
+        <button type="button" class="menu-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="메뉴 열기">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="bp-hero container">
+      <div class="eyebrow mono"><span class="dot"></span>CRAFTING · BLUEPRINTS</div>
+      <h1>청사진 <span class="wk-en">Blueprints</span></h1>
+      <p class="lead">제작기(Fabricator)로 아이템을 만들 때 필요한 청사진 <b>{{TOTAL}}개</b>를 한국어로 정리했어요. 필요한 재료와 수량, 제작 시간, 재료 품질에 따른 성능 변화, 그리고 <b>청사진을 주는 미션</b>(의뢰인 · 지역 · 필요 평판)까지 확인할 수 있습니다.</p>
+      <dl class="meta">
+        <div><dt>청사진</dt><dd class="mono">{{TOTAL}}개</dd></div>
+        <div><dt>게임 버전</dt><dd class="mono">{{GAMEVER}}</dd></div>
+        <div><dt>업데이트</dt><dd class="mono">{{UPDATED}}</dd></div>
+      </dl>
+    </section>
+
+    <section class="section container" id="planner">
+      <div class="section-head-row">
+        <div class="section-head">
+          <div class="kicker mono">MY PLANNER</div>
+          <h2>내 제작 플래너</h2>
+          <p class="section-lead">청사진의 <b>☆</b>로 만들 목록을 정하고, 가진 재료를 적어 두세요. 필요한 재료를 합쳐서 <b>더 모아야 할 양</b>을 보여 줍니다. 가진 청사진은 <b>보유</b>로 표시할 수 있어요. 기록은 이 브라우저에만 저장돼요.</p>
+        </div>
+        <div class="wk-plan-tools">
+          <button type="button" class="btn btn-ghost btn-sm" id="plCopy">📋 남은 재료 복사</button>
+          <button type="button" class="btn btn-ghost btn-sm" id="plExport">💾 백업</button>
+          <label class="btn btn-ghost btn-sm wk-file-btn">📂 불러오기<input type="file" id="plImport" accept="application/json,.json" hidden></label>
+          <button type="button" class="btn btn-ghost btn-sm" id="plReset">초기화</button>
+        </div>
+      </div>
+      <div class="wk-plan" id="planBody"><div class="wk-plan-empty">불러오는 중…</div></div>
+    </section>
+
+    <section class="section container" id="list">
+      <div class="section-head">
+        <div class="kicker mono">BLUEPRINTS</div>
+        <h2>청사진 목록</h2>
+        <p class="section-lead">이름을 누르면 상세가 열려요. 재료를 누르면 어디서 구하는지, 미션을 누르면 어디서 어떤 미션을 받는지 보여 줍니다.</p>
+      </div>
+      <div class="wk-toolbar">
+        <div class="wk-tabs" id="bpCats" role="group" aria-label="분류"></div>
+        <label class="wk-search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input type="search" id="bpSearch" placeholder="이름·재료·미션 검색 (한국어/영어)" aria-label="청사진 검색">
+        </label>
+      </div>
+      <div class="bp-subs" id="bpSubs" role="group" aria-label="세부 분류"></div>
+      <div class="wk-filters" role="group" aria-label="필터">
+        <button type="button" class="wk-filter" data-filter="tracked" aria-pressed="false">★ 만들 목록</button>
+        <button type="button" class="wk-filter" data-filter="owned" aria-pressed="false">📘 보유한 청사진</button>
+        <button type="button" class="wk-filter" data-filter="ready" aria-pressed="false">✓ 지금 제작 가능</button>
+        <button type="button" class="wk-filter" data-filter="mission" aria-pressed="false">🎯 미션으로 획득</button>
+        <button type="button" class="wk-filter" data-filter="default" aria-pressed="false">기본 제공</button>
+        <select id="bpSort" class="bp-sort" aria-label="정렬">
+          <option value="name">이름순</option>
+          <option value="time">제작 시간 짧은 순</option>
+          <option value="ing">재료 적은 순</option>
+          <option value="grade">등급 높은 순</option>
+        </select>
+        <span class="wk-kbd dim"><kbd>/</kbd> 검색</span>
+      </div>
+      <p class="wk-count dim" id="bpCount" aria-live="polite"></p>
+      <div class="bp-grid" id="bpGrid"></div>
+      <div class="bp-more" id="bpMore" hidden><button type="button" class="btn btn-ghost btn-sm" id="bpMoreBtn">더 보기</button></div>
+      <p class="wk-empty" id="bpEmpty" hidden>조건에 맞는 청사진이 없어요.</p>
+    </section>
+
+    <section class="section container wk-credits">
+      <div class="kicker mono">SOURCE · LICENSE</div>
+      <p>청사진·미션 데이터는 <a href="https://api.star-citizen.wiki/" target="_blank" rel="noopener">Star Citizen Wiki API</a>(게임 {{GAMEVER}} 기준)에서, 한국어 이름과 미션 설명은 SC-KR 한국어 패치에서 가져왔어요. 게임 데이터의 권리는 Cloud Imperium Games에 있습니다. 패치로 내용이 바뀌면 다시 생성합니다.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-row">
+        <div class="footer-brand">
+          <svg class="logo" width="22" height="22" viewBox="0 0 28 28" fill="none" aria-hidden="true"><circle cx="14" cy="14" r="5.5" fill="currentColor"/><ellipse cx="14" cy="14" rx="12.5" ry="5" transform="rotate(-24 14 14)" stroke="currentColor" stroke-width="1.6"/></svg>
+          <span class="brand-name">SC-KR</span>
+          <span class="dim small-13 mono">DOKU-web/sc-kr</span>
+        </div>
+        <div class="footer-links">
+          <a href="../">홈</a>
+          <a href="../wikelo/">위켈로</a>
+          <a href="https://discord.gg/Nmg6R6sagZ" target="_blank" rel="noopener">Discord</a>
+        </div>
+      </div>
+      <p class="disclaimer">SC-KR은 비공식 커뮤니티 팬 프로젝트로 Cloud Imperium Games 및 Roberts Space Industries와 관련이 없습니다. Star Citizen®은 Cloud Imperium Rights LLC의 등록 상표입니다.</p>
+    </div>
+  </footer>
+</div>
+
+<dialog class="wk-modal" id="wkModal" aria-labelledby="wkModalTitle">
+  <div class="wk-modal-inner">
+    <div class="wk-modal-bar">
+      <button type="button" class="wk-modal-back" id="wkModalBack" hidden aria-label="이전으로">← 이전</button>
+      <button type="button" class="wk-modal-close" id="wkModalClose" aria-label="닫기">×</button>
+    </div>
+    <div class="wk-modal-body" id="wkModalBody"></div>
+  </div>
+</dialog>
+
+<script src="blueprints.js?v={{VER}}"></script>
+<script src="../space.js?v={{VER}}" defer></script>
+</body>
+</html>

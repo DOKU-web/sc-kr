@@ -56,7 +56,10 @@
   function ingName(i) { var g = D.ing[i]; return g ? (g.k || g.n) : '?'; }
   function ingNameHtml(i) { var g = D.ing[i]; return g ? esc(g.k || g.n) + (g.k ? ' <span class="wk-en-sub">(' + esc(g.n) + ')</span>' : '') : '?'; }
   function bpName(b) { return b.k || b.n || b.u; }
-  function bpNameFull(b) { return b.k ? b.k + ' (' + b.n + ')' : b.n; }
+  function bpNameFull(b) { return b.k ? b.k + ' (' + b.n + ')' : (b.n || b.u); }
+  function ingNameFull(i) { var g = D.ing[i]; return g ? (g.k ? g.k + ' (' + g.n + ')' : g.n) : '?'; }
+  // 아이템 이름: 한국어 (영어 원본)
+  function bpLabelHtml(b) { return b.k ? esc(b.k) + ' <span class="wk-en-sub">(' + esc(b.n) + ')</span>' : esc(b.n || b.u); }
   var PH = { TargetName: '대상', Location: '장소', Destination: '목적지', System: '성계', Ship: '함선', Item: '아이템', Contractor: '의뢰인', Danger: '위험도', Amount: '수량', Reward: '보상', Creature: '생물', Commodity: '화물', ObjectiveSetupItem: '목표 물품' };
   function koPH(t) { return String(t || '').replace(/\[([A-Za-z]+)\]/g, function (_, k) { return '[' + (PH[k] || k) + ']'; }); }
   function mName(m) { return m.k ? koPH(m.k) : m.n; }
@@ -161,14 +164,13 @@
     var t = tracked(b.u), h = has(b.u), ready = canCraft(b), p = progress(b);
     var ings = b.i.slice(0, 4).map(function (x) {
       var ok = owned(x[0]) >= x[1];
-      return '<li class="' + (ok ? 'ok' : '') + '"><button type="button" class="bp-ing" data-ing="' + x[0] + '">' + esc(ingName(x[0])) + '</button><span class="mono">' + qtyText(x[1], x[2]) + '</span></li>';
+      return '<li class="' + (ok ? 'ok' : '') + '"><button type="button" class="bp-ing" data-ing="' + x[0] + '">' + ingNameHtml(x[0]) + '</button><span class="mono">' + qtyText(x[1], x[2]) + '</span></li>';
     }).join('') + (b.i.length > 4 ? '<li class="dim">외 ' + (b.i.length - 4) + '종</li>' : '');
     var src = b.d ? '<span class="bp-badge bp-badge-def">기본 제공</span>' : (b.m ? '<span class="bp-badge bp-badge-ms">🎯 미션 ' + b.m.length + '개</span>' : '<span class="bp-badge">획득처 정보 없음</span>');
     var tags = [typeKo(b), weightKo(b), b.x && b.x[1], b.g && b.g !== '1' ? b.g + '등급' : ''].filter(Boolean);
     return '<article class="bp-card' + (ready ? ' is-ready' : '') + (h ? ' is-have' : '') + '" data-u="' + b.u + '">' +
       '<div class="bp-card-head">' + (b.im ? '<button type="button" class="bp-thumb" data-bp="' + b.u + '" tabindex="-1" aria-hidden="true"><img src="' + esc(b.im) + '" alt="" loading="lazy" decoding="async" width="72" height="72"></button>' : '<span class="bp-icon">' + icon(b.c) + '</span>') +
-        '<div class="bp-title"><button type="button" class="bp-open" data-bp="' + b.u + '">' + esc(bpName(b)) + '</button>' +
-          (b.k ? '<span class="wk-title-en">' + esc(b.n) + '</span>' : '') +
+        '<div class="bp-title"><button type="button" class="bp-open" data-bp="' + b.u + '">' + bpLabelHtml(b) + '</button>' +
           '<span class="bp-tags">' + esc(tags.join(' · ')) + '</span></div>' +
         '<button type="button" class="wk-star bp-star' + (t ? ' on' : '') + '" data-track="' + b.u + '" aria-pressed="' + !!t + '" title="' + (t ? '만들 목록에서 빼기' : '만들 목록에 추가') + '">' + (t ? '★' : '☆') + '</button></div>' +
       '<ul class="bp-ings">' + ings + '</ul>' +
@@ -244,7 +246,7 @@
         m.at.map(function (l) { return '<span class="wk-m-chip bp-loc">📍 ' + esc(l) + '</span>'; }).join('') + '</div>' : '') +
       '<div class="bp-mdesc" data-desc="' + idx + '"><p class="dim">미션 설명 불러오는 중…</p></div>' +
       (others.length > 1 ? '<div class="wk-m-subtitle">이 미션으로 얻는 청사진 ' + others.length + '개</div><div class="wk-m-chips">' +
-        others.slice(0, 40).map(function (u) { var b = byU[u]; return b ? '<button type="button" class="wk-m-chip" data-bp="' + u + '">' + esc(bpName(b)) + '</button>' : ''; }).join('') +
+        others.slice(0, 40).map(function (u) { var b = byU[u]; return b ? '<button type="button" class="wk-m-chip" data-bp="' + u + '">' + bpLabelHtml(b) + '</button>' : ''; }).join('') +
         (others.length > 40 ? '<span class="dim">외 ' + (others.length - 40) + '개</span>' : '') + '</div>' : '') +
       '</div></details>';
   }
@@ -261,7 +263,7 @@
     var html = (b.im ? '<div class="wk-m-hero bp-m-hero"><img src="' + esc(b.im) + '" alt=""></div>' : '') +
       '<div class="bp-m-head">' + (b.im ? '' : '<span class="bp-icon bp-icon-lg">' + icon(b.c) + '</span>') + '<div>' +
       '<div class="wk-m-kicker mono">' + esc(tags.join(' · ')) + '</div>' +
-      '<h3 class="wk-m-title" id="wkModalTitle">' + esc(bpName(b)) + (b.k ? '<span class="wk-m-title-en">' + esc(b.n) + '</span>' : '') + '</h3></div></div>' +
+      '<h3 class="wk-m-title" id="wkModalTitle">' + bpLabelHtml(b) + '</h3></div></div>' +
       '<div class="wk-m-meta"><span>제작 시간 <b>' + fmtTime(b.tm) + '</b></span>' + (b.g ? '<span>등급 <b>' + esc(b.g) + '</b></span>' : '') +
         '<span>획득 <b>' + (b.d ? '기본 제공' : (b.m ? '미션 ' + b.m.length + '개' : '정보 없음')) + '</b></span>' +
         (b.r ? '<span>미션 성계 ' + regionBadges(b.r) + '</span>' : '') + '</div>' +
@@ -303,7 +305,7 @@
           '<label class="bp-q"><span>재료 품질</span><input type="range" min="1" max="1000" value="500" id="bpQ" aria-label="재료 품질"><b class="mono" id="bpQv">500</b></label>' +
           '<div class="bp-slots">' + d.slots.map(function (s) {
             return '<div class="bp-slot"><div class="bp-slot-head"><b>' + esc(tr(SLOT, s.s)) + '</b> <span class="dim">' + esc(s.s) + '</span>' +
-              (s.in != null ? '<span class="bp-slot-in">' + esc(ingName(s.in)) + ' · ' + qtyText(s.q, s.scu) + (s.mq > 1 ? ' · 최소 품질 ' + s.mq : '') + '</span>' : '') + '</div>' +
+              (s.in != null ? '<span class="bp-slot-in">' + ingNameHtml(s.in) + ' · ' + qtyText(s.q, s.scu) + (s.mq > 1 ? ' · 최소 품질 ' + s.mq : '') + '</span>' : '') + '</div>' +
               (s.mod.length ? '<ul class="bp-mods">' + s.mod.map(function (m) {
                 return '<li data-a="' + m[1] + '" data-b="' + m[2] + '" data-better="' + m[3] + '"><span>' + esc(tr(MOD, m[0])) + '</span>' +
                   '<span class="mono bp-mod-range">×' + fmt(m[1]) + ' ~ ×' + fmt(m[2]) + '</span><b class="mono bp-mod-now"></b></li>';
@@ -312,7 +314,7 @@
       }
       if (d.dt || (d.ret && d.ret.length)) {
         h += '<div class="wk-m-sec"><h4>분해</h4><p class="wk-game-text">분해 시간 <b>' + fmtTime(d.dt) + '</b>' + (d.eff ? ' · 회수율 <b>' + Math.round(d.eff * 100) + '%</b>' : '') + '</p>' +
-          (d.ret && d.ret.length ? '<div class="wk-m-chips">' + d.ret.map(function (r) { return '<button type="button" class="wk-m-chip" data-ing="' + r[0] + '">' + esc(ingName(r[0])) + ' ' + fmt(r[1]) + ' SCU</button>'; }).join('') + '</div>' : '') + '</div>';
+          (d.ret && d.ret.length ? '<div class="wk-m-chips">' + d.ret.map(function (r) { return '<button type="button" class="wk-m-chip" data-ing="' + r[0] + '">' + ingNameHtml(r[0]) + ' ' + fmt(r[1]) + ' SCU</button>'; }).join('') + '</div>' : '') + '</div>';
       }
       slot.innerHTML = h;
       updateQuality();
@@ -339,7 +341,7 @@
     var g = D.ing[i], uses = ingUse[i] || [];
     var h = '<div class="bp-m-head"><span class="bp-icon bp-icon-lg"><span class="bp-ing-ic">' + (g.kind === 'resource' ? '⛏' : '◆') + '</span></span><div>' +
       '<div class="wk-m-kicker mono">' + (g.kind === 'resource' ? '자원 (SCU 단위)' : '아이템') + '</div>' +
-      '<h3 class="wk-m-title" id="wkModalTitle">' + esc(g.k || g.n) + (g.k ? '<span class="wk-m-title-en">' + esc(g.n) + '</span>' : '') + '</h3></div></div>';
+      '<h3 class="wk-m-title" id="wkModalTitle">' + ingNameHtml(i) + '</h3></div></div>';
     if (g.desc) h += '<p class="wk-m-lead">' + esc(g.desc) + '</p>';
     var total = 0;
     Object.keys(st.tracked).forEach(function (u) {
@@ -359,7 +361,7 @@
       h += '<p class="wk-game-text">개인(FPS) 채굴로 얻는 광물이거나 전리품으로 나오는 아이템이에요. 동굴 · 소행성 표면에서 손 채굴 도구로 캘 수 있는 경우가 많아요.</p>';
     }
     h += '</div><div class="wk-m-sec"><h4>이 재료가 쓰이는 청사진 <small>' + uses.length + '개</small></h4><div class="wk-m-chips">' +
-      uses.slice(0, 60).map(function (u) { var b = byU[u]; return '<button type="button" class="wk-m-chip" data-bp="' + u + '">' + (tracked(u) ? '★ ' : '') + esc(bpName(b)) + '</button>'; }).join('') +
+      uses.slice(0, 60).map(function (u) { var b = byU[u]; return '<button type="button" class="wk-m-chip" data-bp="' + u + '">' + (tracked(u) ? '★ ' : '') + bpLabelHtml(b) + '</button>'; }).join('') +
       (uses.length > 60 ? '<button type="button" class="wk-m-chip" data-search-ing="' + i + '">전체 ' + uses.length + '개 목록에서 보기 →</button>' : '') + '</div></div>';
     return h;
   }
@@ -403,7 +405,7 @@
       b.i.forEach(function (x) {
         var a = agg[x[0]] || (agg[x[0]] = { i: x[0], need: 0, scu: x[2], used: [] });
         a.need += x[1] * n;
-        a.used.push(bpName(b) + (n > 1 ? ' ×' + n : ''));
+        a.used.push(bpNameFull(b) + (n > 1 ? ' ×' + n : ''));
       });
     });
     return Object.keys(agg).map(function (k) {
@@ -428,14 +430,14 @@
       '<div class="wk-plan-chips">' + us.map(function (u) {
         var b = byU[u], n = st.tracked[u], ok = canCraft(b, n), p = progress(b, n);
         var need = !has(u) && !b.d;
-        return '<div class="wk-plan-chip' + (ok ? ' is-ready' : '') + '"><button type="button" class="wk-plan-chip-name" data-bp="' + u + '" title="' + esc(bpNameFull(b)) + '">' + esc(bpName(b)) + (n > 1 ? ' ×' + n : '') + '</button>' +
+        return '<div class="wk-plan-chip' + (ok ? ' is-ready' : '') + '"><button type="button" class="wk-plan-chip-name" data-bp="' + u + '" title="' + esc(bpNameFull(b)) + '">' + bpLabelHtml(b) + (n > 1 ? ' ×' + n : '') + '</button>' +
           '<div class="wk-prog-bar"><span style="width:' + (ok ? 100 : p) + '%"></span></div><span class="wk-plan-chip-pct mono">' + (ok ? '제작 가능' : p + '%') + (need ? ' · <span class="bp-need-bp" title="청사진을 아직 보유하지 않음">청사진 필요</span>' : '') + '</span>' +
           '<button type="button" class="wk-plan-chip-x" data-untrack="' + u + '" aria-label="목록에서 빼기">×</button></div>';
       }).join('') + '</div>' +
       (rows.length ? '<div class="wk-plan-table"><table><thead><tr><th>재료</th><th>필요</th><th>보유</th><th>남음</th></tr></thead><tbody>' + rows.map(function (r) {
         var g = D.ing[r.i];
         return '<tr class="' + (r.left ? '' : 'full') + '"><td><div class="wk-plan-name"><span class="wk-m-thumb"><span>' + (g.kind === 'resource' ? '⛏' : '◆') + '</span></span><div>' +
-          '<button type="button" class="wk-plan-item" data-ing="' + r.i + '">' + esc(g.k || g.n) + '</button><div class="wk-plan-used dim">' + esc(r.used.join(' · ')) + '</div></div></div></td>' +
+          '<button type="button" class="wk-plan-item" data-ing="' + r.i + '">' + ingNameHtml(r.i) + '</button><div class="wk-plan-used dim">' + esc(r.used.join(' · ')) + '</div></div></div></td>' +
           '<td class="mono">' + qtyText(r.need, r.scu) + '</td><td>' + stepper(r.i, null, r.scu) + '</td>' +
           '<td class="mono wk-plan-left">' + (r.left ? qtyText(r.left, r.scu) : '✓') + '</td></tr>';
       }).join('') + '</tbody></table></div>' : '');
@@ -491,7 +493,7 @@
     if ((el = e.target.closest('[data-untrack]'))) { setTracked(el.dataset.untrack, 0); return; }
     if ((el = e.target.closest('[data-have]'))) { toggleHave(el.dataset.have); return; }
     if ((el = e.target.closest('[data-search-ing]'))) {
-      closeModal(); q = ingName(Number(el.dataset.searchIng)); $('bpSearch').value = q; cat = 'all'; sub = ''; renderCats(); apply(); $('list').scrollIntoView(); return;
+      closeModal(); q = D.ing[Number(el.dataset.searchIng)].n; $('bpSearch').value = q; cat = 'all'; sub = ''; renderCats(); apply(); $('list').scrollIntoView(); return;
     }
     if ((el = e.target.closest('[data-ing]')) && !e.target.closest('.wk-step')) { e.preventDefault(); show({ type: 'ing', id: Number(el.dataset.ing) }); return; }
     if ((el = e.target.closest('[data-bp]'))) { e.preventDefault(); show({ type: 'bp', id: el.dataset.bp }); return; }

@@ -123,3 +123,51 @@ class GameText:
             e.update({'giver_ko': giver_ko, 'giver_en': giver_en, 'where': where})
             out.append(e)
         return out
+
+
+def _split_ko_en(v):
+    """'코다 권총 탄창(6캡)(Coda Pistol Magazine (6 cap)) · 제조사' → ('코다 권총 탄창(6캡)', 'Coda Pistol Magazine (6 cap)')
+    맨 뒤의 괄호 묶음(중첩 괄호 포함)을 영어 원본으로 봅니다."""
+    head = re.sub(r'\s*<EM\d>.*?</EM\d>', '', (v or '').split(' · ')[0]).strip()
+    if not head.endswith(')'):
+        return None, None
+    depth, i = 0, len(head) - 1
+    while i >= 0:
+        if head[i] == ')':
+            depth += 1
+        elif head[i] == '(':
+            depth -= 1
+            if depth == 0:
+                break
+        i -= 1
+    if i <= 0:
+        return None, None
+    ko, en = head[:i].strip(), head[i + 1:-1].strip()
+    en = re.sub(r'^\[[^\]]*\]\s*', '', en).strip()
+    return (ko if re.search(r'[가-힣]', ko) else None), en
+
+
+def _item_index(gt):
+    if getattr(gt, '_by_en', None) is None:
+        gt._by_en = {}
+        for k, v in gt.ko.items():
+            kl = k.lower()
+            if (kl.startswith(('item_name', 'items_commodities_', 'vehicle_name'))) and not kl.endswith(('_desc', '_short')):
+                ko, en = _split_ko_en(v)
+                if ko and en:
+                    gt._by_en.setdefault(_norm(en), ko)
+    return gt._by_en
+
+
+def item_ko(self, en_name):
+    """영어 아이템 이름 → 한국어 패치 이름 (없으면 None)"""
+    if not self.ok or not en_name:
+        return None
+    idx = _item_index(self)
+    bp = re.search(r'\s+blueprint$', en_name, re.I)
+    base = re.sub(r'\s+blueprint$', '', en_name, flags=re.I)
+    ko = idx.get(_norm(base)) or idx.get(_norm(re.sub(r'\s*\((?:Ore|Raw)\)', '', base)))
+    return (ko + ' 청사진') if (ko and bp) else ko
+
+
+GameText.item_ko = item_ko

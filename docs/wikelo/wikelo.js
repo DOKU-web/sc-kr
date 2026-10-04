@@ -241,7 +241,7 @@
       var info = it.page && data.items[it.page];
       var thumb = info && info.img ? '<img src="' + esc(info.img.file) + '" alt="" loading="lazy">' : '<span class="wk-m-noimg">' + esc((it.name || '?')[0]) + '</span>';
       var hint = kind === 'orders' ? '<span class="wk-m-go">획득 방법 →</span>' : '<span class="wk-m-go">자세히 →</span>';
-      var inner = '<span class="wk-m-thumb">' + thumb + '</span><span class="wk-m-qty mono">' + esc(it.qty) + '</span><span class="wk-m-name">' + esc(it.name) + '</span>' + (info ? hint : '');
+      var inner = '<span class="wk-m-thumb">' + thumb + '</span><span class="wk-m-qty mono">' + esc(it.qty) + '</span><span class="wk-m-name">' + itemNameHtml(it.ko, it.name) + '</span>' + (info ? hint : '');
       var btn = info ? '<button type="button" class="wk-m-item" data-item="' + esc(it.page) + '">' + inner + '</button>' : '<div class="wk-m-item">' + inner + '</div>';
       if (kind !== 'orders') return '<li>' + btn + '</li>';
       var n = need(it), key = itemKey(it);
@@ -274,6 +274,10 @@
     return '<div class="wk-game-text ' + (cls || '') + '">' + gameText(ko || en) + '</div>' +
       (ko && en ? '<details class="wk-m-orig"><summary>영어 원본 보기</summary><div class="wk-game-text">' + gameText(en) + '</div></details>' : '');
   }
+
+  // 아이템 이름: 한국어 (영어 원본)
+  function itemNameHtml(ko, en) { return ko ? esc(ko) + ' <span class="wk-en-sub">(' + esc(en) + ')</span>' : esc(en); }
+  function itemNameText(ko, en) { return ko ? ko + ' (' + en + ')' : en; }
 
   function contractLinks(ids, label) {
     if (!ids || !ids.length) return '';
@@ -321,7 +325,7 @@
     if (it.subtitle) tags.push(esc(tr(SUB, it.subtitle)));
     if (it.rarity) tags.push('<span class="wk-rar wk-rar-' + esc(it.rarity) + '">' + esc(tr(RARITY, it.rarity)) + '</span>');
     h += '<div class="wk-m-kicker mono">' + tags.join(' · ') + '</div>';
-    h += '<h3 class="wk-m-title" id="wkModalTitle">' + esc(it.title) + '</h3>';
+    h += '<h3 class="wk-m-title" id="wkModalTitle">' + itemNameHtml(it.ko_name, it.title) + '</h3>';
     var lead = it.lead_ko || it.lead;
     if (lead) h += '<p class="wk-m-lead">' + esc(lead) + '</p>';
 
@@ -446,7 +450,7 @@
       if (!c || isDone(id)) return;
       c.orders.forEach(function (o) {
         var k = itemKey(o);
-        if (!agg[k]) { agg[k] = { key: k, name: o.name, page: o.page, need: 0, unit: unit(o), used: [] }; order.push(k); }
+        if (!agg[k]) { agg[k] = { key: k, name: o.name, ko: o.ko, page: o.page, need: 0, unit: unit(o), used: [] }; order.push(k); }
         agg[k].need += need(o);
         agg[k].used.push(c.name);
       });
@@ -485,7 +489,7 @@
       rows.map(function (r) {
         var info = r.page && data.items[r.page];
         var thumb = info && info.img ? '<img src="' + esc(info.img.file) + '" alt="" loading="lazy">' : '<span>' + esc(r.name[0]) + '</span>';
-        var name = info ? '<button type="button" class="wk-plan-item" data-item="' + esc(r.page) + '" title="획득 방법 보기">' + esc(r.name) + '</button>' : esc(r.name);
+        var name = info ? '<button type="button" class="wk-plan-item" data-item="' + esc(r.page) + '" title="획득 방법 보기">' + itemNameHtml(r.ko, r.name) + '</button>' : itemNameHtml(r.ko, r.name);
         return '<tr class="' + (r.left ? '' : 'full') + '" data-need="' + r.need + '">' +
           '<td><div class="wk-plan-name"><span class="wk-m-thumb">' + thumb + '</span><div>' + name + '<div class="wk-plan-used dim">' + esc(r.used.join(' · ')) + '</div></div></div></td>' +
           '<td class="mono">' + fmt(r.need) + esc(r.unit) + '</td>' +
@@ -509,7 +513,7 @@
     var lines = ['[위켈로 계약 플래너 — SC-KR]', '추적 중: ' + tracked.map(function (id) { return cName(data.contracts[id]); }).join(', '), ''];
     if (rows.length) {
       lines.push('더 모을 재료:');
-      rows.forEach(function (r) { lines.push('- ' + r.name + ': ' + fmt(r.left) + r.unit + ' (보유 ' + fmt(r.have) + ' / 필요 ' + fmt(r.need) + r.unit + ')'); });
+      rows.forEach(function (r) { lines.push('- ' + itemNameText(r.ko, r.name) + ': ' + fmt(r.left) + r.unit + ' (보유 ' + fmt(r.have) + ' / 필요 ' + fmt(r.need) + r.unit + ')'); });
     } else {
       lines.push('필요한 재료를 모두 모았어요!');
     }

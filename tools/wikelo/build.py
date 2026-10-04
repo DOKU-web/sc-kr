@@ -236,7 +236,7 @@ def fetch_images(names, subdir, width):
 def items_html(lst, cls):
     out = []
     for it in lst:
-        name = esc(it['name'])
+        name = ('%s <span class="wk-en-sub">(%s)</span>' % (esc(it['ko']), esc(it['name']))) if it.get('ko') else esc(it['name'])
         inner = ('<button type="button" class="wk-item-btn" data-item="%s">%s</button>' % (esc(it['page']), name)) if it['page'] else '<span>%s</span>' % name
         out.append('<li><span class="qty mono">%s</span>%s</li>' % (esc(it['qty']), inner))
     return '<ul class="%s">%s</ul>' % (cls, ''.join(out))
@@ -334,6 +334,16 @@ def build():
 
     gt = GAME.GameText()
     if gt.ok:
+        # 아이템 이름: 한국어 패치 이름 (한국어 (영어 원본) 으로 표시)
+        for c in contracts:
+            for it in c['orders'] + c['rewards']:
+                ko = gt.item_ko(it['name'])
+                if ko:
+                    it['ko'] = ko
+        for page, it in items.items():
+            ko = gt.item_ko(it['title']) or gt.item_ko(page)
+            if ko:
+                it['ko_name'] = ko
         for page, it in items.items():
             ms = gt.missions_for(page)
             if ms:

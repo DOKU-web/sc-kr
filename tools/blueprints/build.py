@@ -93,15 +93,11 @@ class Names:
 
     @staticmethod
     def split(v):
-        """'옴니스키 III 대포([E-S1] Omnisky III Cannon) · Amon & Reese Co. · 사이즈S1' → (한글, 영문, [부가])"""
+        """'옴니스키 III 대포([E-S1] Omnisky III Cannon) · Amon & Reese Co. · 사이즈S1' → (한글, 영문, [부가])
+        영어 원본은 맨 뒤의 괄호 묶음(중첩 괄호 포함)."""
+        from game_text import _split_ko_en
         parts = (v or '').split(' · ')
-        m = re.match(r'^(.*?)\((.*)\)\s*$', parts[0].strip())
-        if not m:
-            return None, None, parts[1:]
-        ko, en = m.group(1).strip(), strip_tags(m.group(2))
-        en = re.sub(r'^\[[^\]]*\]\s*', '', en).strip()   # '[E-S1] ' 같은 접두 표시 제거
-        if not re.search(r'[가-힣]', ko):
-            return None, en, parts[1:]
+        ko, en = _split_ko_en(parts[0])
         return ko, en, parts[1:]
 
     def item(self, cls, en_name):

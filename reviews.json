@@ -1,0 +1,13 @@
+{
+  "count": 1,
+  "average": 5,
+  "reviews": [
+    {
+      "name": "DOKKU",
+      "rating": 5,
+      "text": "다운로드가 간편해요",
+      "lang": "en",
+      "date": "2026-10-09"
+    }
+  ]
+}

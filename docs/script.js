@@ -15,7 +15,7 @@
   var I18N = {
     ko: {
       'nav.label': '주요 메뉴',
-      'nav.features': '기능', 'nav.how': '설치 방법', 'nav.crew': '번역팀', 'nav.partners': '파트너', 'nav.wikelo': '위켈로', 'nav.blueprints': '청사진', 'nav.discord': '디스코드',
+      'nav.features': '기능', 'nav.how': '설치 방법', 'nav.crew': '번역팀', 'nav.partners': '파트너', 'nav.reviews': '후기', 'nav.wikelo': '위켈로', 'nav.blueprints': '청사진', 'nav.discord': '디스코드',
       'cta.download': '런처 다운로드', 'cta.discord': '디스코드 참여',
       'hero.title': '스타시티즌,<br>이제 <span class="accent">한국어로.</span>',
       'hero.lead': '한국어 번역 적용부터 게임 채팅 한글 입력까지, SC-KR 런처 하나로 끝납니다. 번역팀이 게임 업데이트를 계속 따라가고, 런처는 실행할 때마다 최신 버전을 스스로 확인해요.',
@@ -38,6 +38,15 @@
       'partners.contact': '파트너 문의하기', 'partners.channel': '채널 바로가기',
       'partners.emptyTitle': '첫 파트너를 기다리고 있어요',
       'partners.emptyBody': 'SC-KR과 함께하고 싶은 스트리머라면 디스코드로 문의해 주세요.',
+      'reviews.title': '사용 후기',
+      'reviews.lead': '디스코드에서 SC-KR을 써본 분들이 남긴 후기입니다.',
+      'reviews.write': '디스코드에서 후기 남기기', 'reviews.more': '후기 더 보기',
+      'reviews.how': '디스코드 <code>⭐・사용-후기</code> 채널에서 별점 버튼을 누르세요',
+      'reviews.count': '후기 {n}개', 'reviews.rating': '5점 만점에 {n}점',
+      'reviews.loading': '후기를 불러오는 중…',
+      'reviews.emptyTitle': '아직 후기가 없어요',
+      'reviews.emptyBody': '디스코드 후기 채널의 별점 버튼으로 첫 후기를 남겨주세요.',
+      'reviews.error': '후기를 불러오지 못했어요. 잠시 후 다시 확인해 주세요.',
       'discord.title': '디스코드에서 함께 플레이해요',
       'discord.lead': '패치노트와 언어팩 배포 소식을 가장 먼저 받고, 같이 비행할 파티도 찾아보세요. 번역 오류나 버그 제보도 디스코드 티켓으로 받고 있어요.',
       'discord.join': '디스코드 참여하기',
@@ -47,7 +56,7 @@
     },
     en: {
       'nav.label': 'Main menu',
-      'nav.features': 'Features', 'nav.how': 'Setup', 'nav.crew': 'Crew', 'nav.partners': 'Partners', 'nav.wikelo': 'Wikelo', 'nav.blueprints': 'Blueprints', 'nav.discord': 'Discord',
+      'nav.features': 'Features', 'nav.how': 'Setup', 'nav.crew': 'Crew', 'nav.partners': 'Partners', 'nav.reviews': 'Reviews', 'nav.wikelo': 'Wikelo', 'nav.blueprints': 'Blueprints', 'nav.discord': 'Discord',
       'cta.download': 'Download launcher', 'cta.discord': 'Join Discord',
       'hero.title': 'Star Citizen,<br>now in <span class="accent">Korean.</span>',
       'hero.lead': 'From applying the Korean translation to typing Hangul in game chat, the SC-KR launcher does it all. The crew keeps up with every game update, and the launcher checks for new versions each time it starts.',
@@ -70,6 +79,15 @@
       'partners.contact': 'Become a partner', 'partners.channel': 'Visit channel',
       'partners.emptyTitle': 'Waiting for our first partner',
       'partners.emptyBody': 'Streamers who want to team up with SC-KR, reach out on Discord.',
+      'reviews.title': 'Reviews',
+      'reviews.lead': 'What players who tried SC-KR said on our Discord.',
+      'reviews.write': 'Write a review on Discord', 'reviews.more': 'Show more reviews',
+      'reviews.how': 'Press a star button in the reviews channel (<code>⭐・사용-후기</code>)',
+      'reviews.count': '{n} reviews', 'reviews.rating': 'Rated {n} out of 5',
+      'reviews.loading': 'Loading reviews…',
+      'reviews.emptyTitle': 'No reviews yet',
+      'reviews.emptyBody': 'Be the first — press a star button in the reviews channel on our Discord.',
+      'reviews.error': "Couldn't load reviews. Please check back later.",
       'discord.title': 'Play together on Discord',
       'discord.lead': 'Get patch notes and language pack releases first, and find a crew to fly with. Translation errors and bug reports go through Discord tickets.',
       'discord.join': 'Join the Discord',
@@ -208,10 +226,76 @@
     }).join('');
   }
 
+  /* ========== 사용 후기 ========== */
+  var REVIEW_PAGE = 6;
+  var reviewState = { data: null, error: false, expanded: false };
+
+  function starsHtml(rating) {
+    var full = Math.round(rating);
+    var s = '';
+    for (var i = 1; i <= 5; i++) s += '<span class="' + (i <= full ? 'on' : 'off') + '">★</span>';
+    return '<span class="stars" aria-hidden="true">' + s + '</span>';
+  }
+  function fmt(key, l, n) { return tl(key, l).replace('{n}', n); }
+
+  function reviewsHtml(o) {
+    var d = reviewState.data;
+    if (!d) {
+      var msg = reviewState.error ? 'reviews.error' : 'reviews.loading';
+      return '<div class="partners-empty"><span>' + esc(tl(msg, o.lang)) + '</span></div>';
+    }
+    if (!d.reviews.length) {
+      return '<div class="partners-empty"><strong>' + esc(tl('reviews.emptyTitle', o.lang)) + '</strong><span>' + esc(tl('reviews.emptyBody', o.lang)) + '</span></div>';
+    }
+    var list = reviewState.expanded ? d.reviews : d.reviews.slice(0, REVIEW_PAGE);
+    return list.map(function (r) {
+      var rating = Math.max(1, Math.min(5, Math.round(Number(r.rating)) || 1));
+      return '<article class="review">' +
+        '<div class="review-top">' + starsHtml(rating) + '<span class="sr-only">' + esc(fmt('reviews.rating', o.lang, rating)) + '</span>' +
+        '<time class="mono dim" datetime="' + esc(r.date) + '">' + esc(r.date) + '</time></div>' +
+        '<p>' + esc(r.text) + '</p>' +
+        '<div class="review-name">' + esc(r.name) + '</div></article>';
+    }).join('');
+  }
+
+  function renderReviewExtras() {
+    var d = reviewState.data;
+    var summary = document.getElementById('reviewSummary');
+    var more = document.getElementById('reviewMore');
+    summary.hidden = !(d && d.count);
+    if (d && d.count) {
+      var avg = (Number(d.average) || 0).toFixed(1);
+      summary.innerHTML = '<div class="review-avg">' + avg + '</div><div>' + starsHtml(Number(avg)) +
+        '<span class="sr-only">' + esc(fmt('reviews.rating', lang, avg)) + '</span>' +
+        '<div class="dim small-13">' + esc(fmt('reviews.count', lang, d.count)) + '</div></div>';
+    }
+    more.hidden = !(d && !reviewState.expanded && d.reviews.length > REVIEW_PAGE);
+  }
+
+  // 디스코드 봇(cogs/reviews.py)이 reviews 브랜치에 올리는 파일
+  function loadReviews() {
+    fetch('https://raw.githubusercontent.com/' + GH.owner + '/' + GH.repo + '/reviews/reviews.json', { cache: 'no-store' })
+      .then(function (r) {
+        if (r.status === 404) return { count: 0, average: 0, reviews: [] }; // 아직 후기 없음
+        if (!r.ok) throw new Error(r.status);
+        return r.json();
+      })
+      .then(function (d) {
+        reviewState.data = { count: d.count || 0, average: d.average || 0, reviews: Array.isArray(d.reviews) ? d.reviews : [] };
+      })
+      .catch(function () { reviewState.error = true; })
+      .then(renderAll);
+    document.getElementById('reviewMore').addEventListener('click', function () {
+      reviewState.expanded = true;
+      renderAll();
+    });
+  }
+
   var RENDERERS = {
     features: { id: 'featuresGrid', html: featuresHtml },
     crew: { id: 'crewList', html: crewHtml },
     partners: { id: 'partnerList', html: partnersHtml },
+    reviews: { id: 'reviewList', html: reviewsHtml },
   };
 
   function renderAll() {
@@ -219,6 +303,7 @@
     Object.keys(RENDERERS).forEach(function (k) {
       document.getElementById(RENDERERS[k].id).innerHTML = RENDERERS[k].html(o);
     });
+    renderReviewExtras();
   }
   // 검색 로봇용 정적 HTML (한국어, 편집 버튼 없음)
   function staticHtml(kind) { return RENDERERS[kind].html({ lang: 'ko', editable: false }); }
@@ -316,7 +401,7 @@
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
     }, { threshold: 0.1 });
-    document.querySelectorAll('.section-head, .features, .steps, .crew-groups, .partners, .cta-panel').forEach(function (el) {
+    document.querySelectorAll('.section-head, .features, .steps, .crew-groups, .partners, .reviews, .cta-panel').forEach(function (el) {
       el.classList.add('reveal');
       io.observe(el);
     });
@@ -344,6 +429,7 @@
   initMenu();
   initReveal();
   loadRelease();
+  loadReviews();
   document.querySelectorAll('.lang-switch button').forEach(function (b) {
     b.addEventListener('click', function () { setLang(b.dataset.lang); });
   });

@@ -58,7 +58,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Sora:wght@600;700&display=swap">
-<link rel="stylesheet" href="styles.css?v=20261003b">
+<link rel="stylesheet" href="styles.css?v=20261009">
 </head>
 <body>
 <div class="page" id="top">
@@ -81,6 +81,7 @@
         <a href="#how" data-i18n="nav.how">설치 방법</a>
         <a href="#crew" data-i18n="nav.crew">번역팀</a>
         <a href="#partners" data-i18n="nav.partners">파트너</a>
+        <a href="#reviews" data-i18n="nav.reviews">후기</a>
         <a href="wikelo/" data-i18n="nav.wikelo">위켈로</a>
         <a href="blueprints/" data-i18n="nav.blueprints">청사진</a>
         <a href="#discord" data-i18n="nav.discord">디스코드</a>
@@ -274,10 +275,31 @@
       </form>
     </section>
 
+    <!-- 사용 후기 (디스코드 후기 채널의 별점 버튼 → 봇이 reviews 브랜치의 reviews.json 갱신) -->
+    <section id="reviews" class="section container">
+      <div class="section-head-row">
+        <div class="section-head">
+          <div class="kicker mono">05 — REVIEWS</div>
+          <h2 data-i18n="reviews.title">사용 후기</h2>
+          <p class="section-lead" data-i18n="reviews.lead">디스코드에서 SC-KR을 써본 분들이 남긴 후기입니다.</p>
+        </div>
+        <div class="review-summary" id="reviewSummary" hidden></div>
+      </div>
+      <div class="reviews" id="reviewList"></div>
+      <div class="review-actions">
+        <button type="button" class="btn btn-ghost btn-sm" id="reviewMore" hidden data-i18n="reviews.more">후기 더 보기</button>
+        <a href="https://discord.gg/Nmg6R6sagZ" target="_blank" rel="noopener" class="text-link">
+          <span data-i18n="reviews.write">디스코드에서 후기 남기기</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+        </a>
+        <span class="dim small-13" data-i18n-html="reviews.how">디스코드 <code>⭐・사용-후기</code> 채널에서 별점 버튼을 누르세요</span>
+      </div>
+    </section>
+
     <!-- 디스코드 -->
     <section id="discord" class="section container">
       <div class="cta-panel">
-        <div class="kicker mono">05 — COMMUNITY</div>
+        <div class="kicker mono">06 — COMMUNITY</div>
         <h2 data-i18n-html="discord.title">디스코드에서 함께 플레이해요</h2>
         <p data-i18n="discord.lead">패치노트와 언어팩 배포 소식을 가장 먼저 받고, 같이 비행할 파티도 찾아보세요. 번역 오류나 버그 제보도 디스코드 티켓으로 받고 있어요.</p>
         <a href="https://discord.gg/Nmg6R6sagZ" target="_blank" rel="noopener" class="btn btn-primary btn-lg">
@@ -363,9 +385,9 @@
   <div class="bgm-frame"><div id="bgmPlayer"></div></div>
 </aside>
 
-<script src="script.js?v=20261003b"></script>
-<script src="editor.js?v=20261003b"></script>
-<script src="bgm.js?v=20261003b"></script>
-<script src="space.js?v=20261003b"></script>
+<script src="script.js?v=20261009"></script>
+<script src="editor.js?v=20261009"></script>
+<script src="bgm.js?v=20261009"></script>
+<script src="space.js?v=20261009"></script>
 </body>
 </html>

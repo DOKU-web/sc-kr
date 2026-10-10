@@ -1,7 +1,14 @@
 {
-  "count": 2,
+  "count": 3,
   "average": 5,
   "reviews": [
+    {
+      "name": "잠수중",
+      "rating": 5,
+      "text": "한국어로 파티원이랑 할 때 메모를 쓸 수 있는게 좋아요",
+      "lang": "ko",
+      "date": "2026-10-10"
+    },
     {
       "name": "밀레니어 (Milleny)",
       "rating": 5,

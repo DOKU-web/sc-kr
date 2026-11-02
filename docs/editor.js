@@ -149,6 +149,11 @@
     var titleEn = $('fTitleEn').value.trim(), descEn = $('fDescEn').value.trim();
     if (titleEn) f.titleEn = titleEn;
     if (descEn) f.descEn = descEn;
+    // 선택 항목: 상태(비우면 '제공 중'), 추가된 버전
+    var status = $('fStatus') ? $('fStatus').value : '';
+    var since = $('fSince') ? $('fSince').value.trim() : '';
+    if (status) f.status = status;
+    if (since) f.since = since;
     if (!f.title || !f.desc) return;
     withBusyLabel(this, '추가 중...', commit('features', S.data.features.concat([f]), f.title + ' 추가'));
   });

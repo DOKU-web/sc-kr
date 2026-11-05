@@ -1,0 +1,36 @@
+body { overflow: auto; }
+
+.page {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  align-items: start;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.card { padding: 14px 16px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); }
+.card h2 { margin: 0 0 10px; font-size: 15px; color: var(--accent); }
+
+.big-number { margin: 0 0 8px; font-size: 26px; font-weight: 700; }
+.big-number small { font-size: 12px; font-weight: 400; color: var(--mid); }
+
+.meter { position: relative; height: 10px; border-radius: 999px; background: var(--field); overflow: hidden; }
+.meter-fill { height: 100%; width: 0; background: var(--accent); }
+.meter.warn .meter-fill { background: var(--err); }
+.meter-mark { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--hi); }
+
+.muted { margin: 8px 0; color: var(--mid); font-size: 12px; }
+.row { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
+.row input[type="number"], .row input[type="text"] { flex: 1; min-width: 0; }
+.row input[type="checkbox"] { accent-color: var(--accent); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips button { padding: 1px 9px; border-radius: 999px; font-size: 12px; }
+
+.report { padding: 8px 0; border-top: 1px solid var(--line); overflow-wrap: anywhere; }
+.report:first-child { border-top: 0; }
+.report .who { color: var(--accent); font-weight: 700; }
+.report .tools { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.report .tools button { padding: 2px 9px; font-size: 12px; }

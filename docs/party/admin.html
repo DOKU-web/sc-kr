@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src https://*.workers.dev; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>SC-KR 관리자</title>
+<link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<main class="page">
+  <section class="card">
+    <h2 data-t="usage">이번 달 관전 사용량</h2>
+    <p class="big-number"><span id="used">-</span> GB <small id="source"></small></p>
+    <div class="meter" role="img" id="meter-label">
+      <div class="meter-fill" id="meter"></div>
+      <div class="meter-mark" id="mark"></div>
+    </div>
+    <p class="muted"><span id="month"></span> · <span id="mode"></span></p>
+    <p class="muted" id="estimate-note" data-t="estimate_note">측정값을 읽지 못해 서버 추정치를 표시합니다. Cloudflare 대시보드와 비교하세요.</p>
+    <label class="row"><input id="low-on" type="checkbox"><span data-t="low_on">1,000GB에 저화질 전용으로 전환</span></label>
+    <label class="row"><input id="hard-on" type="checkbox"><span data-t="hard_on">정한 용량에서 관전 완전 중지</span></label>
+    <label class="row"><span data-t="hard_gb">중지 용량(GB)</span><input id="hard-gb" type="number" min="1" max="1000000"></label>
+    <p class="muted" data-t="bill_note">저화질 전용은 데이터를 줄일 뿐 청구를 막지 않습니다. 청구를 막으려면 완전 중지를 켜세요.</p>
+    <button class="primary" id="save" type="button" data-t="save">설정 저장</button>
+  </section>
+
+  <section class="card">
+    <h2 data-t="reports">신고</h2>
+    <div id="reports"></div>
+  </section>
+
+  <section class="card">
+    <h2 data-t="words">금칙어</h2>
+    <div class="chips" id="words"></div>
+    <form id="word-form" class="row">
+      <input id="word" type="text" maxlength="30" data-t-place="word_hint" placeholder="추가할 단어">
+      <button type="submit" data-t="add">추가</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2 data-t="restricted">제한된 사용자</h2>
+    <div id="restricted"></div>
+  </section>
+</main>
+<script src="config.js"></script>
+<script src="common.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>

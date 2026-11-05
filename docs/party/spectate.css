@@ -1,0 +1,100 @@
+body { display: flex; flex-direction: column; }
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.bar small { color: var(--mid); }
+.grow { flex: 1; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+
+.chip { padding: 1px 9px; border: 1px solid var(--line); border-radius: 999px; color: var(--soft); font-size: 12px; }
+
+.fx-control { display: inline-flex; align-items: center; gap: 5px; color: var(--mid); }
+.fx-control input[type="range"] { width: 90px; accent-color: var(--accent); }
+.fx-control input[type="checkbox"] { accent-color: var(--accent); }
+
+.pager { display: inline-flex; align-items: center; gap: 6px; color: var(--mid); }
+
+.grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  gap: 8px;
+  padding: 8px;
+  grid-template-columns: repeat(var(--cols, 1), minmax(0, 1fr));
+  grid-auto-rows: minmax(0, 1fr);
+}
+
+.tile {
+  position: relative;
+  display: block;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: #000;
+}
+
+.tile video, .big video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+
+.wait { position: absolute; inset: 0; display: grid; place-items: center; color: var(--mid); font-size: 12px; }
+
+/* 바디캠 효과는 보는 쪽에서만 입힙니다. 그리드는 움직이지 않는 층이라 다시 그리는 일이 적습니다. */
+.fx::before, .fx::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: var(--fx-level, .6);
+}
+
+.fx::before { background: radial-gradient(ellipse at center, transparent 52%, rgba(0, 0, 0, .78) 100%); }
+
+.fx::after {
+  background-image: repeating-linear-gradient(0deg, rgba(0, 0, 0, .16) 0 1px, transparent 1px 3px), var(--noise, none);
+  mix-blend-mode: overlay;
+}
+
+.fx-off .fx::before, .fx-off .fx::after { display: none; }
+
+.hud {
+  position: absolute;
+  left: 8px;
+  top: 6px;
+  z-index: 2;
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  max-width: calc(100% - 16px);
+  padding: 1px 8px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, .45);
+  color: var(--hi);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.hud b { overflow: hidden; text-overflow: ellipsis; }
+.rec { color: var(--err); font-weight: 700; }
+.clock { color: var(--soft); font-variant-numeric: tabular-nums; }
+
+.empty { flex: 1; display: grid; place-items: center; margin: 0; color: var(--mid); }
+
+.big { position: relative; flex: 1; min-height: 0; background: #000; overflow: hidden; }
+.big canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.big .hud { left: 14px; top: 12px; font-size: 14px; }
+
+/* 왜곡을 WebGL로 그릴 때는 비네팅과 노이즈도 그 안에 들어 있습니다 */
+.big.gl::before, .big.gl::after { display: none; }
+.big.gl video { opacity: 0; }
+
+.big-tools { position: absolute; right: 14px; bottom: 14px; z-index: 2; display: flex; gap: 6px; }

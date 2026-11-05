@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src data:; media-src blob:; connect-src https://*.workers.dev wss://*.workers.dev; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>SC-KR 파티 관전</title>
+<link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="spectate.css">
+</head>
+<body>
+<header class="bar">
+  <strong id="title"></strong>
+  <span class="chip" id="quality" hidden></span>
+  <small id="decoder"></small>
+  <span class="grow"></span>
+  <label class="fx-control"><input id="fx-on" type="checkbox" checked><span data-t="effect">효과</span></label>
+  <label class="fx-control"><span class="sr" data-t="strength">효과 강도</span><input id="fx-level" type="range" min="10" max="100" value="60"></label>
+  <span class="pager" id="pager" hidden>
+    <button id="prev" type="button" data-t="prev">이전</button>
+    <span id="page"></span>
+    <button id="next" type="button" data-t="next">다음</button>
+  </span>
+</header>
+<main class="grid" id="grid"></main>
+<p class="empty" id="empty" data-t="empty" hidden>아직 관전 허용을 켠 파티원이 없습니다.</p>
+<section class="big fx" id="big" hidden>
+  <video id="big-video" muted playsinline autoplay></video>
+  <canvas id="big-canvas"></canvas>
+  <div class="hud"><b id="big-name"></b><span class="rec">● REC</span><time class="clock"></time></div>
+  <div class="big-tools">
+    <button id="big-prev" type="button" data-t="prev_cam">이전 캠</button>
+    <button id="big-back" type="button" data-t="back">그리드로</button>
+    <button id="big-next" type="button" data-t="next_cam">다음 캠</button>
+  </div>
+</section>
+<script src="config.js"></script>
+<script src="common.js"></script>
+<script src="spectate-fx.js"></script>
+<script src="spectate.js"></script>
+</body>
+</html>

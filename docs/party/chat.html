@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src https://cdn.discordapp.com; connect-src https://*.workers.dev wss://*.workers.dev; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>SC-KR 채팅</title>
+<link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="chat.css">
+</head>
+<body>
+<header role="tablist">
+  <button class="tab" id="tab-global" role="tab" aria-selected="true"><span data-t="global">전체</span><span class="badge" id="badge-global" hidden></span></button>
+  <button class="tab" id="tab-party" role="tab" aria-selected="false" disabled><span data-t="party">파티</span><span class="badge" id="badge-party" hidden></span></button>
+</header>
+<div class="log" id="log-global" role="log" aria-live="polite"></div>
+<div class="log" id="log-party" role="log" aria-live="polite" hidden></div>
+<button class="jump" id="jump" type="button" hidden data-t="newer">새 글 보기</button>
+<form id="form">
+  <input id="text" type="text" maxlength="300" autocomplete="off" data-t-place="placeholder" placeholder="메시지 입력" aria-label="메시지">
+  <button class="primary" id="send" data-t="send">보내기</button>
+</form>
+<script src="config.js"></script>
+<script src="common.js"></script>
+<script src="chat.js"></script>
+</body>
+</html>

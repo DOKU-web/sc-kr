@@ -1,0 +1,75 @@
+/* 런처 스페이스 테마와 같은 색입니다 */
+:root {
+  --bg: #060912;
+  --panel: #0b111f;
+  --field: #080d19;
+  --line: #22324c;
+  --accent: #68ccff;
+  --accent2: #78a0ff;
+  --hi: #ecf3fc;
+  --mid: #8a9ab6;
+  --soft: #bad0e8;
+  --ok: #5ae1aa;
+  --err: #ff606e;
+  --r: 14px;
+  --r-s: 10px;
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--hi);
+  font: 14px/1.45 "Malgun Gothic", "Segoe UI", system-ui, sans-serif;
+  overflow: hidden;
+}
+
+[hidden] { display: none !important; }
+
+button, input, select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-s);
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) { border-color: var(--accent); }
+button:disabled { opacity: .45; cursor: default; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+button.primary { background: var(--accent); border-color: var(--accent); color: #04121c; font-weight: 700; }
+button.danger { color: var(--err); }
+
+input[type="text"], input[type="number"], select {
+  background: var(--field);
+  border: 1px solid var(--line);
+  border-radius: var(--r-s);
+  padding: 7px 10px;
+}
+
+.notice {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  top: 12px;
+  z-index: 50;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: 10px 14px;
+  color: var(--soft);
+}
+
+.notice.bad { border-color: var(--err); color: var(--hi); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src https://*.workers.dev wss://*.workers.dev; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>SC-KR 관전 허용</title>
+<link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="broadcast.css">
+</head>
+<body>
+<main class="pill" id="pill">
+  <span class="dot" id="dot" aria-hidden="true"></span>
+  <div class="status">
+    <strong id="state" data-t="off">관전 허용 꺼짐</strong>
+    <small id="detail" data-t="hint">켜려면 스타시티즌 창을 고르세요.</small>
+  </div>
+  <button class="primary" id="toggle" type="button" data-t="turn_on" disabled>켜기</button>
+</main>
+<p class="tip" data-t="borderless">게임은 테두리 없는 창모드로 실행하세요.</p>
+<script src="config.js"></script>
+<script src="common.js"></script>
+<script src="broadcast.js"></script>
+</body>
+</html>
